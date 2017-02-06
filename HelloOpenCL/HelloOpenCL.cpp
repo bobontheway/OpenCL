@@ -12,8 +12,8 @@ const char *source =
 "{								        \n"
 "	int g_id = get_global_id(0);				        \n"
 "                                                                       \n"
-"	if ((input[g_id] >= 'a') && (input[g_id] <= 'z'))               \n"
-"		output[g_id] = input[g_id] - 32;                        \n"
+"	if ((input[g_id] >= 'A') && (input[g_id] <= 'Z'))               \n"
+"		output[g_id] = input[g_id] + 32;                        \n"
 "	else                                                            \n"
 "		output[g_id] = input[g_id];                             \n"
 "}								        \n";
@@ -72,7 +72,7 @@ int main()
 	cl_kernel kernel;
 
 	cl_mem input, output;
-	char *lower_case = "hello opencl";
+	char *lower_case = "Hello OpenCL, I like U";
 
 	// get platform
 	err = clGetPlatformIDs(1, &platform, NULL);
