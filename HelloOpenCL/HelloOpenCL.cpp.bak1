@@ -113,15 +113,28 @@ int main()
 		exit(EXIT_FAILURE);
 	}
 
+	//err = clBuildProgram(program, 0, NULL, NULL, NULL, NULL);
 	err = clBuildProgram(program, 1, &device, NULL, NULL, NULL);
 	if (CL_SUCCESS != err) {
 		size_t bufSize = 1024;
+		//char *buf;
 		char buf[bufSize];
 	
+		err = clGetProgramBuildInfo(program, device, CL_PROGRAM_BUILD_LOG,
+			0, NULL, &bufSize);
+		check_error(err, __LINE__);
+#if 0
+		buf = (char *)malloc(sizeof(char) * bufSize);
+		if (buf == NULL) {
+			printf("alloc memory fial: line(%d)\n", __LINE__);
+			exit(EXIT_FAILURE);
+		}
+#endif
 		err = clGetProgramBuildInfo(program, device, CL_PROGRAM_BUILD_LOG,
 			bufSize, buf, NULL);
 		check_error(err, __LINE__);
 		printf("build log:\n%s\n", buf);
+//		free(buf);
 		exit(EXIT_FAILURE);
 	}
 
