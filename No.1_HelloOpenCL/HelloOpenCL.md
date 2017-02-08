@@ -119,6 +119,7 @@ err = clEnqueueNDRangeKernel(queue, kernel, 1,
                 0, g_size, local_size,
                 0, NULL, NULL);
 ```
+参数 local_work_size 可以为 NULL。在这种情况下，由 OpenCL 的实现来决定如何把全局工作项划分为更小的工作组。
 
 ### 11.清空队列
 避免获取的结果异常，等待直到命令队列中的命令在设备端执行完。

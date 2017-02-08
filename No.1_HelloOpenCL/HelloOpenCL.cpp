@@ -74,7 +74,7 @@ int main()
 	cl_kernel kernel;
 
 	cl_mem input, output;
-	char *upper_case = "Hello OpenCL, I like U";
+	const char *upper_case = "Hello OpenCL, I like U";
 
 	// get platform
 	err = clGetPlatformIDs(1, &platform, NULL);
@@ -127,7 +127,7 @@ int main()
 
 	// create memory object
 	input = clCreateBuffer(context, CL_MEM_READ_ONLY |
-		CL_MEM_COPY_HOST_PTR, strlen(upper_case), upper_case, &err);
+		CL_MEM_COPY_HOST_PTR, strlen(upper_case), (void *)upper_case, &err);
 	output = clCreateBuffer(context, CL_MEM_WRITE_ONLY, strlen(upper_case),
 		NULL, &err);
 	if (input == NULL || output == NULL) {
