@@ -13,7 +13,7 @@ const char *source =
 "	int g_id = get_global_id(0);				        \n"
 "                                                                       \n"
 "	if ((in[g_id] >= 'A') && (in[g_id] <= 'Z'))               	\n"
-"		out[g_id] = in[g_id] + 32                        	\n"
+"		out[g_id] = in[g_id] + 32;                        	\n"
 "	else                                                            \n"
 "		out[g_id] = in[g_id];                             	\n"
 "}								        \n";
