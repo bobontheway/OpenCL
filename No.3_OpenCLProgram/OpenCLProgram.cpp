@@ -7,6 +7,7 @@
 #include <CL/cl.h>
 #endif
 
+#if 0
 const char *source =
 "__kernel void toupper(__global char *in, __global char *out)		\n"
 "{								        \n"
@@ -17,6 +18,7 @@ const char *source =
 "	else                                                            \n"
 "		out[g_id] = in[g_id];                             	\n"
 "}								        \n";
+#endif
 
 void check_error(int error, int line)
 {
@@ -38,7 +40,7 @@ void get_platform_info(cl_platform_id *platform, int num)
 			NULL);
 		check_error(err, __LINE__);
 		printf("platform name: %s\n", buf);
-	
+
 		printf("\n");
 	}
 }
@@ -54,9 +56,47 @@ void get_devices_info(cl_device_id *devices, int num)
 		err = clGetDeviceInfo(devices[i], CL_DEVICE_NAME, len, buf, NULL);
 		check_error(err, __LINE__);
 		printf("device name: %s\n", buf);
-	
+
 		printf("\n");
 	}
+}
+
+char *use_program(const char *filename)
+{
+	FILE *file;
+	char *buf;
+	long program_size;
+
+	// file = fopen("test.cl", "rb");
+	file = fopen(filename, "rb");
+	if (!file) {
+		printf("open file fail\n");
+		exit(EXIT_FAILURE);
+	}
+
+	// 设置文件位置指示符，指向文件末尾
+	fseek(file, 0, SEEK_END);
+
+	// 获取文件指示符的当前位置
+	// 注意：文件中实际的字符个数比可见的多一个，在 Linux 系统中，
+	// 文件最后补充了一个不可见的换行符 '\n'。
+	program_size = ftell(file);
+
+	// 重置指示符指向文件的起始位置
+	rewind(file);
+
+	buf = malloc(program_size + 1);
+	if (!buf) {
+		printf("alloc memory fail\n");
+		fclose(file);
+		exit(EXIT_FAILURE);
+	}
+
+	fread(buf, sizeof(char), program_size, file);
+
+	//free(buf);
+	fclose(file);
+	return buf;
 }
 
 int main()
@@ -72,6 +112,7 @@ int main()
 	cl_command_queue queue;
 	cl_program program;
 	cl_kernel kernel;
+	char *program_buf;
 
 	cl_mem input, output;
 	const char *upper_case = "Hello OpenCL, I like U";
@@ -106,18 +147,21 @@ int main()
 		exit(EXIT_FAILURE);
 	}
 
+	program_buf = use_program("program.cl");
 	// create program
-	program = clCreateProgramWithSource(context, 1, &source, NULL, &err);
+	//program = clCreateProgramWithSource(context, 1, &source, NULL, &err);
+	program = clCreateProgramWithSource(context, 1, &program_buf, NULL, &err);
 	if (program == NULL) {
 		printf("create program fail\n");
 		exit(EXIT_FAILURE);
 	}
+	free(program_buf);
 
 	err = clBuildProgram(program, 1, &device, NULL, NULL, NULL);
 	if (CL_SUCCESS != err) {
 		size_t bufSize = 1024;
 		char buf[bufSize];
-	
+
 		err = clGetProgramBuildInfo(program, device, CL_PROGRAM_BUILD_LOG,
 			bufSize, buf, NULL);
 		check_error(err, __LINE__);
