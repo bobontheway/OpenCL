@@ -7,19 +7,6 @@
 #include <CL/cl.h>
 #endif
 
-#if 0
-const char *source =
-"__kernel void toupper(__global char *in, __global char *out)		\n"
-"{								        \n"
-"	int g_id = get_global_id(0);				        \n"
-"                                                                       \n"
-"	if ((in[g_id] >= 'A') && (in[g_id] <= 'Z'))               	\n"
-"		out[g_id] = in[g_id] + 32;                        	\n"
-"	else                                                            \n"
-"		out[g_id] = in[g_id];                             	\n"
-"}								        \n";
-#endif
-
 void check_error(int error, int line)
 {
 	if (error != CL_SUCCESS) {
