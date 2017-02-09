@@ -143,6 +143,18 @@ clReleaseContext(context);
 
 ## 内核
 __kernel 代表这是一个内核函数。它包含两个参数，它们是指向全局内存区域的指针。in 指向的内存区域由 input 内存对象来引用，out 指向的内存区域由 output 内存对象来引用。每个工作项在全局范围内都有一个唯一的标识，通过该标识就可以将缓冲区中的每个元素和执行的内核实例关联。
+```c
+const char *source =
+"__kernel void toupper(__global char *in, __global char *out)		\n"
+"{								        \n"
+"	int g_id = get_global_id(0);				        \n"
+"                                                                       \n"
+"	if ((in[g_id] >= 'A') && (in[g_id] <= 'Z'))               	\n"
+"		out[g_id] = in[g_id] + 32;                        	\n"
+"	else                                                            \n"
+"		out[g_id] = in[g_id];                             	\n"
+"}								        \n";
+```
 
 ## 小结
 使用 clCreateXXXX 创建的对象，在程序退出前需要释放对应的资源。`EXIT_FAILURE` 在 `stdlib.h` 中定义，通常作为 `exit()` 函数参数来表明程序的运行结果。
