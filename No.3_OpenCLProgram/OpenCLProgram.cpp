@@ -61,17 +61,16 @@ void get_devices_info(cl_device_id *devices, int num)
 	}
 }
 
-char *use_program(const char *filename)
+char *package_program(const char *filename)
 {
 	FILE *file;
 	char *buf;
 	long program_size;
 
-	// file = fopen("test.cl", "rb");
 	file = fopen(filename, "rb");
 	if (!file) {
-		printf("open file fail\n");
-		exit(EXIT_FAILURE);
+		perror("open file fail");
+		return NULL;
 	}
 
 	// 设置文件位置指示符，指向文件末尾
@@ -85,16 +84,14 @@ char *use_program(const char *filename)
 	// 重置指示符指向文件的起始位置
 	rewind(file);
 
-	buf = malloc(program_size + 1);
+	buf = (char *)malloc(program_size + 1);
 	if (!buf) {
-		printf("alloc memory fail\n");
+		perror("alloc memory fail");
 		fclose(file);
-		exit(EXIT_FAILURE);
+		return NULL;
 	}
-
+	buf[program_size] = '\0';
 	fread(buf, sizeof(char), program_size, file);
-
-	//free(buf);
 	fclose(file);
 	return buf;
 }
@@ -147,10 +144,15 @@ int main()
 		exit(EXIT_FAILURE);
 	}
 
-	program_buf = use_program("program.cl");
+	program_buf = package_program("program.cl");
+	if (!program_buf) {
+		printf("alloc program buffer fail\n");
+		exit(EXIT_FAILURE);
+
+	}
+
 	// create program
-	//program = clCreateProgramWithSource(context, 1, &source, NULL, &err);
-	program = clCreateProgramWithSource(context, 1, &program_buf, NULL, &err);
+	program = clCreateProgramWithSource(context, 1, (const char **)&program_buf, NULL, &err);
 	if (program == NULL) {
 		printf("create program fail\n");
 		exit(EXIT_FAILURE);
