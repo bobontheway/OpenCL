@@ -15,7 +15,7 @@ git push -f origin master
 获取 OpenCL 编码中的错误信息，并对其纠正。
 
 ### No.3_OpenCLProgram
-将设备端内核代码和主机代码分离，利于程序编写。
+将设备端内核代码和主机代码分离，方便程序编写、调试。
 
 
 
