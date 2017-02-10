@@ -17,5 +17,7 @@ git push -f origin master
 ### No.3_OpenCLProgram
 将设备端内核代码和主机代码分离，方便程序编写、调试。
 
+### No.4_OpenCLCompile
+把程序构建拆分为编译和链接步骤。Mali T-880 只支持到了 OpenCL 1.1，在 OpenCL 1.2 中支持，只能在 ubuntu 中测试。
 
 
