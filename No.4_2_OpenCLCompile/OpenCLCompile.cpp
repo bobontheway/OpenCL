@@ -94,7 +94,7 @@ int main()
 	// should be release
 	cl_context context;
 	cl_command_queue queue;
-	cl_program program;
+	cl_program program, header_program;
 	cl_kernel kernel;
 	char *program_buf;
 
@@ -131,6 +131,7 @@ int main()
 		exit(EXIT_FAILURE);
 	}
 
+	/* main program */
 	program_buf = package_program("program.cl");
 	if (!program_buf) {
 		printf("alloc program buffer fail\n");
@@ -146,13 +147,39 @@ int main()
 	}
 	free(program_buf);
 
+	/* header program */
+	program_buf = package_program("lower.cl");
+	if (!program_buf) {
+		printf("alloc program buffer fail\n");
+		exit(EXIT_FAILURE);
+
+	}
+
+	// create program
+	header_program = clCreateProgramWithSource(context, 1, (const char **)&program_buf, NULL, &err);
+	if (header_program == NULL) {
+		printf("create header program fail\n");
+		exit(EXIT_FAILURE);
+	}
+	free(program_buf);
+
+
+	const char *header_name = "lower.h";
 	err = clCompileProgram(program, 1, &device, NULL,
-		0, NULL, NULL, NULL, NULL);
+		1, &header_program, &header_name, NULL, NULL);
 	if (CL_SUCCESS != err) {
-		printf("compile error\n");
+		size_t bufSize = 1024;
+		char buf[bufSize];
+
+		err = clGetProgramBuildInfo(program, device,
+			CL_PROGRAM_BUILD_LOG, bufSize, buf, NULL);
+		check_error(err, __LINE__);
+		printf("build log:\n%s\n", buf);
+
 		exit(EXIT_FAILURE);
 	}
 
+	/* no need to change */
 	program = clLinkProgram(context, 1, &device, NULL,
 		1, &program, NULL, NULL, &err);
 	if (!program) {

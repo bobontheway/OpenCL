@@ -37,6 +37,10 @@ input_programs
 
 一一对应关系
 
+1.使用 clCompileProgram 编译错误时，也能使用 clBuildProgramInfo 获取编译错误信息。
+2.将 xxx.cl 中的 toupper 改为 tolower，转换为小写字母，待办
+
+
 
 
 
