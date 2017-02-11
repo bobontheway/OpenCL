@@ -149,21 +149,6 @@ int main()
 	err = clCompileProgram(program, 1, &device, NULL,
 		0, NULL, NULL, NULL, NULL);
 	if (CL_SUCCESS != err) {
-		printf("compile error\n");
-		exit(EXIT_FAILURE);
-	}
-
-	program = clLinkProgram(context, 1, &device, NULL,
-		1, &program, NULL, NULL, &err);
-	if (!program) {
-		printf("program link error: %d\n", err);
-		exit(EXIT_FAILURE);
-	}
-
-
-#if 0
-	err = clBuildProgram(program, 1, &device, NULL, NULL, NULL);
-	if (CL_SUCCESS != err) {
 		size_t bufSize = 1024;
 		char buf[bufSize];
 
@@ -173,7 +158,13 @@ int main()
 		printf("build log:\n%s\n", buf);
 		exit(EXIT_FAILURE);
 	}
-#endif
+
+	program = clLinkProgram(context, 1, &device, NULL,
+		1, &program, NULL, NULL, &err);
+	if (!program) {
+		printf("program link error: %d\n", err);
+		exit(EXIT_FAILURE);
+	}
 
 	// create memory object
 	input = clCreateBuffer(context, CL_MEM_READ_ONLY |
