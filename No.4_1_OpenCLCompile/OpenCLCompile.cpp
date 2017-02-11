@@ -177,7 +177,7 @@ int main()
 	}
 
 	// create kernel
-	kernel = clCreateKernel(program, "toupper", &err);
+	kernel = clCreateKernel(program, "tolower", &err);
 	if (kernel == NULL) {
 		printf("create kernel fail: %d\n", err);
 		exit(EXIT_FAILURE);

@@ -1,82 +1,63 @@
 ## 概述
-该 OpenCL 程序在华为 Mate 8 上执行，输出结果如下
+由于华为 Mate 8 只支持到 OpenCL 1.1，为了使用 OpenCL 1.2 功能，该 OpenCL 程序在 Ubuntu 上执行，GPU 为 RX460。输出结果如下：
 
 ```bash
-shell@HWFRD:/data/local/tmp $ ./opencl_program
+xbdong@xbdong-opencl:~/Project/github/OpenCL/No.4_1_OpenCLCompile$ ./OpenCLCompile 
 [Platform Infomation]
-platform name: ARM Platform
+platform name: AMD Accelerated Parallel Processing
 
 [Device Infomation]
-device name: Mali-T880
+device name: Baffin
 
 [Result]
 lower case is: hello opencl, i like u
 ```
 
 ## 简介
-为了便于设备端 OpenCL 代码的编辑和调试，在 `No.1_HelloOpenCL` 的基础上，将设备端的内核代码从主机代码分离，存放到单独的 `program.cl` 文件中。这样主机代码在无需重新编译的情况下，只修改 `program.cl` 文件，就可以重新定义内核代码功能。
+对于功能比较丰富的程序，在实现的时候，为了便于维护，可以将不同的功能放到不同的头文件件中，再统一编译、链接。在 OpenCL 1.2 中，支持将程序的构建拆分为编译、链接两个步骤，这两个步骤相互独立。
+
+本文描述如何将构建拆分为编译和链接两个独立的步骤，在 `No.4_2_OpenCLCompile` 中再把功能实现放到单独的头文件中。
 
 ## 实现
-### 1.分离内核代码
-将下面 OpenCL 代码从源文件分离出来，存放到新建的 `program.cl` 文件中。
+
+将 `clBuildProgram` 拆分为 `clCompileProgram` 和 `clLinkProgram`。在 `clCompileProgram` 中，参数 `num_input_headers`、`input_headers` 和 `header_include_names` 分别表示程序对象所包含头文件的数目、头文件对应的程序对象，以及头文件的名称，头文件名称和程序对象一一对应。由于这里描述的程序对象没有包含头文件，这些参数分别设置为 0 和NULL 即可，在 `No.4_2_OpenCLCompile` 中会根据头文件的属性来设置相关参数。
+
+### 1.编译
+编译 `clCompileProgram` 成功执行完成后，产生的对象文件将和 `program` 程序对象关联，该程序对象在链接阶段使用。如果编译错误，使用 `clGetProgramBuildInfo` 获取编译信息，定位问题所在。
 ```c
-__kernel void toupper(__global char *in, __global char *out)
-{
-	int g_id = get_global_id(0);
-
-	if ((in[g_id] >= 'A') && (in[g_id] <= 'Z'))
-		out[g_id] = in[g_id] + 32;
-	else
-		out[g_id] = in[g_id];
-}
+cl_int clCompileProgram (cl_program program,
+  	cl_uint num_devices,
+  	const cl_device_id *device_list,
+  	const char *options,
+  	cl_uint num_input_headers,
+  	const cl_program *input_headers,
+  	const char **header_include_names,
+  	void (CL_CALLBACK *pfn_notify)( cl_program program, void *user_data),
+  	void *user_data)
 ```
+部分参数说明如下：
+- `num_input_headers` - 指定程序对象的数目， 描述 `input_headers` 数组中的头文件；
+- `input_headers` - 可看作数组，数组中的程序对象使用 `clCreateProgramWithSource` 创建，程序对象表示内嵌头文件；
+- `header_include_names` - 可看作指针数组，其成员和 `input_headers` 中的程序对象一一对应。数组 `header_include_names` 中每个成员指定在 `program` 程序对象中使用引用的内嵌头文件的名字。`input_headers` 中对应的成员表示程序对象，它包含将要使用的头见文件源代码。
 
-### 2.实现 package_program 函数
-在主机端实现 package_program 函数，其目的是将文件中的内容以字符串的形式存放到缓冲区中。
+### 2.链接
+输入的程序对象在经过 clLinkProgram 连接后，生成可执行文件，可在设备端运行。
 ```c
-char *package_program(const char *filename)
-{
-	FILE *file;
-	char *buf;
-	long program_size;
-
-	file = fopen(filename, "rb");
-	if (!file) {
-		perror("open file fail");
-		return NULL;
-	}
-
-	// 设置文件位置指示符，指向文件末尾
-	fseek(file, 0, SEEK_END);
-
-	// 获取文件指示符的当前位置
-	program_size = ftell(file);
-
-	// 重置指示符指向文件的起始位置
-	rewind(file);
-
-	buf = (char *)malloc(program_size + 1);
-	if (!buf) {
-		perror("alloc memory fail");
-		fclose(file);
-		return NULL;
-	}
-	buf[program_size] = '\0';
-	fread(buf, sizeof(char), program_size, file);
-	fclose(file);
-	return buf;
-}
+cl_program clLinkProgram (cl_context context,
+  	cl_uint num_devices,
+  	const cl_device_id *device_list,
+  	const char *options,
+  	cl_uint num_input_programs,
+  	const cl_program *input_programs,
+  	void (CL_CALLBACK *pfn_notify) (cl_program program, void *user_data),
+  	void *user_data,
+  	cl_int *errcode_ret)
 ```
+部分参数描述如下：
+- `num_input_programs` - 指定 `input_programs` 数组中程序对象的数目；
+- `input_programs` - 程序对象的数组，被编译为二进制文件或库文件，被链接后创建可执行程序。
 
-文件中每行的末尾自动补充一个换行符 `\n`，其 ASCII 码对应的值为 `0xA`。调用 malloc 分配缓冲区的时候，会多分配一个字节内存单元，向其中存入 `\0` 字符。这样在调用 `clCreateProgramWithSource` 的时候，参数 `lengths` 可直接传入 NULL，表示 `strings` 参数是以 null 结尾的字符串。
-
-### 3.创建程序对象
-使用缓冲区 `program_buf` 作为参数，创建程序对象。程序对象创建后，可以释放该缓冲区。
-```c
-program = clCreateProgramWithSource(context, 1, (const char **)&program_buf, NULL, &err);
-```
-##参考
-http://man7.org/linux/man-pages/man3/fseek.3.html
+下一篇 `No.4_2_OpenCLCompile` 将把功能实现放到单独的头文件中。
 
 
 

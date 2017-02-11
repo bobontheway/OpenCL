@@ -1,5 +1,5 @@
 #include "lower.h"
-__kernel void toupper(__global char *in, __global char *out)
+__kernel void tolower(__global char *in, __global char *out)
 {
 	int g_id = get_global_id(0);
 
