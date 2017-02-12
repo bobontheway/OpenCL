@@ -98,7 +98,7 @@ if (input == NULL || output == NULL) {
 ### 8.创建内核
 内核是设备程序的入口，如图形处理器中的着色器程序。它类似于库文件中导出的库函数。设置执行的程序，以内核对象的方式提交到命令队列中。
 ```c
-kernel = clCreateKernel(program, "toupper", &err);
+kernel = clCreateKernel(program, "tolower", &err);
 if (kernel == NULL) {
         printf("create kernel fail: %d\n", err);
         exit(EXIT_FAILURE);
@@ -145,7 +145,7 @@ clReleaseContext(context);
 __kernel 代表这是一个内核函数。它包含两个参数，它们是指向全局内存区域的指针。in 指向的内存区域由 input 内存对象来引用，out 指向的内存区域由 output 内存对象来引用。每个工作项在全局范围内都有一个唯一的标识，通过该标识就可以将缓冲区中的每个元素和执行的内核实例关联。
 ```c
 const char *source =
-"__kernel void toupper(__global char *in, __global char *out)    \n"
+"__kernel void tolower(__global char *in, __global char *out)    \n"
 "{                                                               \n"
 "   int g_id = get_global_id(0);                                 \n"
 "                                                                \n"

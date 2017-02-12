@@ -24,7 +24,7 @@ OpenCL 内核程序在运行之前，需要通过编译、链接等步骤。由�
 ### 1.修改内核程序
 去掉内核程序中第 6 行末尾的分号，使其在构建时失败。
 ```c
-"__kernel void toupper(__global char *in, __global char *out)           \n"
+"__kernel void tolower(__global char *in, __global char *out)           \n"
 "{                                                                      \n"
 "       int g_id = get_global_id(0);                                    \n"
 "                                                                       \n"

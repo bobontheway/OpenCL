@@ -8,7 +8,7 @@
 #endif
 
 const char *source =
-"__kernel void toupper(__global char *in, __global char *out)		\n"
+"__kernel void tolower(__global char *in, __global char *out)		\n"
 "{								        \n"
 "	int g_id = get_global_id(0);				        \n"
 "                                                                       \n"
@@ -136,7 +136,7 @@ int main()
 	}
 
 	// create kernel
-	kernel = clCreateKernel(program, "toupper", &err);
+	kernel = clCreateKernel(program, "tolower", &err);
 	if (kernel == NULL) {
 		printf("create kernel fail: %d\n", err);
 		exit(EXIT_FAILURE);

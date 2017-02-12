@@ -20,7 +20,7 @@ lower case is: hello opencl, i like u
 ### 1.分离内核代码
 将下面 OpenCL 代码从源文件分离出来，存放到新建的 `program.cl` 文件中。
 ```c
-__kernel void toupper(__global char *in, __global char *out)
+__kernel void tolower(__global char *in, __global char *out)
 {
 	int g_id = get_global_id(0);
 
