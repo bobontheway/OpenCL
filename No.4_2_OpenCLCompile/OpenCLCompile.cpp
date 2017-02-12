@@ -132,9 +132,10 @@ int main()
 	}
 
 	/* main program */
-	program_buf = package_program("program.cl");
+	const char *program_main = "program.cl";
+	program_buf = package_program(program_main);
 	if (!program_buf) {
-		printf("alloc program buffer fail\n");
+		printf("alloc program buffer fail: %s\n", program_main);
 		exit(EXIT_FAILURE);
 
 	}
@@ -142,15 +143,16 @@ int main()
 	// create program
 	program = clCreateProgramWithSource(context, 1, (const char **)&program_buf, NULL, &err);
 	if (program == NULL) {
-		printf("create program fail\n");
+		printf("create program fail: %s\n", program_main);
 		exit(EXIT_FAILURE);
 	}
 	free(program_buf);
 
 	/* header program */
-	program_buf = package_program("lower.cl");
+	const char *program_head = "lower.cl";
+	program_buf = package_program(program_head);
 	if (!program_buf) {
-		printf("alloc program buffer fail\n");
+		printf("alloc program buffer fail:%s\n", program_head);
 		exit(EXIT_FAILURE);
 
 	}
@@ -158,7 +160,7 @@ int main()
 	// create program
 	header_program = clCreateProgramWithSource(context, 1, (const char **)&program_buf, NULL, &err);
 	if (header_program == NULL) {
-		printf("create header program fail\n");
+		printf("create header program fail: %s\n", program_head);
 		exit(EXIT_FAILURE);
 	}
 	free(program_buf);
@@ -175,7 +177,6 @@ int main()
 			CL_PROGRAM_BUILD_LOG, bufSize, buf, NULL);
 		check_error(err, __LINE__);
 		printf("build log:\n%s\n", buf);
-
 		exit(EXIT_FAILURE);
 	}
 
@@ -186,21 +187,6 @@ int main()
 		printf("program link error: %d\n", err);
 		exit(EXIT_FAILURE);
 	}
-
-
-#if 0
-	err = clBuildProgram(program, 1, &device, NULL, NULL, NULL);
-	if (CL_SUCCESS != err) {
-		size_t bufSize = 1024;
-		char buf[bufSize];
-
-		err = clGetProgramBuildInfo(program, device, CL_PROGRAM_BUILD_LOG,
-			bufSize, buf, NULL);
-		check_error(err, __LINE__);
-		printf("build log:\n%s\n", buf);
-		exit(EXIT_FAILURE);
-	}
-#endif
 
 	// create memory object
 	input = clCreateBuffer(context, CL_MEM_READ_ONLY |

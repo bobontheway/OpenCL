@@ -1,82 +1,56 @@
 ## 概述
-该 OpenCL 程序在华为 Mate 8 上执行，输出结果如下
+本文是上一篇 `No.4_1_OpenCLCompile` 的第二部分，把功能实现放到单独的头文件中。输出结果如下：
 
 ```bash
-shell@HWFRD:/data/local/tmp $ ./opencl_program
+xbdong@xbdong-opencl:~/Project/github/OpenCL/No.4_2_OpenCLCompile$ ./OpenCLCompile
 [Platform Infomation]
-platform name: ARM Platform
+platform name: AMD Accelerated Parallel Processing
 
 [Device Infomation]
-device name: Mali-T880
+device name: Baffin
 
 [Result]
 lower case is: hello opencl, i like u
 ```
 
-## 简介
-为了便于设备端 OpenCL 代码的编辑和调试，在 `No.1_HelloOpenCL` 的基础上，将设备端的内核代码从主机代码分离，存放到单独的 `program.cl` 文件中。这样主机代码在无需重新编译的情况下，只修改 `program.cl` 文件，就可以重新定义内核代码功能。
-
 ## 实现
-### 1.分离内核代码
-将下面 OpenCL 代码从源文件分离出来，存放到新建的 `program.cl` 文件中。
+### 1.创建头文件
+新建 `lower.cl` 文件，在该文件中添加 `lower` 函数，该函数实现将大写字母转换为小写字母。
 ```c
-__kernel void toupper(__global char *in, __global char *out)
+char lower(char val)
 {
-	int g_id = get_global_id(0);
-
-	if ((in[g_id] >= 'A') && (in[g_id] <= 'Z'))
-		out[g_id] = in[g_id] + 32;
-	else
-		out[g_id] = in[g_id];
+	return val+32;
 }
 ```
 
-### 2.实现 package_program 函数
-在主机端实现 package_program 函数，其目的是将文件中的内容以字符串的形式存放到缓冲区中。
+### 2.头文件程序对象
+创建头文件对应的程序对象，在编译时使用。
 ```c
-char *package_program(const char *filename)
-{
-	FILE *file;
-	char *buf;
-	long program_size;
+cl_program header_program;
 
-	file = fopen(filename, "rb");
-	if (!file) {
-		perror("open file fail");
-		return NULL;
-	}
-
-	// 设置文件位置指示符，指向文件末尾
-	fseek(file, 0, SEEK_END);
-
-	// 获取文件指示符的当前位置
-	program_size = ftell(file);
-
-	// 重置指示符指向文件的起始位置
-	rewind(file);
-
-	buf = (char *)malloc(program_size + 1);
-	if (!buf) {
-		perror("alloc memory fail");
-		fclose(file);
-		return NULL;
-	}
-	buf[program_size] = '\0';
-	fread(buf, sizeof(char), program_size, file);
-	fclose(file);
-	return buf;
+/* header program */
+program_buf = package_program("lower.cl");
+if (!program_buf) {
+	printf("alloc program buffer fail:lower.cl\n");
+	exit(EXIT_FAILURE);
 }
+
+// create program
+header_program = clCreateProgramWithSource(context, 1, (const char **)&program_buf, NULL, &err);
+if (header_program == NULL) {
+	printf("create header program fail\n");
+	exit(EXIT_FAILURE);
+}
+free(program_buf);
 ```
 
-文件中每行的末尾自动补充一个换行符 `\n`，其 ASCII 码对应的值为 `0xA`。调用 malloc 分配缓冲区的时候，会多分配一个字节内存单元，向其中存入 `\0` 字符。这样在调用 `clCreateProgramWithSource` 的时候，参数 `lengths` 可直接传入 NULL，表示 `strings` 参数是以 null 结尾的字符串。
+### 3.编译
 
-### 3.创建程序对象
-使用缓冲区 `program_buf` 作为参数，创建程序对象。程序对象创建后，可以释放该缓冲区。
 ```c
-program = clCreateProgramWithSource(context, 1, (const char **)&program_buf, NULL, &err);
+err = clCompileProgram(program, 1, &device, NULL,
+	1, &header_program, &header_name, NULL, NULL);
 ```
-##参考
-http://man7.org/linux/man-pages/man3/fseek.3.html
+相关参数在 `No.4_1_OpenCLCompile` 中描述，这里不在赘述。编译后的程序对象 `program` 在链接时使用。由于在链接时，只有一个程序对象输入，这和 `No.4_1_OpenCLCompile` 中一样，故无需对 `clLinkProgram` 的函数参数进行修改。
 
 
 
