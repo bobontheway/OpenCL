@@ -1,4 +1,7 @@
 ## 概述
+为了便于设备端 OpenCL 代码的编辑和调试，在 `No.1_HelloOpenCL` 的基础上，将设备端的内核代码从主机代码分离，存放到单独的 `program.cl` 文件中。这样主机代码在无需重新编译的情况下，只修改 `program.cl` 文件，就可以重新定义内核代码功能。
+
+## 简介
 该 OpenCL 程序在华为 Mate 8 上执行，输出结果如下
 
 ```bash
@@ -12,9 +15,6 @@ device name: Mali-T880
 [Result]
 lower case is: hello opencl, i like u
 ```
-
-## 简介
-为了便于设备端 OpenCL 代码的编辑和调试，在 `No.1_HelloOpenCL` 的基础上，将设备端的内核代码从主机代码分离，存放到单独的 `program.cl` 文件中。这样主机代码在无需重新编译的情况下，只修改 `program.cl` 文件，就可以重新定义内核代码功能。
 
 ## 实现
 ### 1.分离内核代码
