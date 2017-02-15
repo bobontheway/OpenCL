@@ -1,5 +1,5 @@
 ## 概述
-由于华为 Mate 8 只支持到 OpenCL 1.1，为了使用 OpenCL 1.2 功能，该 OpenCL 程序在 Ubuntu 上执行，GPU 为 RX460。输出结果如下：
+由于华为 Mate 8 只支持到 OpenCL 1.1，为了使用 OpenCL 1.2 功能，该 OpenCL 程序在 Ubuntu 上执行，GPU 为 AMD RX 460。输出结果如下：
 
 ```bash
 xbdong@xbdong-opencl:~/Project/github/OpenCL/No.4_1_OpenCLCompile$ ./OpenCLCompile 

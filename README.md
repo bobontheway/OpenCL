@@ -18,6 +18,8 @@ git push -f origin master
 将设备端内核代码和主机代码分离，方便程序编写、调试。
 
 ### No.4_OpenCLCompile
-把程序构建拆分为编译和链接步骤。Android 下，当前 Mali T-880 只支持到了 OpenCL 1.1。为了使用 OpenCL 1.2 的功能，在 ubuntu 中测试，对应的硬件为 AMD RX460。
+把程序构建拆分为编译和链接步骤。Android 下，当前 Mali T-880 只支持到了 OpenCL 1.1。为了使用 OpenCL 1.2 的功能，在 ubuntu 中测试，对应的硬件为 AMD RX 460。
 
+### No.5_OpenCLRotate
+分别在 CPU 上使用 C 语言和在 GPU 上使用 OpenCL 对一张 YUV420p 的图像顺时针旋转 90 度，比较两者之间的性能差异。
 
