@@ -25,6 +25,8 @@ YUV 格式包含两大类，分别为 planar 和 packed：
 
 **图一**
 范德萨
+<img src="image/YUV420p/image_yuv.png" width="50%" height="50%"><img src="image/YUV420p/image_y_rotated.png" width="25%" height="25%">
+
 ![](image/YUV420p/image_yuv.png)
 ![](image/YUV420p/image_y_rotated.png)
 方式的
