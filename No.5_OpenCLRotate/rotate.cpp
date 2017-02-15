@@ -1,6 +1,18 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <sys/time.h>
 #include <time.h>
+#ifdef __APPLE__
+#include <OpenCL/cl.h>
+#else
+#include <CL/cl.h>
+#endif
 
+
+/**
+* 计算程序执行时间
+*/
 static int64_t g_time;
 
 static int64_t system_time()
@@ -11,19 +23,28 @@ static int64_t system_time()
 	return (int64_t)(t.tv_sec)*1000000000LL + (int64_t)t.tv_nsec;
 }
 
-//static void time_start()
 static void time_start()
 {
 	g_time = system_time();
 }
 
-//static void time_end(const char *str)
 static void time_end(const char *str)
 {
 	int64_t t = system_time() - g_time;
 	double ds = ((double)t) / 1e6;
 	printf("Test: %s, %f ms\n", str, ds);
 
+}
+
+/**
+* 获取代码错误位置
+*/
+void check_error(int error, int line)
+{
+	if (error != CL_SUCCESS) {
+		printf("error is: %d,  line: %d\n", error, line-1);
+		exit(EXIT_FAILURE);
+	}
 }
 
 /**
@@ -196,35 +217,140 @@ void yuv420p_rotate_opencl_use(uint8_t *src, uint8_t *des, int w, int h)
 				src[wh+halfUV + ((halfH - j) * halfW + i)];
 }
 
+
+/**
+* 获取 GPU 信息并初始化
+*/
+void get_platform_info(cl_platform_id *platform, int num)
+{
+	int err;
+	size_t len = 100;
+	char buf[len];
+
+	printf("[Platform Infomation]\n");
+	for (int i = 0; i < num; i++) {
+		err = clGetPlatformInfo(platform[i], CL_PLATFORM_NAME, len, buf,
+			NULL);
+		check_error(err, __LINE__);
+		printf("platform name: %s\n", buf);
+
+		printf("\n");
+	}
+}
+
+void get_devices_info(cl_device_id *devices, int num)
+{
+	int err;
+	size_t len = 100;
+	char buf[len];
+
+	printf("[Device Infomation]\n");
+	for (int i = 0; i < num; i++) {
+		err = clGetDeviceInfo(devices[i], CL_DEVICE_NAME, len, buf, NULL);
+		check_error(err, __LINE__);
+		printf("device name: %s\n", buf);
+
+		printf("\n");
+	}
+}
+
+/**
+* 读取 kernel 代码，存放到缓冲区中
+*/
+void init_opencl(cl_context *context, cl_command_queue *queue, cl_program *program)
+{
+	int err;
+	cl_platform_id platform;
+	cl_device_id device;
+
+	char *rotate_y, *rotate_uv;
+	char *program_buffer[2];
+
+	// get platform
+	err = clGetPlatformIDs(1, &platform, NULL);
+	check_error(err, __LINE__);
+	get_platform_info(&platform, 1);
+
+	// get gpu device
+	err = clGetDeviceIDs(platform, CL_DEVICE_TYPE_GPU, 1, &device, NULL);
+	if (err != CL_SUCCESS) {
+		printf("can' get cpu device, try cpu...\n");
+		err = clGetDeviceIDs(platform, CL_DEVICE_TYPE_CPU, 1, &device, NULL);
+		check_error(err, __LINE__);
+	}
+	get_devices_info(&device, 1);
+
+	// create context
+	context = clCreateContext(NULL, 1, &device, NULL, NULL, &err);
+	if (context == NULL) {
+		printf("create context fail\n");
+		exit(EXIT_FAILURE);
+	}
+
+	// create command queue
+	queue = clCreateCommandQueue(context, device, 0, &err);
+	if (queue == NULL) {
+		printf("create command queue fail\n");
+		exit(EXIT_FAILURE);
+	}
+
+	rotate_y = package_program("rotate_y.cl");
+	if (!rotate_y) {
+		printf("alloc program rotate-y buffer fail\n");
+		exit(EXIT_FAILURE);
+
+	}
+	
+	rotate_uv = package_program("rotate_uv.cl");
+	if (!rotate_uv) {
+		printf("alloc program rotate-uv buffer fail\n");
+		exit(EXIT_FAILURE);
+
+	}
+
+	program_buffer[2] = {rotate_y, rotate_uv};
+
+	// create program
+	program = clCreateProgramWithSource(context, 1, (const char **)program_buffer, NULL, &err);
+	if (program == NULL) {
+		printf("create program fail\n");
+		exit(EXIT_FAILURE);
+	}
+	free(rotate_y);
+	free(rotate_uv);
+
+	// build program
+	err = clBuildProgram(program, 1, &device, NULL, NULL, NULL);
+	if (CL_SUCCESS != err) {
+		size_t bufSize = 1024;
+		char buf[bufSize];
+
+		err = clGetProgramBuildInfo(program, device, CL_PROGRAM_BUILD_LOG,
+			bufSize, buf, NULL);
+		check_error(err, __LINE__);
+		printf("build log:\n%s\n", buf);
+		exit(EXIT_FAILURE);
+	}
+}
+
 /**
  * 使用 OpenCL 在 GPU 上执行旋转操作
  */
-void yuv420p_rotate_opencl(uint8_t *src, uint8_t *des, int w, int h,
-	cl_program program, cl_context context, cl_command_queue queue)
+void yuv420p_rotate_opencl(uint8_t *src, uint8_t *des, int w, int h)
 {
-	//w = 16;
-	//h = 16;
-	//w = 32;
-	//h = 32;
-#if 0
-	w = 256;
-	h = 256;
-
-	w = 512;
-	h = 512;
-
-	w = 1024;
-	h = 1024;
-#endif
-
 	int i,j,n;
 	int halfW = w / 2;
 	int halfH = h / 2;
 	int baseU = w * h;
 	int baseV = w * h * 5 / 4;
 
-	//opencl
+	// should be release
+	cl_context context;
+	cl_command_queue queue;
+	cl_program program;
 	cl_kernel rotate_y_kernel, rotate_uv_kernel;
+
+	init_opencl(&context, &queue, &program)
 
 	size_t global_y_size[2];
 	global_y_size[0] = w;
@@ -246,42 +372,40 @@ void yuv420p_rotate_opencl(uint8_t *src, uint8_t *des, int w, int h,
 	cl_int err;
 	cl_mem in_buffer, out_buffer;
 
-	rotate_y_kernel = clCreateKernel(program, "rotateY", &err);
+	rotate_y_kernel = clCreateKernel(program, "rotate_y", &err);
 	if (err != CL_SUCCESS) {
-		printf("Couldn't create rotateY kernel(%d)", err);
-		//perror("Couldn't create rotateY kernel");
-		exit(1);
+		printf("Couldn't create rotateY kernel(%d)", err);		
+		exit(EXIT_FAILURE);
 	}
 
-	rotate_uv_kernel = clCreateKernel(program, "rotateUV", &err);
+	rotate_uv_kernel = clCreateKernel(program, "rotate_uv", &err);
 	if (err != CL_SUCCESS) {
 		printf("Couldn't create rotateUV kernel(%d)\n", err);
-		//perror("Couldn't create rotateUV kernel");
-		exit(1);
+		exit(EXIT_FAILURE);
 	}
 
 	in_buffer = clCreateBuffer(context,
 		CL_MEM_READ_ONLY|CL_MEM_USE_HOST_PTR, (w*h*3/2)*sizeof(uint8_t), src, &err);
 	if (err < 0) {
 		perror("Couldn't create a img buffer");
-		exit(1);   
+		exit(EXIT_FAILURE);   
 	}
 
 	out_buffer = clCreateBuffer(context, CL_MEM_WRITE_ONLY, (w*h*3/2)*sizeof(uint8_t), NULL, &err);
 	if (err < 0)  {
 		perror("Couldn't create a out buffer");
-		exit(1);   
+		exit(EXIT_FAILURE);   
 	}
 
 	time_start();
 	// rotateY
-	err  = clSetKernelArg(rotate_y_kernel, 0,sizeof(cl_mem), &out_buffer);
-	err |= clSetKernelArg(rotate_y_kernel, 1,sizeof(cl_mem), &in_buffer);
+	err  = clSetKernelArg(rotate_y_kernel, 0,sizeof(cl_mem), &in_buffer);
+	err |= clSetKernelArg(rotate_y_kernel, 1,sizeof(cl_mem), &out_buffer);
 	err |= clSetKernelArg(rotate_y_kernel, 2,sizeof(int), &w);
 	err |= clSetKernelArg(rotate_y_kernel, 3,sizeof(int), &h);
 	if (err != CL_SUCCESS) {
 		printf("Couldn't set an argument for the exposure rotateY kernel");
-		exit(1);   
+		exit(EXIT_FAILURE);   
 	}
 
 	printf("global_y_size=%d, %d  local_y_size=%d, %d\n",
@@ -291,18 +415,18 @@ void yuv420p_rotate_opencl(uint8_t *src, uint8_t *des, int w, int h,
 	if (err != CL_SUCCESS) {
 		printf("Couldn't enqueue the exposure rotateY kernel(%d)\n", err);
 		//perror("Couldn't enqueue the exposure rotateY kernel\n");
-		exit(1);   
+		exit(EXIT_FAILURE);   
 	}
 
 	// rotateU
-	err  = clSetKernelArg(rotate_uv_kernel, 0,sizeof(cl_mem), &out_buffer);
-	err |= clSetKernelArg(rotate_uv_kernel, 1,sizeof(cl_mem), &in_buffer);
+	err  = clSetKernelArg(rotate_uv_kernel, 0,sizeof(cl_mem), &in_buffer);
+	err |= clSetKernelArg(rotate_uv_kernel, 1,sizeof(cl_mem), &out_buffer);
 	err |= clSetKernelArg(rotate_uv_kernel, 2,sizeof(int), &halfW);
 	err |= clSetKernelArg(rotate_uv_kernel, 3,sizeof(int), &halfH);
 	err |= clSetKernelArg(rotate_uv_kernel, 4,sizeof(int), &baseU);
 	if(err < 0) {
 		printf("Couldn't set an argument for the exposure rotateU kernel");
-		exit(1);   
+		exit(EXIT_FAILURE);   
 	}
 
 	err = clEnqueueNDRangeKernel(queue, rotate_uv_kernel, 2, global_uv_offset, global_uv_size, local_uv_size, 0, NULL, NULL);   
@@ -310,34 +434,42 @@ void yuv420p_rotate_opencl(uint8_t *src, uint8_t *des, int w, int h,
 	{
 		printf("%d\n",err);
 		perror("Couldn't enqueue the exposure rotateU kernel\n");
-		exit(1);   
+		exit(EXIT_FAILURE);   
 	}
 
 	// rotateV
-	err  = clSetKernelArg(rotate_uv_kernel, 0,sizeof(cl_mem), &out_buffer);
-	err |= clSetKernelArg(rotate_uv_kernel, 1,sizeof(cl_mem), &in_buffer);
+	err  = clSetKernelArg(rotate_uv_kernel, 0,sizeof(cl_mem), &in_buffer);
+	err |= clSetKernelArg(rotate_uv_kernel, 1,sizeof(cl_mem), &out_buffer);
 	err |= clSetKernelArg(rotate_uv_kernel, 2,sizeof(int), &halfW);
 	err |= clSetKernelArg(rotate_uv_kernel, 3,sizeof(int), &halfH);
 	err |= clSetKernelArg(rotate_uv_kernel, 4,sizeof(int), &baseV);
 	if (err < 0) {
 		printf("Couldn't set an argument for the exposure rotateV kernel");
-		exit(1);   
+		exit(EXIT_FAILURE);   
 	}
 
 	err = clEnqueueNDRangeKernel(queue, rotate_uv_kernel, 2, global_uv_offset, global_uv_size, local_uv_size, 0, NULL, NULL);   
 	if(err != 0) {
 		printf("%d\n",err);
 		perror("Couldn't enqueue the exposure rotateV kernel\n");
-		exit(1);   
+		exit(EXIT_FAILURE);   
 	}
 
 	err = clEnqueueReadBuffer(queue, out_buffer, CL_TRUE, 0,
 		(w*h*3/2)*sizeof(uint8_t), des, 0, NULL, NULL);
 	if(err < 0) {
 		perror("Couldn't read the buffer");
-		exit(1);   
+		exit(EXIT_FAILURE);   
 	} 
-	time_end("calculate YUV");
+	time_end("calculate YUV");	
+
+	clReleaseKernel(rotate_y_kernel);
+	clReleaseKernel(rotate_uv_kernel);
+	clReleaseMemObject(in_buffer);
+	clReleaseMemObject(out_buffer);
+	clReleaseProgram(program);
+	clReleaseCommandQueue(queue);
+	clReleaseContext(context);
 }
 
 /**
@@ -365,5 +497,4 @@ int rotate(uint8_t *img_src, uint8_t *img_dst, int w, int h)
 
 	return ret;
 }
-
 
