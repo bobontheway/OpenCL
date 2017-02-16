@@ -82,6 +82,42 @@ void store_data(const char *file, void *addr, uint32_t w, uint32_t h)
 }
 
 /**
+* 将文件中的内容保存到缓冲区中
+*/
+char *package_program(const char *filename)
+{
+	FILE *file;
+	char *buf;
+	long program_size;
+
+	file = fopen(filename, "rb");
+	if (!file) {
+		perror("open file fail");
+		return NULL;
+	}
+
+	// 设置文件位置指示符，指向文件末尾
+	fseek(file, 0, SEEK_END);
+
+	// 获取文件指示符的当前位置	
+	program_size = ftell(file);
+
+	// 重置指示符指向文件的起始位置
+	rewind(file);
+
+	buf = (char *)malloc(program_size + 1);
+	if (!buf) {
+		perror("alloc memory fail");
+		fclose(file);
+		return NULL;
+	}
+	buf[program_size] = '\0';
+	fread(buf, sizeof(char), program_size, file);
+	fclose(file);
+	return buf;
+}
+
+/**
  * 使用 C 语言在 CPU 上执行旋转操作。
  */
 void yuv420p_rotate_normal(uint8_t *src, uint8_t *des, int w, int h)

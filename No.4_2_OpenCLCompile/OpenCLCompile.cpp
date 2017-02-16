@@ -64,8 +64,6 @@ char *package_program(const char *filename)
 	fseek(file, 0, SEEK_END);
 
 	// 获取文件指示符的当前位置
-	// 注意：文件中实际的字符个数比可见的多一个，在 Linux 系统中，
-	// 文件最后补充了一个不可见的换行符 '\n'。
 	program_size = ftell(file);
 
 	// 重置指示符指向文件的起始位置
