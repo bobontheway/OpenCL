@@ -14,15 +14,15 @@ int main()
 	uint width = 3264,
 	     height = 2448,
 	     size = width * height * 3/2;
-	uchar *img_buffer, *out_buffer;
+	uint8_t *img_buffer, *out_buffer;
 
 	// 1.定义输入文件和输出文件
 	const char *img_file = "/data/local/tmp/ghost_yuv420_3264x2448.yuv";
 	const char *out_file = "/data/local/tmp/rotate_output.yuv";
 
 	// 2.分别为两个文件预分配缓冲区
-	img_buffer = (uchar*)malloc(size);
-	out_buffer = (uchar*)malloc(size);
+	img_buffer = (uint8_t *)malloc(size);
+	out_buffer = (uint8_t *)malloc(size);
 	if ((NULL == img_buffer) || (NULL == out_buffer)) {
 		perror("malloc memory fail");
 		exit(EXIT_FAILURE);

@@ -475,7 +475,7 @@ void yuv420p_rotate_opencl(uint8_t *src, uint8_t *des, int w, int h)
 /**
  * 旋转图像。将原缓冲区中的图像顺时针旋转 90 度后存入目标缓冲区
  */
-int rotate(uint8_t *img_src, uint8_t *img_dst, int w, int h)
+void rotate(uint8_t *img_src, uint8_t *img_dst, int w, int h)
 {
 	yuv420p_rotate_opencl(img_src, w, h, img_dst);
 
@@ -494,7 +494,5 @@ int rotate(uint8_t *img_src, uint8_t *img_dst, int w, int h)
 	time_start();
 	yuv420p_rotate_opencl_use(img_src, img_dst, w, h);
 	time_end("yuv420p_rotate_opencl_use");
-
-	return ret;
 }
 
