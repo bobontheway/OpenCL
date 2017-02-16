@@ -7,6 +7,8 @@
 #include <CL/cl.h>
 #endif
 
+#include "rotate.h"
+
 int main()
 {
 	uint width = 3264,
