@@ -11,8 +11,8 @@
 
 
 /**
-* 计算程序执行时间
-*/
+ * 计算程序执行时间
+ */
 static int64_t g_time;
 
 static int64_t system_time()
@@ -37,8 +37,8 @@ static void time_end(const char *str)
 }
 
 /**
-* 获取代码错误位置
-*/
+ * 获取代码错误位置
+ */
 void check_error(int error, int line)
 {
 	if (error != CL_SUCCESS) {
@@ -82,8 +82,8 @@ void store_data(const char *file, void *addr, uint32_t w, uint32_t h)
 }
 
 /**
-* 将文件中的内容保存到缓冲区中
-*/
+ * 将文件中的内容保存到缓冲区中
+ */
 char *package_program(const char *filename)
 {
 	FILE *file;
@@ -92,7 +92,7 @@ char *package_program(const char *filename)
 
 	file = fopen(filename, "rb");
 	if (!file) {
-		perror("open file fail");
+		perror("open file fail when package program");
 		return NULL;
 	}
 
@@ -255,8 +255,8 @@ void yuv420p_rotate_opencl_use(uint8_t *src, uint8_t *des, int w, int h)
 
 
 /**
-* 获取 GPU 信息并初始化
-*/
+ * 获取 GPU 信息并初始化
+ */
 void get_platform_info(cl_platform_id *platform, int num)
 {
 	int err;
@@ -291,13 +291,18 @@ void get_devices_info(cl_device_id *devices, int num)
 }
 
 /**
-* 读取 kernel 代码，存放到缓冲区中
-*/
-void init_opencl(cl_context *context, cl_command_queue *queue, cl_program *program)
+ * 读取 kernel 代码，存放到缓冲区中
+ */
+//void init_opencl(cl_context *context, cl_command_queue *queue, cl_program *program)
+void init_opencl(cl_context *c, cl_command_queue *q, cl_program *p)
 {
 	int err;
 	cl_platform_id platform;
 	cl_device_id device;
+
+	cl_context context;
+	cl_command_queue queue;
+	cl_program program;
 
 	char *rotate_y, *rotate_uv;
 	char *program_buffer[2];
@@ -311,7 +316,8 @@ void init_opencl(cl_context *context, cl_command_queue *queue, cl_program *progr
 	err = clGetDeviceIDs(platform, CL_DEVICE_TYPE_GPU, 1, &device, NULL);
 	if (err != CL_SUCCESS) {
 		printf("can' get cpu device, try cpu...\n");
-		err = clGetDeviceIDs(platform, CL_DEVICE_TYPE_CPU, 1, &device, NULL);
+		err = clGetDeviceIDs(platform, CL_DEVICE_TYPE_CPU,
+			1, &device, NULL);
 		check_error(err, __LINE__);
 	}
 	get_devices_info(&device, 1);
@@ -336,7 +342,7 @@ void init_opencl(cl_context *context, cl_command_queue *queue, cl_program *progr
 		exit(EXIT_FAILURE);
 
 	}
-	
+
 	rotate_uv = package_program("rotate_uv.cl");
 	if (!rotate_uv) {
 		printf("alloc program rotate-uv buffer fail\n");
@@ -344,10 +350,12 @@ void init_opencl(cl_context *context, cl_command_queue *queue, cl_program *progr
 
 	}
 
-	program_buffer[2] = {rotate_y, rotate_uv};
+	program_buffer[0] = rotate_y;
+	program_buffer[1] = rotate_uv;
 
 	// create program
-	program = clCreateProgramWithSource(context, 1, (const char **)program_buffer, NULL, &err);
+	// xbdong - 2 program
+	program = clCreateProgramWithSource(context, 2, (const char **)program_buffer, NULL, &err);
 	if (program == NULL) {
 		printf("create program fail\n");
 		exit(EXIT_FAILURE);
@@ -367,6 +375,11 @@ void init_opencl(cl_context *context, cl_command_queue *queue, cl_program *progr
 		printf("build log:\n%s\n", buf);
 		exit(EXIT_FAILURE);
 	}
+
+	// get return value
+	*c = context;
+	*q = queue;
+	*p = program;
 }
 
 /**
@@ -386,7 +399,7 @@ void yuv420p_rotate_opencl(uint8_t *src, uint8_t *des, int w, int h)
 	cl_program program;
 	cl_kernel rotate_y_kernel, rotate_uv_kernel;
 
-	init_opencl(&context, &queue, &program)
+	init_opencl(&context, &queue, &program);
 
 	size_t global_y_size[2];
 	global_y_size[0] = w;
@@ -410,7 +423,7 @@ void yuv420p_rotate_opencl(uint8_t *src, uint8_t *des, int w, int h)
 
 	rotate_y_kernel = clCreateKernel(program, "rotate_y", &err);
 	if (err != CL_SUCCESS) {
-		printf("Couldn't create rotateY kernel(%d)", err);		
+		printf("Couldn't create rotateY kernel(%d)\n", err);
 		exit(EXIT_FAILURE);
 	}
 
@@ -445,8 +458,8 @@ void yuv420p_rotate_opencl(uint8_t *src, uint8_t *des, int w, int h)
 	}
 
 	printf("global_y_size=%d, %d  local_y_size=%d, %d\n",
-		global_y_size[0], global_y_size[1],
-		local_y_size[0], local_y_size[1]);
+		(int)global_y_size[0], (int)global_y_size[1],
+		(int)local_y_size[0], (int)local_y_size[1]);
 	err = clEnqueueNDRangeKernel(queue, rotate_y_kernel, 2, NULL, global_y_size, local_y_size, 0, NULL, NULL);   
 	if (err != CL_SUCCESS) {
 		printf("Couldn't enqueue the exposure rotateY kernel(%d)\n", err);
@@ -513,7 +526,8 @@ void yuv420p_rotate_opencl(uint8_t *src, uint8_t *des, int w, int h)
  */
 void rotate(uint8_t *img_src, uint8_t *img_dst, int w, int h)
 {
-	yuv420p_rotate_opencl(img_src, w, h, img_dst);
+#if 0
+	yuv420p_rotate_opencl(img_src, img_dst, w, h);
 
 	time_start();
 	yuv420p_rotate_normal(img_src, img_dst, w, h);
@@ -526,9 +540,12 @@ void rotate(uint8_t *img_src, uint8_t *img_dst, int w, int h)
 	time_start();
 	yuv420p_rotate_delete_shift(img_src, img_dst, w, h);
 	time_end("yuv420p_rotate_delete_shift");
+#endif
 
+#if 1
 	time_start();
 	yuv420p_rotate_opencl_use(img_src, img_dst, w, h);
 	time_end("yuv420p_rotate_opencl_use");
+#endif
 }
 
