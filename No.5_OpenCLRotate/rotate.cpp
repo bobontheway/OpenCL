@@ -50,7 +50,7 @@ void check_error(int error, int line)
 /**
  * 将文件中的数据加载到缓冲区中
  */
-static void load_data(const char *file, uint8_t *addr, uint32_t w, uint32_t h)
+void load_data(const char *file, uint8_t *addr, uint32_t w, uint32_t h)
 {
 	FILE *fp = NULL;
 	uint32_t size = w * h * 3/2;
@@ -67,7 +67,7 @@ static void load_data(const char *file, uint8_t *addr, uint32_t w, uint32_t h)
 /**
  * 把缓冲区中的数据存入文件
  */
-static void store_data(const char *file, void *addr, uint32_t w, uint32_t h)
+void store_data(const char *file, void *addr, uint32_t w, uint32_t h)
 {
 	FILE *fp = NULL;
 	uint32_t size = w * h * 3/2;
