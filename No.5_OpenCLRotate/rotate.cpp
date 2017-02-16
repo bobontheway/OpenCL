@@ -524,28 +524,26 @@ void yuv420p_rotate_opencl(uint8_t *src, uint8_t *des, int w, int h)
 /**
  * 旋转图像。将原缓冲区中的图像顺时针旋转 90 度后存入目标缓冲区
  */
-void rotate(uint8_t *img_src, uint8_t *img_dst, int w, int h)
+void rotate(uint8_t *img_src, uint8_t *img_opencl, uint8_t *img_normal,
+	uint8_t *img_shift, uint8_t *img_delete_shift,
+	uint8_t *img_opencl_use, int w, int h)
 {
-#if 0
-	yuv420p_rotate_opencl(img_src, img_dst, w, h);
+	yuv420p_rotate_opencl(img_src, img_opencl, w, h);
 
 	time_start();
-	yuv420p_rotate_normal(img_src, img_dst, w, h);
+	yuv420p_rotate_normal(img_src, img_normal, w, h);
 	time_end("yuv420p_rotate_normal");
 
 	time_start();
-	yuv420p_rotate_shift(img_src, img_dst, w, h);
+	yuv420p_rotate_shift(img_src, img_shift, w, h);
 	time_end("yuv420p_rotate_shift");
 
 	time_start();
-	yuv420p_rotate_delete_shift(img_src, img_dst, w, h);
+	yuv420p_rotate_delete_shift(img_src, img_delete_shift, w, h);
 	time_end("yuv420p_rotate_delete_shift");
-#endif
 
-#if 1
 	time_start();
-	yuv420p_rotate_opencl_use(img_src, img_dst, w, h);
+	yuv420p_rotate_opencl_use(img_src, img_opencl_use, w, h);
 	time_end("yuv420p_rotate_opencl_use");
-#endif
 }
 
