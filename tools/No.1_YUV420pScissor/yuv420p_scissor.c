@@ -114,23 +114,18 @@ void yuv420p_left_bottom(uint8_t *img_buffer, uint8_t *out_buffer,
 int main()
 {
 	/* original YUV420p picture */
-	int img_orig_width = 3264,
-	    img_orig_height = 2448,
+	int img_orig_width = 1280,
+	    img_orig_height = 720,
 	    orig_size = img_orig_width * img_orig_height * 3/2;
 
-#if 0 /* 720p */
-	int img_width = 1920,
-	    img_height = 1080,
-#endif
-	    /* size after adjust */
-	    int img_width = 1280,
-	    img_height = 720,
+	/* size after adjust */
+	int img_width = 640,
+	    img_height = 640,
 	    size = img_width * img_height * 3/2;
 
 	/* file names */
-	const char *img_file = "./ghost_yuv420p_3264x2448.yuv";
-	const char *out_file = "./yuv420p_1280x720.yuv";
-	//const char *out_file = "./yuv420p_1920x1080.yuv";
+	const char *img_file = "./ghost_yuv420p_1280x720.yuv";
+	const char *out_file = "./yuv420p_640x640.yuv";
 
 	/* buffer used to save data */
 	uint8_t *img_buffer, *out_buffer;
@@ -146,11 +141,10 @@ int main()
 	load_data(img_file, img_buffer, img_orig_width, img_orig_height);
 
 	/* adjust image size */
-	yuv420p_left_bottom(img_buffer, out_buffer, img_orig_width,
-		img_orig_height, img_width, img_height);
-
-#if 0 // get left top
 	yuv420p_left_top(img_buffer, out_buffer, img_orig_width,
+		img_orig_height, img_width, img_height);
+#if 0
+	yuv420p_left_bottom(img_buffer, out_buffer, img_orig_width,
 		img_orig_height, img_width, img_height);
 #endif
 

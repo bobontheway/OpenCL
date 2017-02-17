@@ -85,6 +85,40 @@ void yuv420p_left_bottom(uint8_t *img_buffer, uint8_t *out_buffer,
 }
 ```
 
+## 示例
+原始图像的大小为 1280x720，截取其左上角矩形区域，生成 640x640 的图像。程序中对原始图像的大小采用了硬编码，后续可以将原始图像的文件名和大小及相关属性作为参数传递给可执行程序。
+
+### 1.生成图像
+执行程序，生成截取的图像，图像格式以 YUV420p 格式保存。
+```bash
+xbdong@ubuntu:~/xxxxx/No.1_YUV420pScissor$ ./yuv420p_scissor
+```
+
+### 2.播放图像
+使用 ffplay 程序来播放 YUV 格式的图像，参数如下：
+```bash
+xbdong@ubuntu:~/xxxxx/No.1_YUV420pScissor$ ffplay -fs -f rawvideo -video_size 1280x720 ghost_yuv420p_1280x720.yuv
+xbdong@ubuntu:~/xxxxx/No.1_YUV420pScissor$ ffplay -fs -f rawvideo -video_size 640x640 yuv420p_640x640.yuv
+```
+如果需要全屏显示，播放图像的时候在 ffplay 命令下添加参数 `-fs` 即可。
+
+### 3.保存图像
+使用 ubuntu 的截屏功能可以将显示的图像以图片的形式保存。
+
+> 全屏显示的时候，在 ubuntu 下截屏快捷键不起作用，可以使用 scrot 的延时截屏功能。图片默认保存在当前目录下。
+
+```bash
+xbdong@ubuntu:~/xxxxx/No.1_YUV420pScissor$ scrot -d 10 &
+```
+### 4.显示
+下面的两张图片分别显示的是原始图像和从原始图像的左上角提取的图像，效果如下：
+
+** 原始图像(1280x720) **
+<img src="image/original_1280x720.bmp" width="80%" height="80%">
+
+** 裁剪图像(640x640) **
+<img src="image/scissor_640x640.bmp" width="40%" height="40%">
+
 
 
 
