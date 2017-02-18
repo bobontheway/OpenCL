@@ -24,14 +24,17 @@ YUV 格式包含两大类，分别为 planar 和 packed：
 下面是 YUV420sp 和 YUV420s 图像格式在内存中的存储情况，这些数据在内存中是线性存储的。当使用图片浏览器显示的是时候需要指定它们的尺寸（宽度和高度），否则不能正确显示。例如，40x30 和 20x60 这两张图像的像素点的个数相同，但如果把 40x30 的图像按照 20x60 的图像来显示，就会出现显示异常。
 
 **YUV420sp 格式**
+
 <img src="image/YUV420sp/image_yuv.png" width="60%" height="60%">
 
 **YUV420p 格式**
+
 <img src="image/YUV420p/image_yuv.png" width="60%" height="60%">
 
 把 YUV420p 的图像顺时针旋转 90 度后，Y 分量在内存中存放如下图所示，随后是连续的 U 分量 和 V 分量。
 
 **YUV420p 旋转 90 度**
+
 <img src="image/YUV420p/image_y_rotated.png" width="30%" height="30%">
 
 旋转步骤如下，把图像看作是一个类似 `image[w][h]` 的二维数组。
