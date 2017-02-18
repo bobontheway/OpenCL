@@ -113,11 +113,11 @@ xbdong@ubuntu:~/xxxxx/No.1_YUV420pScissor$ scrot -d 10 &
 ### 4.显示
 下面的两张图片分别显示的是原始图像和从原始图像的左上角提取的图像，效果如下：
 
-** 原始图像(1280x720) **
+**原始图像(1280x720)**
 
 <img src="image/original_1280x720.bmp" width="80%" height="80%">
 
-** 裁剪图像(640x640) **
+**裁剪图像(640x640)**
 
 <img src="image/scissor_640x640.bmp" width="40%" height="40%">
 
