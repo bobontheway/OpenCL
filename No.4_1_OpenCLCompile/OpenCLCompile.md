@@ -4,7 +4,7 @@
 本文描述如何将构建拆分为编译和链接两个独立的步骤，在 `No.4_2_OpenCLCompile` 中再把功能实现放到单独的头文件中。
 
 ## 简介
-由于华为 Mate 8 只支持到 OpenCL 1.1，为了使用 OpenCL 1.2 功能，该 OpenCL 程序在 Ubuntu 上执行，GPU 为 AMD RX 460。输出结果如下：
+由于华为荣耀8 只支持到 OpenCL 1.1，为了使用 OpenCL 1.2 功能，该 OpenCL 程序在 Ubuntu 上执行，GPU 为 AMD RX 460。输出结果如下：
 
 ```bash
 xbdong@xbdong-opencl:~/Project/github/OpenCL/No.4_1_OpenCLCompile$ ./OpenCLCompile 

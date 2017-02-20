@@ -4,7 +4,7 @@
 ![](image/OpenCL_Pipeline.png)
 
 ## 简介
-该 OpenCL 程序在华为 Mate 8 上执行，输出内容如下
+该 OpenCL 程序在华为荣耀8 上执行，输出内容如下
 
 ```bash
 shell@HWFRD:/data/local/tmp $ ./hello_opencl
