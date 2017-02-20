@@ -18,6 +18,7 @@ void load_data(const char *file, uint8_t *addr, uint32_t w, uint32_t h)
 		fclose(fp);
 	} else {
 		perror("open file fail when load data");
+		exit(EXIT_FAILURE);
 	}
 }
 
@@ -35,6 +36,7 @@ void store_data(const char *file, void *addr, uint32_t w, uint32_t h)
 		fclose(fp);
 	} else {
 		perror("open file fail when store data");
+		exit(EXIT_FAILURE);
 	}
 }
 
