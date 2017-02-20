@@ -312,7 +312,7 @@ void init_opencl(cl_context *c, cl_command_queue *q, cl_program *p)
 	// get platform
 	err = clGetPlatformIDs(1, &platform, NULL);
 	check_error(err, __LINE__);
-	get_platform_info(&platform, 1);
+	//get_platform_info(&platform, 1);
 
 	// get gpu device
 	err = clGetDeviceIDs(platform, CL_DEVICE_TYPE_GPU, 1, &device, NULL);
@@ -322,7 +322,7 @@ void init_opencl(cl_context *c, cl_command_queue *q, cl_program *p)
 			1, &device, NULL);
 		check_error(err, __LINE__);
 	}
-	get_devices_info(&device, 1);
+	//get_devices_info(&device, 1);
 
 	// create context
 	context = clCreateContext(NULL, 1, &device, NULL, NULL, &err);
@@ -407,17 +407,13 @@ void yuv420p_rotate_opencl(uint8_t *src, uint8_t *des, int w, int h)
 	global_y_size[0] = w;
 	global_y_size[1] = h;
 
-	//size_t local_y_size[2] = {4, 4};
 	size_t local_y_size[2] = {16, 16};
-	//size_t local_y_size[2] = {48, 48}; error
 
 	size_t global_uv_size[2];
 	global_uv_size[0] = w/2;
 	global_uv_size[1] = h/2;
 
-	//size_t local_uv_size[2] = {32, 24};
 	size_t local_uv_size[2] = {8, 8};
-
 	size_t global_uv_offset[2] = {0, 1};
 
 	cl_int err;
@@ -459,13 +455,12 @@ void yuv420p_rotate_opencl(uint8_t *src, uint8_t *des, int w, int h)
 		exit(EXIT_FAILURE);   
 	}
 
-	printf("global_y_size=%d, %d  local_y_size=%d, %d\n",
-		(int)global_y_size[0], (int)global_y_size[1],
-		(int)local_y_size[0], (int)local_y_size[1]);
+	//printf("global_y_size=%d, %d  local_y_size=%d, %d\n",
+	//	(int)global_y_size[0], (int)global_y_size[1],
+	//	(int)local_y_size[0], (int)local_y_size[1]);
 	err = clEnqueueNDRangeKernel(queue, rotate_y_kernel, 2, NULL, global_y_size, local_y_size, 0, NULL, NULL);   
 	if (err != CL_SUCCESS) {
 		printf("Couldn't enqueue the exposure rotateY kernel(%d)\n", err);
-		//perror("Couldn't enqueue the exposure rotateY kernel\n");
 		exit(EXIT_FAILURE);   
 	}
 
@@ -512,7 +507,7 @@ void yuv420p_rotate_opencl(uint8_t *src, uint8_t *des, int w, int h)
 		perror("Couldn't read the buffer");
 		exit(EXIT_FAILURE);   
 	} 
-	time_end("calculate YUV");	
+	time_end("yuv420p_rotate_opencl");
 
 	clReleaseKernel(rotate_y_kernel);
 	clReleaseKernel(rotate_uv_kernel);
@@ -536,6 +531,7 @@ void rotate(uint8_t *img_src, uint8_t *img_opencl, uint8_t *img_normal,
 	yuv420p_rotate_normal(img_src, img_normal, w, h);
 	time_end("yuv420p_rotate_normal");
 
+#if 0
 	time_start();
 	yuv420p_rotate_shift(img_src, img_shift, w, h);
 	time_end("yuv420p_rotate_shift");
@@ -547,5 +543,6 @@ void rotate(uint8_t *img_src, uint8_t *img_opencl, uint8_t *img_normal,
 	time_start();
 	yuv420p_rotate_opencl_use(img_src, img_opencl_use, w, h);
 	time_end("yuv420p_rotate_opencl_use");
+#endif
 }
 
