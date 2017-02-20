@@ -96,6 +96,7 @@ void yuv420p_rotate_normal(uint8_t *src, uint8_t *des, int w, int h)
 **ARM T-880**
 
 ```bash
+shell@HWFRD:/data/local/tmp $ ./opencl_rotate
 Test: yuv420p_rotate_opencl, 62.497917 ms
 Test: yuv420p_rotate_normal, 100.525000 ms
 ```
@@ -103,7 +104,11 @@ Test: yuv420p_rotate_normal, 100.525000 ms
 
 **AMD RX 460**
 
-
+```bash
+xbdong@xbdong-opencl:~/Project/github/OpenCL/No.5_2_OpenCLRotate$ ./OpenCLRotate
+Test: yuv420p_rotate_opencl, 13.518628 ms
+Test: yuv420p_rotate_normal, 38.027586 ms
+```
 
 > 只有在需要处理大量运算的情况下才能体现 GPU 的优势。如果对 1280x720 的图像旋转，来处理少量的数据，这样 OpenCL 函数调用，设备间通信等操作会把 GPU 带来的好处给抵消调。
 

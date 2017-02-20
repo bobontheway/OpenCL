@@ -25,8 +25,8 @@ int main()
 		*out_delete_shift, *out_opencl_use;
 
 	// 1.定义输入文件和输出文件
-	const char *img_file = "/data/local/tmp/ghost_yuv420p_3264x2448.yuv";
-	//const char *img_file = "/data/local/tmp/ghost_yuv420p_1280x720.yuv";
+	const char *img_file = "binary/ghost_yuv420p_3264x2448.yuv";
+	//const char *img_file = "binary/ghost_yuv420p_1280x720.yuv";
 	const char *out_opencl_file = "rotate_out_opencl.yuv";
 	const char *out_normal_file = "rotate_out_normal.yuv";
 	const char *out_shift_file = "rotate_out_shift.yuv";
