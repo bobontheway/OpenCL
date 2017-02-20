@@ -91,7 +91,7 @@ void yuv420p_rotate_normal(uint8_t *src, uint8_t *des, int w, int h)
 <img src="image/YUV420p/rotated_720x1280.bmp" width="35%" height="35%">
 
 ### 3.性能
-使用 GPU 和 CPU 实现旋转算法，对 `ghost_yuv420p_3264x2448.yuv` 图像旋转，分别在华为荣耀8的 Mali T-880 平台和 Ubuntu 的 AMD RX 460 平台上执行 GPU 运算，ubuntu 对应的 CPU 为 i5-4590，时间统计如下：
+使用 GPU 和 CPU 实现旋转算法，对 `ghost_yuv420p_3264x2448.yuv` 图像旋转，分别在华为荣耀8的 ARM Mali T-880 平台和 Ubuntu 的 AMD RX 460 平台上执行 GPU 运算，ubuntu 对应的 CPU 为 i5-4590，时间统计如下：
 
 **ARM T-880**
 
@@ -109,6 +109,7 @@ xbdong@xbdong-opencl:~/Project/github/OpenCL/No.5_2_OpenCLRotate$ ./OpenCLRotate
 Test: yuv420p_rotate_opencl, 13.518628 ms
 Test: yuv420p_rotate_normal, 38.027586 ms
 ```
+在 AMD RX 460 上使用 GPU 和 CPU 相比，性能提升了 180%，这进一步体现了 GPU 在通用计算的优势。
 
 > 只有在需要处理大量运算的情况下才能体现 GPU 的优势。如果对 1280x720 的图像旋转，来处理少量的数据，这样 OpenCL 函数调用，设备间通信等操作会把 GPU 带来的好处给抵消调。
 
