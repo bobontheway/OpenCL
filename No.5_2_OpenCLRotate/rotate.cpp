@@ -251,7 +251,7 @@ void yuv420p_rotate_opencl_use(uint8_t *src, uint8_t *des, int w, int h)
 	// 旋转 Ｖ 分量
 	for (i = 0; i < halfW; i++)
 		for (j = 1; j <= halfH; j++)
-			des[(wh+wh/4) + (i * halfH + (j-1))] =
+			des[(wh+(wh>>2)) + (i * halfH + (j-1))] =
 				src[wh+halfUV + ((halfH - j) * halfW + i)];
 }
 

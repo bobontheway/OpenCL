@@ -251,7 +251,7 @@ void yuv420p_rotate_opencl_use(uint8_t *src, uint8_t *des, int w, int h)
 	// 旋转 Ｖ 分量
 	for (i = 0; i < halfW; i++)
 		for (j = 1; j <= halfH; j++)
-			des[(wh+wh/4) + (i * halfH + (j-1))] =
+			des[(wh+(wh>>2)) + (i * halfH + (j-1))] =
 				src[wh+halfUV + ((halfH - j) * halfW + i)];
 }
 
@@ -531,7 +531,7 @@ void rotate(uint8_t *img_src, uint8_t *img_opencl, uint8_t *img_normal,
 	yuv420p_rotate_normal(img_src, img_normal, w, h);
 	time_end("yuv420p_rotate_normal");
 
-#if 0
+#if 1
 	time_start();
 	yuv420p_rotate_shift(img_src, img_shift, w, h);
 	time_end("yuv420p_rotate_shift");
