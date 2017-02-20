@@ -11,27 +11,29 @@
 
 int main()
 {
-#if 0
+#if 1
 	uint width = 3264,
 	     height = 2448,
 #endif
+#if 0
 	uint width = 1280,
 	     height = 720,
+#endif
 	     size = width * height * 3/2;
 	uint8_t *img_buffer;
 	uint8_t *out_opencl, *out_normal, *out_shift,
 		*out_delete_shift, *out_opencl_use;
 
 	// 1.定义输入文件和输出文件
-	//const char *img_file = "/data/local/tmp/ghost_yuv420_3264x2448.yuv";
-	const char *img_file = "/data/local/tmp/ghost_yuv420_1280x720.yuv";
-	const char *out_opencl_file = "/data/local/tmp/rotate_out_opencl.yuv";
-	const char *out_normal_file = "/data/local/tmp/rotate_out_normal.yuv";
-	const char *out_shift_file = "/data/local/tmp/rotate_out_shift.yuv";
+	const char *img_file = "/data/local/tmp/ghost_yuv420p_3264x2448.yuv";
+	//const char *img_file = "/data/local/tmp/ghost_yuv420p_1280x720.yuv";
+	const char *out_opencl_file = "rotate_out_opencl.yuv";
+	const char *out_normal_file = "rotate_out_normal.yuv";
+	const char *out_shift_file = "rotate_out_shift.yuv";
 	const char *out_delete_shift_file =
-		"/data/local/tmp/rotate_out_delete_shift.yuv";
+		"rotate_out_delete_shift.yuv";
 	const char *out_opencl_use_file =
-		"/data/local/tmp/rotate_out_opencl_use.yuv";
+		"rotate_out_opencl_use.yuv";
 
 	// 2.分别为两个文件预分配缓冲区
 	img_buffer = (uint8_t *)malloc(size);
