@@ -4,4 +4,4 @@ all:
 	g++ -lfreeimage -o FreeImage util.o FreeImage.o
 
 clean:
-	rm *.o android_rgba.bin FreeImage
+	rm *.o *.bin *.png FreeImage
