@@ -1,0 +1,1 @@
+FreeImage 是一款免费的开源图形库，它可以用于 Windows，Linux 和 Mac OS X 系统。
