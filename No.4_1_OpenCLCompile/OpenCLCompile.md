@@ -1,5 +1,5 @@
 ## 概述
-对于功能比较丰富的程序，在实现的时候，为了便于维护，可以将不同的功能放到不同的头文件件中，再统一编译、链接。在 OpenCL 1.2 中，支持将程序的构建拆分为编译、链接两个步骤，这两个步骤相互独立。
+对于功能比较丰富的程序，在实现的时候，为了便于维护，可以将不同的功能放到不同的头文件中，再统一编译、链接。在 OpenCL 1.2 中，支持将程序的构建拆分为编译、链接两个步骤，这两个步骤相互独立。
 
 本文描述如何将构建拆分为编译和链接两个独立的步骤，在 `No.4_2_OpenCLCompile` 中再把功能实现放到单独的头文件中。
 
@@ -36,9 +36,9 @@ cl_int clCompileProgram (cl_program program,
   	void *user_data)
 ```
 部分参数说明如下：
-- `num_input_headers` - 指定程序对象的数目， 描述 `input_headers` 数组中的头文件；
-- `input_headers` - 可看作数组，数组中的程序对象使用 `clCreateProgramWithSource` 创建，程序对象表示内嵌头文件；
-- `header_include_names` - 可看作指针数组，其成员和 `input_headers` 中的程序对象一一对应。数组 `header_include_names` 中每个成员指定在 `program` 程序对象中使用引用的内嵌头文件的名字。`input_headers` 中对应的成员表示程序对象，它包含将要使用的头见文件源代码。
+- `num_input_headers`：指定程序对象的数目， 描述 `input_headers` 数组中的头文件；
+- `input_headers`：可看作数组，数组中的程序对象使用 `clCreateProgramWithSource` 创建，程序对象表示内嵌头文件；
+- `header_include_names`：可看作指针数组，其成员和 `input_headers` 中的程序对象一一对应。数组 `header_include_names` 中每个成员指定在 `program` 程序对象中使用引用的内嵌头文件的名字。`input_headers` 中对应的成员表示程序对象，它包含将要使用的头文件源代码。
 
 ### 2.链接
 输入的程序对象在经过 clLinkProgram 连接后，生成可执行文件，可在设备端运行。
@@ -54,34 +54,7 @@ cl_program clLinkProgram (cl_context context,
   	cl_int *errcode_ret)
 ```
 部分参数描述如下：
-- `num_input_programs` - 指定 `input_programs` 数组中程序对象的数目；
-- `input_programs` - 程序对象的数组，被编译为二进制文件或库文件，被链接后创建可执行程序。
+- `num_input_programs`：指定 `input_programs` 数组中程序对象的数目；
+- `input_programs`：程序对象的数组，被编译为二进制文件或库文件，被链接后创建可执行程序。
 
-下一篇 `No.4_2_OpenCLCompile` 将把功能实现放到单独的头文件中。
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+下一篇 [No.4_2_OpenCLCompile](../No.4_2_OpenCLCompile/OpenCLCompile.md) 将把功能实现放到单独的头文件中。

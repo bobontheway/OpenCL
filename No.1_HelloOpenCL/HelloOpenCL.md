@@ -47,8 +47,7 @@ if (context == NULL) {
 ```
 
 ### 4.创建命令队列
-当设备执行任务时，由主机来提交命令，将命令发送到队列中。命令队列和设备对应，一个命令队列只能关联到一个设备，但
-是单个设备可以有多个命令队列，这就可以将不同的命令提交到不同队列。
+当设备执行任务时，由主机来提交命令，将命令发送到队列中。命令队列和设备对应，一个命令队列只能关联到一个设备，但是单个设备可以有多个命令队列，这就可以将不同的命令提交到不同队列。
 ```c
 queue = clCreateCommandQueue(context, device, 0, &err);
 if (queue == NULL) {
@@ -88,7 +87,7 @@ if (CL_SUCCESS != err) {
 input = clCreateBuffer(context, CL_MEM_READ_ONLY |
         CL_MEM_COPY_HOST_PTR, strlen(upper_case), upper_case, &err);
 output = clCreateBuffer(context, CL_MEM_WRITE_ONLY, strlen(upper_case),
-        NULL, &err);
+        N设备L, &err);
 if (input == NULL || output == NULL) {
         printf("create memory buffer fail: %d\n", err);
         exit(EXIT_FAILURE);
@@ -96,7 +95,7 @@ if (input == NULL || output == NULL) {
 ```
 
 ### 8.创建内核
-内核是设备程序的入口，如图形处理器中的着色器程序。它类似于库文件中导出的库函数。设置执行的程序，以内核对象的方式提交到命令队列中。
+内核是设备程序的入口，如图形处理器中的着色器程序。它类似于库文件中导出的库函数。设备执行的程序，以内核对象的方式提交到命令队列中。
 ```c
 kernel = clCreateKernel(program, "tolower", &err);
 if (kernel == NULL) {
