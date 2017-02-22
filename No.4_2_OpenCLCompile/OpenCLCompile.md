@@ -50,31 +50,4 @@ free(program_buf);
 err = clCompileProgram(program, 1, &device, NULL,
 	1, &header_program, &header_name, NULL, NULL);
 ```
-相关参数在 `No.4_1_OpenCLCompile` 中描述，这里不在赘述。编译后的程序对象 `program` 在链接时使用。由于在链接时，只有一个程序对象输入，这和 `No.4_1_OpenCLCompile` 中一样，故无需对 `clLinkProgram` 的函数参数进行修改。
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+相关参数在 [No.4_1_OpenCLCompile](../No.4_1_OpenCLCompile/OpenCLCompile.md) 中描述，这里不在赘述。编译后的程序对象 `program` 在链接时使用。由于在链接时，只有一个程序对象输入，这和 `No.4_1_OpenCLCompile` 中一样，故无需对 `clLinkProgram` 的函数参数进行修改。
