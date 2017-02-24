@@ -205,7 +205,7 @@ void init_opencl(cl_context *c, cl_command_queue *q, cl_program *p)
  */
 void rotate(uint8_t *src, uint8_t *des, int w, int h)
 {
-	int i,j,n;
+	int i, j, n;
 
 	// should be release
 	cl_context context;
@@ -215,6 +215,7 @@ void rotate(uint8_t *src, uint8_t *des, int w, int h)
 
 	init_opencl(&context, &queue, &program);
 
+	size_t buffer_size = w * h * 4; /* RGBA */
 	size_t global_y_size[2];
 	global_y_size[0] = w;
 	global_y_size[1] = h;
@@ -231,13 +232,15 @@ void rotate(uint8_t *src, uint8_t *des, int w, int h)
 	}
 
 	in_buffer = clCreateBuffer(context,
-		CL_MEM_READ_ONLY|CL_MEM_USE_HOST_PTR, (w*h*3/2)*sizeof(uint8_t), src, &err);
+		CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR,
+		buffer_size, src, &err);
 	if (err < 0) {
 		perror("Couldn't create a img buffer");
 		exit(EXIT_FAILURE);   
 	}
 
-	out_buffer = clCreateBuffer(context, CL_MEM_WRITE_ONLY, (w*h*3/2)*sizeof(uint8_t), NULL, &err);
+	out_buffer = clCreateBuffer(context, CL_MEM_WRITE_ONLY,
+		buffer_size, NULL, &err);
 	if (err < 0)  {
 		perror("Couldn't create a out buffer");
 		exit(EXIT_FAILURE);   
