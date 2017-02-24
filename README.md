@@ -29,3 +29,5 @@ git push -f origin master
 ### No.5_2_OpenCLRotate
 在桌面安装 Ubuntu 系统的 AMD RX 460 上执行，而 No.5_1_OpenCLRotate 在 Android 系统的 ARM T-880 上执行。
 
+### No.6_OpenCLSampler
+使用 OpenCL 采样器对图像旋转。
