@@ -1,7 +1,7 @@
 LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
-LOCAL_SRC_FILES := rotate.cpp OpenCLSampler.cpp
+LOCAL_SRC_FILES := libs/util.c rotate.cpp OpenCLSampler.cpp
 
 LOCAL_MODULE := opencl_rotate
 

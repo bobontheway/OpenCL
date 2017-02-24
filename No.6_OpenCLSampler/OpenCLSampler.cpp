@@ -8,67 +8,42 @@
 #endif
 
 #include "rotate.h"
+#include "util.h"
 
 int main()
 {
-#if 1
-	uint width = 3264,
-	     height = 2448,
-#endif
-#if 0
-	uint width = 1280,
-	     height = 720,
-#endif
-	     size = width * height * 3/2;
+	/* RGBA */
+	uint width = 512,
+	     height = 512,
+	     size = width * height * 4;
+
 	uint8_t *img_buffer;
-	uint8_t *out_opencl, *out_normal, *out_shift,
-		*out_delete_shift, *out_opencl_use;
+	uint8_t *out_buffer;
 
 	// 1.定义输入文件和输出文件
-	const char *img_file = "/data/local/tmp/ghost_yuv420p_3264x2448.yuv";
-	//const char *img_file = "/data/local/tmp/ghost_yuv420p_1280x720.yuv";
-	const char *out_opencl_file = "rotate_out_opencl.yuv";
-	const char *out_normal_file = "rotate_out_normal.yuv";
-	const char *out_shift_file = "rotate_out_shift.yuv";
-	const char *out_delete_shift_file =
-		"rotate_out_delete_shift.yuv";
-	const char *out_opencl_use_file =
-		"rotate_out_opencl_use.yuv";
+	const char *img_file = "/data/local/tmp/lenna_rgba.bin";
+	const char *out_file = "lenna_rgba_target.bin";
 
 	// 2.分别为两个文件预分配缓冲区
 	img_buffer = (uint8_t *)malloc(size);
-	out_opencl = (uint8_t *)malloc(size);
-	out_normal = (uint8_t *)malloc(size);
-	out_shift = (uint8_t *)malloc(size);
-	out_delete_shift = (uint8_t *)malloc(size);
-	out_opencl_use = (uint8_t *)malloc(size);
-	if (!img_buffer || !out_opencl || !out_normal || !out_shift ||
-		!out_delete_shift || !out_opencl_use) {
+	out_buffer = (uint8_t *)malloc(size);
+	if (!img_buffer || !out_buffer) {
 		perror("malloc memory fail");
 		exit(EXIT_FAILURE);
 	}
 
 	// 3.将输入文件保存到缓冲区中
-	load_data(img_file, img_buffer, width, height);
+	load_data(img_file, img_buffer, size);
 
 	// 4.旋转图像
-	rotate(img_buffer, out_opencl, out_normal, out_shift,
-		out_delete_shift, out_opencl_use, width, height);
+	rotate(img_buffer, out_buffer, width, height);
 
 	// 5.把旋转后的图像数据保存到输出文件中
-	store_data(out_opencl_file, out_opencl, height, width);
-	store_data(out_normal_file, out_normal, height, width);
-	store_data(out_shift_file, out_shift, height, width);
-	store_data(out_delete_shift_file, out_delete_shift, height, width);
-	store_data(out_opencl_use_file, out_opencl_use, height, width);
+	store_data(out_file, out_buffer, size);
 
 	// 6.释放缓冲区
 	free(img_buffer);
-	free(out_opencl);
-	free(out_normal);
-	free(out_shift);
-	free(out_delete_shift);
-	free(out_opencl_use);
+	free(out_buffer);
 
 	return 0;
 }

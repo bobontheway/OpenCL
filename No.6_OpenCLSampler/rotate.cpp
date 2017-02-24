@@ -48,42 +48,6 @@ void check_error(int error, int line)
 }
 
 /**
- * 将文件中的数据加载到缓冲区中
- */
-void load_data(const char *file, uint8_t *addr, uint32_t w, uint32_t h)
-{
-	FILE *fp = NULL;
-	uint32_t size = w * h * 3/2;
-
-	fp = fopen(file, "rb");
-	if (NULL != fp) {
-		fread(addr, 1, size, fp);
-		fclose(fp);
-	} else {
-		perror("open file fail when load data");
-		exit(EXIT_FAILURE);
-	}
-}
-
-/**
- * 把缓冲区中的数据存入文件
- */
-void store_data(const char *file, void *addr, uint32_t w, uint32_t h)
-{
-	FILE *fp = NULL;
-	uint32_t size = w * h * 3/2;
-
-	fp = fopen(file, "wb");
-	if(0 != fp) {
-		fwrite((void*)addr, 1, size, fp);
-		fclose(fp);
-	} else {
-		perror("open file fail when store data");
-		exit(EXIT_FAILURE);
-	}
-}
-
-/**
  * 将文件中的内容保存到缓冲区中
  */
 char *package_program(const char *filename)
@@ -200,7 +164,7 @@ void init_opencl(cl_context *c, cl_command_queue *q, cl_program *p)
 		exit(EXIT_FAILURE);
 	}
 
-	rotate = package_program("rotate.cl");
+	rotate = package_program("kernel_rotate.cl");
 	if (!rotate) {
 		printf("alloc program buffer fail\n");
 		exit(EXIT_FAILURE);
@@ -234,10 +198,12 @@ void init_opencl(cl_context *c, cl_command_queue *q, cl_program *p)
 	*p = program;
 }
 
+
 /**
- * 使用 OpenCL 在 GPU 上执行旋转操作
+ * 使用 OpenCL 旋转图像。将原缓冲区中的图像顺时针旋
+ * 转 90 度后存入目标缓冲区。
  */
-void yuv420p_rotate_opencl(uint8_t *src, uint8_t *des, int w, int h)
+void rotate(uint8_t *src, uint8_t *des, int w, int h)
 {
 	int i,j,n;
 
@@ -311,14 +277,4 @@ void yuv420p_rotate_opencl(uint8_t *src, uint8_t *des, int w, int h)
 	clReleaseProgram(program);
 	clReleaseCommandQueue(queue);
 	clReleaseContext(context);
-}
-
-/**
- * 旋转图像。将原缓冲区中的图像顺时针旋转 90 度后存入目标缓冲区
- */
-void rotate(uint8_t *img_src, uint8_t *img_opencl, uint8_t *img_normal,
-	uint8_t *img_shift, uint8_t *img_delete_shift,
-	uint8_t *img_opencl_use, int w, int h)
-{
-	yuv420p_rotate_opencl(img_src, img_opencl, w, h);
 }
