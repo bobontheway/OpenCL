@@ -13,7 +13,7 @@ void get_image_property(FIBITMAP *bitmap)
 
 int main()
 {
-	const char *image_name = "image/android.png";
+	const char *image_name = "image/lenna.png";
 	FIBITMAP *bitmap;
 
 	// 获取图像的格式，用于图像加载
@@ -41,5 +41,5 @@ int main()
 
 	// 转换为 bmp 类型，存入文件中
 	bitmap = FreeImage_ConvertToType(bitmap, FIT_BITMAP); // FREE_IMAGE_TYPE
-	FreeImage_Save(format, bitmap, "android_target.png");
+	FreeImage_Save(format, bitmap, "lenna_target.png");
 }

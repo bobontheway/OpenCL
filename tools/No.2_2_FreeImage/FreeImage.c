@@ -28,10 +28,13 @@ int load_image(const char *image_name, const char *binary_name)
 		exit(EXIT_FAILURE);
 	}
 
+	// 将位图转换为 32 位格式，返回的位图对象拷贝了输入位图对应的数据
+	bitmap = FreeImage_ConvertTo32Bits(bitmap);
+
 	unsigned width = FreeImage_GetWidth(bitmap),
 		 height = FreeImage_GetHeight(bitmap);
 
-	printf("nWidth=%u nHeight=%u\n", width, height);
+	printf("nWidth=%u nHeight=%u nFormat=%d\n", width, height, format);
 	g_width = width;
 	g_height = height;
 
@@ -98,9 +101,9 @@ int main()
 {
 	int ret;
 
-	const char *image_name = "image/android.png";
-	const char *file_name = "android_rgba.bin";
-	const char *dst_name = "dst_graphics.png";
+	const char *image_name = "image/lenna.png";
+	const char *file_name = "lenna_rgba.bin";
+	const char *dst_name = "lenna_target.png";
 
 	ret = load_image(image_name, file_name);
 	if (ret) {

@@ -120,143 +120,6 @@ char *package_program(const char *filename)
 }
 
 /**
- * 使用 C 语言在 CPU 上执行旋转操作。
- */
-void yuv420p_rotate_normal(uint8_t *src, uint8_t *des, int w, int h)
-{
-	int i, j;
-	int wh = w * h;
-
-	// 旋转 Y 分量，按照列对原始图像取值
-	int k = 0;  
-	for(i = 0; i < w; i++) {
-		for(j = h-1; j >= 0; j--) {  
-			des[k] = src[w*j + i];
-			k++;  
-		}  
-	}
-
-	// 旋转 U 分量
-	for (i = 0; i < w/2; i++) {
-		for (j = 1; j <= h/2; j++) {
-			des[k] = src[wh + ((h/2 - j) * (w/2) + i)];
-			k++;
-		}
-	}
-
-	// 旋转 Ｖ 分量
-	for (i = 0; i < w/2; i++) {
-		for (j = 1; j <= h/2; j++) {
-			des[k] = src[wh+wh/4 + ((h/2 - j) * (w/2) + i)];
-			k++;
-		}
-	}
-}
-
-/**
- * 使用 C 语言在 CPU 上执行旋转操作。将除法替换为移位操作
- */
-void yuv420p_rotate_shift(uint8_t *src, uint8_t *des, int w, int h)
-{
-	int i, j;
-	int wh = w * h;
-
-	// 旋转 Y 分量，按照列对原始图像取值
-	int k = 0;  
-	for(i = 0; i < w; i++) {
-		for(j = h-1; j >= 0; j--) {  
-			des[k] = src[w*j + i];
-			k++;  
-		}  
-	}
-
-	// 旋转 U 分量
-	for (i = 0; i < (w>>1); i++) {
-		for (j = 1; j <= (h>>1); j++) {
-			des[k] = src[wh + (((h>>1) - j) * (w>>1) + i)];
-			k++;
-		}
-	}
-
-	// 旋转 Ｖ 分量
-	for (i = 0; i < (w>>1); i++) {
-		for (j = 1; j <= (h>>1); j++) {
-			des[k] = src[wh+(wh>>2) + (((h>>1) - j) * (w>>1) + i)];
-			k++;
-		}
-	}
-}
-
-/**
- * 使用 C 语言在 CPU 上执行旋转操作。把循环中的移位操作去掉
- */
-void yuv420p_rotate_delete_shift(uint8_t *src, uint8_t *des, int w, int h)
-{
-	int i, j;
-	int wh = w * h;
-
-	// 旋转 Y 分量，按照列对原始图像取值
-	int k = 0;  
-	for(i = 0; i < w; i++) {
-		for(j = h-1; j >= 0; j--) {  
-			des[k] = src[w*j + i];
-			k++;  
-		}  
-	}
-
-	int halfH = h >> 1,
-	    halfW = w >> 1,
-	    halfUV = wh >> 2;
-
-	// 旋转 U 分量
-	for (i = 0; i < halfW; i++) {
-		for (j = 1; j <= halfH; j++) {
-			des[k] = src[wh + ((halfH - j) * halfW + i)];
-			k++;
-		}
-	}
-
-	// 旋转 Ｖ 分量
-	for (i = 0; i < halfW; i++) {
-		for (j = 1; j <= halfH; j++) {
-			des[k] = src[wh+(wh>>2) + ((halfH - j) * halfW + i)];
-			k++;
-		}
-	}
-}
-
-/**
- * 该算法用于 OpenCL 在 GPU 上执行旋转操作
- */
-void yuv420p_rotate_opencl_use(uint8_t *src, uint8_t *des, int w, int h)
-{
-	int i, j;
-	int wh = w * h;
-
-	// 旋转 Y 分量，按照列对原始图像取值
-	for(i = 0; i < w; i++)
-		for(j = h-1; j >= 0; j--)
-			des[i * h + (h-1)-j] = src[w*j + i];
-
-	int halfH = h >> 1,
-	    halfW = w >> 1,
-	    halfUV = wh >> 2;
-
-	// 旋转 U 分量
-	for (i = 0; i < halfW; i++)
-		for (j = 1; j <= halfH; j++)
-			des[wh + (i * halfH + (j-1))] =
-				src[wh + ((halfH - j) * halfW + i)];
-
-	// 旋转 Ｖ 分量
-	for (i = 0; i < halfW; i++)
-		for (j = 1; j <= halfH; j++)
-			des[(wh+(wh>>2)) + (i * halfH + (j-1))] =
-				src[wh+halfUV + ((halfH - j) * halfW + i)];
-}
-
-
-/**
  * 获取 GPU 信息并初始化
  */
 void get_platform_info(cl_platform_id *platform, int num)
@@ -306,8 +169,7 @@ void init_opencl(cl_context *c, cl_command_queue *q, cl_program *p)
 	cl_command_queue queue;
 	cl_program program;
 
-	char *rotate_y, *rotate_uv;
-	char *program_buffer[2];
+	char *rotate;
 
 	// get platform
 	err = clGetPlatformIDs(1, &platform, NULL);
@@ -338,32 +200,20 @@ void init_opencl(cl_context *c, cl_command_queue *q, cl_program *p)
 		exit(EXIT_FAILURE);
 	}
 
-	rotate_y = package_program("rotate_y.cl");
-	if (!rotate_y) {
-		printf("alloc program rotate-y buffer fail\n");
+	rotate = package_program("rotate.cl");
+	if (!rotate) {
+		printf("alloc program buffer fail\n");
 		exit(EXIT_FAILURE);
 
 	}
-
-	rotate_uv = package_program("rotate_uv.cl");
-	if (!rotate_uv) {
-		printf("alloc program rotate-uv buffer fail\n");
-		exit(EXIT_FAILURE);
-
-	}
-
-	program_buffer[0] = rotate_y;
-	program_buffer[1] = rotate_uv;
 
 	// create program
-	// xbdong - 2 program
-	program = clCreateProgramWithSource(context, 2, (const char **)program_buffer, NULL, &err);
+	program = clCreateProgramWithSource(context, 1, (const char **)&rotate, NULL, &err);
 	if (program == NULL) {
 		printf("create program fail\n");
 		exit(EXIT_FAILURE);
 	}
-	free(rotate_y);
-	free(rotate_uv);
+	free(rotate);
 
 	// build program
 	err = clBuildProgram(program, 1, &device, NULL, NULL, NULL);
@@ -390,16 +240,12 @@ void init_opencl(cl_context *c, cl_command_queue *q, cl_program *p)
 void yuv420p_rotate_opencl(uint8_t *src, uint8_t *des, int w, int h)
 {
 	int i,j,n;
-	int halfW = w / 2;
-	int halfH = h / 2;
-	int baseU = w * h;
-	int baseV = w * h * 5 / 4;
 
 	// should be release
 	cl_context context;
 	cl_command_queue queue;
 	cl_program program;
-	cl_kernel rotate_y_kernel, rotate_uv_kernel;
+	cl_kernel rotate_kernel;
 
 	init_opencl(&context, &queue, &program);
 
@@ -409,25 +255,12 @@ void yuv420p_rotate_opencl(uint8_t *src, uint8_t *des, int w, int h)
 
 	size_t local_y_size[2] = {16, 16};
 
-	size_t global_uv_size[2];
-	global_uv_size[0] = w/2;
-	global_uv_size[1] = h/2;
-
-	size_t local_uv_size[2] = {8, 8};
-	size_t global_uv_offset[2] = {0, 1};
-
 	cl_int err;
 	cl_mem in_buffer, out_buffer;
 
-	rotate_y_kernel = clCreateKernel(program, "rotate_y", &err);
+	rotate_kernel = clCreateKernel(program, "rotate_y", &err);
 	if (err != CL_SUCCESS) {
 		printf("Couldn't create rotateY kernel(%d)\n", err);
-		exit(EXIT_FAILURE);
-	}
-
-	rotate_uv_kernel = clCreateKernel(program, "rotate_uv", &err);
-	if (err != CL_SUCCESS) {
-		printf("Couldn't create rotateUV kernel(%d)\n", err);
 		exit(EXIT_FAILURE);
 	}
 
@@ -445,11 +278,11 @@ void yuv420p_rotate_opencl(uint8_t *src, uint8_t *des, int w, int h)
 	}
 
 	time_start();
-	// rotateY
-	err  = clSetKernelArg(rotate_y_kernel, 0,sizeof(cl_mem), &in_buffer);
-	err |= clSetKernelArg(rotate_y_kernel, 1,sizeof(cl_mem), &out_buffer);
-	err |= clSetKernelArg(rotate_y_kernel, 2,sizeof(int), &w);
-	err |= clSetKernelArg(rotate_y_kernel, 3,sizeof(int), &h);
+	// rotate
+	err  = clSetKernelArg(rotate_kernel, 0,sizeof(cl_mem), &in_buffer);
+	err |= clSetKernelArg(rotate_kernel, 1,sizeof(cl_mem), &out_buffer);
+	err |= clSetKernelArg(rotate_kernel, 2,sizeof(int), &w);
+	err |= clSetKernelArg(rotate_kernel, 3,sizeof(int), &h);
 	if (err != CL_SUCCESS) {
 		printf("Couldn't set an argument for the exposure rotateY kernel");
 		exit(EXIT_FAILURE);   
@@ -458,46 +291,9 @@ void yuv420p_rotate_opencl(uint8_t *src, uint8_t *des, int w, int h)
 	//printf("global_y_size=%d, %d  local_y_size=%d, %d\n",
 	//	(int)global_y_size[0], (int)global_y_size[1],
 	//	(int)local_y_size[0], (int)local_y_size[1]);
-	err = clEnqueueNDRangeKernel(queue, rotate_y_kernel, 2, NULL, global_y_size, local_y_size, 0, NULL, NULL);   
+	err = clEnqueueNDRangeKernel(queue, rotate_kernel, 2, NULL, global_y_size, local_y_size, 0, NULL, NULL);   
 	if (err != CL_SUCCESS) {
 		printf("Couldn't enqueue the exposure rotateY kernel(%d)\n", err);
-		exit(EXIT_FAILURE);   
-	}
-
-	// rotateU
-	err  = clSetKernelArg(rotate_uv_kernel, 0,sizeof(cl_mem), &in_buffer);
-	err |= clSetKernelArg(rotate_uv_kernel, 1,sizeof(cl_mem), &out_buffer);
-	err |= clSetKernelArg(rotate_uv_kernel, 2,sizeof(int), &halfW);
-	err |= clSetKernelArg(rotate_uv_kernel, 3,sizeof(int), &halfH);
-	err |= clSetKernelArg(rotate_uv_kernel, 4,sizeof(int), &baseU);
-	if(err < 0) {
-		printf("Couldn't set an argument for the exposure rotateU kernel");
-		exit(EXIT_FAILURE);   
-	}
-
-	err = clEnqueueNDRangeKernel(queue, rotate_uv_kernel, 2, global_uv_offset, global_uv_size, local_uv_size, 0, NULL, NULL);   
-	if(err != 0) 
-	{
-		printf("%d\n",err);
-		perror("Couldn't enqueue the exposure rotateU kernel\n");
-		exit(EXIT_FAILURE);   
-	}
-
-	// rotateV
-	err  = clSetKernelArg(rotate_uv_kernel, 0,sizeof(cl_mem), &in_buffer);
-	err |= clSetKernelArg(rotate_uv_kernel, 1,sizeof(cl_mem), &out_buffer);
-	err |= clSetKernelArg(rotate_uv_kernel, 2,sizeof(int), &halfW);
-	err |= clSetKernelArg(rotate_uv_kernel, 3,sizeof(int), &halfH);
-	err |= clSetKernelArg(rotate_uv_kernel, 4,sizeof(int), &baseV);
-	if (err < 0) {
-		printf("Couldn't set an argument for the exposure rotateV kernel");
-		exit(EXIT_FAILURE);   
-	}
-
-	err = clEnqueueNDRangeKernel(queue, rotate_uv_kernel, 2, global_uv_offset, global_uv_size, local_uv_size, 0, NULL, NULL);   
-	if(err != 0) {
-		printf("%d\n",err);
-		perror("Couldn't enqueue the exposure rotateV kernel\n");
 		exit(EXIT_FAILURE);   
 	}
 
@@ -509,8 +305,7 @@ void yuv420p_rotate_opencl(uint8_t *src, uint8_t *des, int w, int h)
 	} 
 	time_end("yuv420p_rotate_opencl");
 
-	clReleaseKernel(rotate_y_kernel);
-	clReleaseKernel(rotate_uv_kernel);
+	clReleaseKernel(rotate_kernel);
 	clReleaseMemObject(in_buffer);
 	clReleaseMemObject(out_buffer);
 	clReleaseProgram(program);
@@ -526,23 +321,4 @@ void rotate(uint8_t *img_src, uint8_t *img_opencl, uint8_t *img_normal,
 	uint8_t *img_opencl_use, int w, int h)
 {
 	yuv420p_rotate_opencl(img_src, img_opencl, w, h);
-
-	time_start();
-	yuv420p_rotate_normal(img_src, img_normal, w, h);
-	time_end("yuv420p_rotate_normal");
-
-#if 1
-	time_start();
-	yuv420p_rotate_shift(img_src, img_shift, w, h);
-	time_end("yuv420p_rotate_shift");
-
-	time_start();
-	yuv420p_rotate_delete_shift(img_src, img_delete_shift, w, h);
-	time_end("yuv420p_rotate_delete_shift");
-
-	time_start();
-	yuv420p_rotate_opencl_use(img_src, img_opencl_use, w, h);
-	time_end("yuv420p_rotate_opencl_use");
-#endif
 }
-
