@@ -233,19 +233,13 @@ void rotate(uint8_t *src, uint8_t *des, int w, int h, float angle)
 	}
 
 	cl_image_desc image_desc;
+	memset((void *)&image_desc, 0, sizeof(cl_image_desc));
 	image_desc.image_type = CL_MEM_OBJECT_IMAGE2D;
 	image_desc.image_width = w;
 	image_desc.image_height = h;
-	image_desc.image_depth = 0;
-	image_desc.image_array_size = 0;
-	image_desc.image_row_pitch = 0;
-	image_desc.image_slice_pitch = 0;
-	image_desc.num_mip_levels = 0;
-	image_desc.num_samples = 0;
-	image_desc.buffer = NULL;
-
 
 	cl_image_format image_format;
+	memset((void *)&image_format, 0, sizeof(cl_image_format));
 	image_format.image_channel_order = CL_RGBA;
 	image_format.image_channel_data_type = CL_UNORM_INT8;
 
@@ -305,11 +299,19 @@ void rotate(uint8_t *src, uint8_t *des, int w, int h, float angle)
 		printf("Couldn't enqueue the exposure kernel(%d)\n", err);
 		exit(EXIT_FAILURE);   
 	}
+	clFinish(queue);
 
 	printf("=====[line=%d]===\n", __LINE__);
 
+#if 0
 	err = clEnqueueReadBuffer(queue, out_buffer, CL_TRUE, 0,
 		buffer_size, des, 0, NULL, NULL);
+#endif
+	// 该函数待分析，为什么不能使用 ReadBuffer 来读取？（无效内对对象）
+	size_t origin[3] = {0 , 0, 0};
+	size_t region[3] = {w, h, 1};
+	err = clEnqueueReadImage(queue, out_buffer, CL_TRUE, origin, region, 0,
+		0, des, 0, NULL, NULL);
 	if(err < 0) {
 		printf("Couldn't read the buffer: %d\n", err);
 		exit(EXIT_FAILURE);   
