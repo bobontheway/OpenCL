@@ -31,3 +31,6 @@ git push -f origin master
 
 ### No.6_OpenCLSampler
 使用 OpenCL 采样器对图像旋转。
+
+### No.6_2_OpenCLSampler
+基于 No.6_OpenCLSampler，移植到 Ubuntu 系统中执行

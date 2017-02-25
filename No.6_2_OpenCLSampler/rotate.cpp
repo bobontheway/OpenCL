@@ -198,6 +198,7 @@ void init_opencl(cl_context *c, cl_command_queue *q, cl_program *p)
 	*p = program;
 }
 
+#define PI 3.1415926
 
 /**
  * 使用 OpenCL 旋转图像。将原缓冲区中的图像顺时针旋
@@ -231,16 +232,47 @@ void rotate(uint8_t *src, uint8_t *des, int w, int h, float angle)
 		exit(EXIT_FAILURE);
 	}
 
+	cl_image_desc image_desc;
+	image_desc.image_type = CL_MEM_OBJECT_IMAGE2D;
+	image_desc.image_width = w;
+	image_desc.image_height = h;
+	image_desc.image_depth = 0;
+	image_desc.image_array_size = 0;
+	image_desc.image_row_pitch = 0;
+	image_desc.image_slice_pitch = 0;
+	image_desc.num_mip_levels = 0;
+	image_desc.num_samples = 0;
+	image_desc.buffer = NULL;
+
+
+	cl_image_format image_format;
+	image_format.image_channel_order = CL_RGBA;
+	image_format.image_channel_data_type = CL_UNORM_INT8;
+
+	/* pitch 值描述? */
+#if 1
+	in_buffer = clCreateImage(context,
+		CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, &image_format,
+		&image_desc, src, &err);
+#endif
+#if 0
 	in_buffer = clCreateBuffer(context,
 		CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR,
 		buffer_size, src, &err);
+#endif
 	if (err < 0) {
 		perror("Couldn't create a img buffer");
 		exit(EXIT_FAILURE);   
 	}
 
+#if 1
+	out_buffer = clCreateImage(context, CL_MEM_WRITE_ONLY, &image_format,
+		&image_desc, NULL, &err);
+#endif
+#if 0
 	out_buffer = clCreateBuffer(context, CL_MEM_WRITE_ONLY,
 		buffer_size, NULL, &err);
+#endif
 	if (err < 0)  {
 		perror("Couldn't create a out buffer");
 		exit(EXIT_FAILURE);   
@@ -248,32 +280,43 @@ void rotate(uint8_t *src, uint8_t *des, int w, int h, float angle)
 
 	float radian = angle * PI / 180.0f;
 
+	printf("=====[radian=%f  line=%d]===\n", radian, __LINE__);
+	printf("=====[in_buffer=%d  out_buffer=%d]===\n",
+		in_buffer, out_buffer);
+
 	time_start();
 	// rotate
 	err  = clSetKernelArg(rotate_kernel, 0,sizeof(cl_mem), &in_buffer);
 	err |= clSetKernelArg(rotate_kernel, 1,sizeof(cl_mem), &out_buffer);
-	err |= clSetKernelArg(rotate_kernel, 2,sizeof(float), radian);
+	err |= clSetKernelArg(rotate_kernel, 2,sizeof(float), &radian);
 	if (err != CL_SUCCESS) {
 		printf("Couldn't set an argument for the exposure kernel");
 		exit(EXIT_FAILURE);   
 	}
 
-	//printf("global_y_size=%d, %d  local_y_size=%d, %d\n",
-	//	(int)global_y_size[0], (int)global_y_size[1],
-	//	(int)local_y_size[0], (int)local_y_size[1]);
+
+	printf("=====[line=%d]===\n", __LINE__);
+
+	printf("global_y_size=%d, %d  local_y_size=%d, %d\n",
+		(int)global_y_size[0], (int)global_y_size[1],
+		(int)local_y_size[0], (int)local_y_size[1]);
 	err = clEnqueueNDRangeKernel(queue, rotate_kernel, 2, NULL, global_y_size, local_y_size, 0, NULL, NULL);   
 	if (err != CL_SUCCESS) {
 		printf("Couldn't enqueue the exposure kernel(%d)\n", err);
 		exit(EXIT_FAILURE);   
 	}
 
+	printf("=====[line=%d]===\n", __LINE__);
+
 	err = clEnqueueReadBuffer(queue, out_buffer, CL_TRUE, 0,
 		buffer_size, des, 0, NULL, NULL);
 	if(err < 0) {
-		perror("Couldn't read the buffer");
+		printf("Couldn't read the buffer: %d\n", err);
 		exit(EXIT_FAILURE);   
 	} 
 	time_end("opencl sampler rotate");
+
+	printf("=====[line=%d]===\n", __LINE__);
 
 	clReleaseKernel(rotate_kernel);
 	clReleaseMemObject(in_buffer);

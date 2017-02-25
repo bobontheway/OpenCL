@@ -16,6 +16,7 @@ int main()
 	uint width = 512,
 	     height = 512,
 	     size = width * height * 4;
+	float angle = 30;
 
 	uint8_t *img_buffer;
 	uint8_t *out_buffer;
@@ -36,7 +37,7 @@ int main()
 	load_data(img_file, img_buffer, size);
 
 	// 4.旋转图像
-	rotate(img_buffer, out_buffer, width, height);
+	rotate(img_buffer, out_buffer, width, height, angle);
 
 	// 5.把旋转后的图像数据保存到输出文件中
 	store_data(out_file, out_buffer, size);
