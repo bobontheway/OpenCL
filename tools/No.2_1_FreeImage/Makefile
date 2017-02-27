@@ -3,4 +3,4 @@ all:
 	g++ -o FreeImage FreeImage.cpp -lfreeimage
 
 clean:
-	rm *.o *.bin *.png FreeImage
+	rm *.png FreeImage
