@@ -1,4 +1,4 @@
-FreeImage 是一款免费的开源图形库，它可以用于 Windows，Linux 和 Mac OS X 系统。
+该程序使用 FreeImage 来对图像执行旋转操作。FreeImage 是一款免费的开源图形库，它可以用于 Windows，Linux 和 Mac OS X 系统。
 
 ### 1.获取位图格式
 ```c
@@ -104,7 +104,11 @@ FreeImage_Save(format, bitmap, "lenna_target.png");
 ```
 将位图对象 `FIBITMAP` 保存到指定的文件中。第一个参数表示位图对应的格式。例如，当传递的参数是 `FIF_BMP` 时，则保存为 bmp 文件格式；第二个指向将要保存的位图对象；最后一个参数指定存储的文件名。
 
-
+### 7.释放内存
+```c
+FreeImage_Unload(bitmap)
+```
+从内存中删除前面加载的 `FIBITMAP` 对象。一个位图对象是对地址空间中某个内存区域的引用。
 
 
 
