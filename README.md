@@ -33,8 +33,11 @@ git push -f origin master
 ### No.5_2_OpenCLRotate
 在桌面安装 Ubuntu 系统的 AMD RX 460 上执行，而 No.5_1_OpenCLRotate 在 Android 系统的 ARM T-880 上执行。
 
-### No.6_OpenCLSampler
+### No.6_1_OpenCLSampler
 使用 OpenCL 采样器对图像旋转。
 
 ### No.6_2_OpenCLSampler
-基于 No.6_OpenCLSampler，移植到 Ubuntu 系统中执行
+基于 No.6_1_OpenCLSampler，移植到 Ubuntu 系统中执行
+
+### No.6_3_OpenCLSampler
+基于 No.6_1_OpenCLSampler，从原始图像中截取部分矩形区域（左下角区域）
