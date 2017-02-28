@@ -6,8 +6,8 @@
 
 #include "util.h"
 
-FREE_IMAGE_FORMAT g_format;
-int g_width, g_height;
+FREE_IMAGE_FORMAT g_format = (FREE_IMAGE_FORMAT)13;
+int g_width = 512, g_height = 512;
 
 /**
  * 将图像文件保存到二进制文件中
@@ -19,7 +19,7 @@ int load_image(const char *image_name, const char *binary_name)
 
 	// 获取位图格式，用于加载位图文件
 	FREE_IMAGE_FORMAT format = FreeImage_GetFileType(image_name);
-	g_format = format;
+	//g_format = format;
 
 	// 加载位图文件
 	bitmap = FreeImage_Load(format, image_name);
@@ -36,11 +36,11 @@ int load_image(const char *image_name, const char *binary_name)
 	unsigned width = FreeImage_GetWidth(bitmap),
 		 height = FreeImage_GetHeight(bitmap);
 
-#if 0
+#if 1
 	printf("nWidth=%u nHeight=%u nFormat=%d\n", width, height, format);
 #endif
-	g_width = width;
-	g_height = height;
+	//g_width = width;
+	//g_height = height;
 	size_t size = width * height * 4; /* RGBA format */
 	uint8_t *buffer = (unsigned char *)malloc(size);
 	if (buffer == NULL) {
@@ -110,11 +110,13 @@ int main()
 	const char *file_name = "lenna_rgba.bin";
 	const char *dst_name = "lenna_target.png";
 
+#if 0
 	ret = load_image(image_name, file_name);
 	if (ret) {
 		printf("load image file fail\n");
 		exit(EXIT_FAILURE);
 	}
+#endif
 
 	ret = store_image(file_name, dst_name);
 	if (ret) {
