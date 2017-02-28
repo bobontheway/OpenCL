@@ -8,45 +8,49 @@
 
 FREE_IMAGE_FORMAT g_format;
 int g_width, g_height;
-	
+
 /**
  * 将图像文件保存到二进制文件中
  */
 int load_image(const char *image_name, const char *binary_name)
 {
 	int ret;
-	FIBITMAP *bitmap;
+	FIBITMAP *bitmap, *bitmap_temp;
 
-	// 获取图像的格式，用于图像加载
+	// 获取位图格式，用于加载位图文件
 	FREE_IMAGE_FORMAT format = FreeImage_GetFileType(image_name);
 	g_format = format;
 
-	// 加载图像
+	// 加载位图文件
 	bitmap = FreeImage_Load(format, image_name);
 	if (bitmap == NULL) {
 		perror("bitmap load fail");
 		exit(EXIT_FAILURE);
 	}
 
-	// 将位图转换为 32 位格式，返回的位图对象拷贝了输入位图对应的数据
+	// 将位图转换为 32 位格式，返回的位图对象拷贝了输入位图
+	bitmap_temp = bitmap;
 	bitmap = FreeImage_ConvertTo32Bits(bitmap);
+	FreeImage_Unload(bitmap_temp);
 
 	unsigned width = FreeImage_GetWidth(bitmap),
 		 height = FreeImage_GetHeight(bitmap);
 
+#if 0
 	printf("nWidth=%u nHeight=%u nFormat=%d\n", width, height, format);
+#endif
 	g_width = width;
 	g_height = height;
-
-	uint8_t *buffer = (unsigned char *)malloc(width * height * 4);
+	size_t size = width * height * 4; /* RGBA format */
+	uint8_t *buffer = (unsigned char *)malloc(size);
 	if (buffer == NULL) {
 		printf("alloc memory fail\n");
 		exit(EXIT_FAILURE);
 	}
 
 	// 返回指向数据位的指针
-	memcpy(buffer, FreeImage_GetBits(bitmap), width * height * 4);
-	ret = store_data(binary_name, buffer, width * height * 4);
+	memcpy(buffer, FreeImage_GetBits(bitmap), size);
+	ret = store_data(binary_name, buffer, size);
 	if (ret) {
 		printf("store data to file fail: %s\n", binary_name);
 		return EXIT_FAILURE;
@@ -64,14 +68,15 @@ int load_image(const char *image_name, const char *binary_name)
 int store_image(const char *binary_name, const char *image_name)
 {
 	int i, ret = 0;
+	size_t size = g_width * g_height * 4;
 
-	uint8_t *buffer = (unsigned char *)malloc(g_width * g_height * 4);
+	uint8_t *buffer = (unsigned char *)malloc(size);
 	if (buffer == NULL) {
 		printf("alloc memory fail\n");
 		return EXIT_FAILURE;
 	}
 
-	ret = load_data(binary_name, buffer, g_width * g_height * 4);
+	ret = load_data(binary_name, buffer, size);
 	if (ret) {
 		printf("load data from file fail: %s\n", binary_name);
 		free(buffer);
