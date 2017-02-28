@@ -203,11 +203,10 @@ void init_opencl(cl_context *c, cl_command_queue *q, cl_program *p)
  * 使用 OpenCL 旋转图像。将原缓冲区中的图像顺时针旋
  * 转 90 度后存入目标缓冲区。
  */
-void rotate(uint8_t *src, uint8_t *des, int w, int h, float angle)
+void scissor(uint8_t *src, uint8_t *des, int orig_width, int orig_height,
+	int new_width, int new_height)
 {
 	int i, j, n;
-	int sWidth = 384,
-	    sHeight = 384;
 
 	// should be release
 	cl_context context;
@@ -218,8 +217,8 @@ void rotate(uint8_t *src, uint8_t *des, int w, int h, float angle)
 	init_opencl(&context, &queue, &program);
 
 	size_t global_y_size[2];
-	global_y_size[0] = sWidth;
-	global_y_size[1] = sHeight;
+	global_y_size[0] = new_width;
+	global_y_size[1] = new_height;
 
 	size_t local_y_size[2] = {16, 16};
 
@@ -248,27 +247,26 @@ void rotate(uint8_t *src, uint8_t *des, int w, int h, float angle)
 
 	in_buffer = clCreateImage2D(context,
 		CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, &image_format,
-		w, h, 0, src, &err);
+		orig_width, orig_height, 0, src, &err);
 	if (err < 0) {
 		perror("Couldn't create a img buffer");
 		exit(EXIT_FAILURE);   
 	}
 
 	out_buffer = clCreateImage2D(context, CL_MEM_WRITE_ONLY, &image_format,
-		sWidth, sHeight, 0, NULL, &err);
-		//w, h, 0, NULL, &err);
+		new_width, new_height, 0, NULL, &err);
 	if (err < 0)  {
 		perror("Couldn't create a out buffer");
 		exit(EXIT_FAILURE);   
 	}
 
-	float radian = angle * PI / 180.0f;
+	//float radian = angle * PI / 180.0f;
 
 	time_start();
 	// rotate
 	err  = clSetKernelArg(rotate_kernel, 0,sizeof(cl_mem), &in_buffer);
 	err |= clSetKernelArg(rotate_kernel, 1,sizeof(cl_mem), &out_buffer);
-	err |= clSetKernelArg(rotate_kernel, 2,sizeof(float), &radian);
+	//err |= clSetKernelArg(rotate_kernel, 2,sizeof(float), &radian);
 	if (err != CL_SUCCESS) {
 		printf("Couldn't set an argument for the exposure kernel");
 		exit(EXIT_FAILURE);   
@@ -286,7 +284,7 @@ void rotate(uint8_t *src, uint8_t *des, int w, int h, float angle)
 
 	size_t origin[3] = {0 , 0, 0};
 	//size_t region[3] = {w, h, 1};
-	size_t region[3] = {sWidth, sHeight, 1};
+	size_t region[3] = {new_width, new_height, 1};
 	err = clEnqueueReadImage(queue, out_buffer, CL_TRUE, origin, region, 0,
 		0, des, 0, NULL, NULL);
 	if(err < 0) {
