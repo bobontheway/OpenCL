@@ -2,8 +2,7 @@ __constant  sampler_t sampler = CLK_NORMALIZED_COORDS_FALSE |
 	CLK_FILTER_NEAREST | CLK_ADDRESS_CLAMP;
 
 __kernel void rotate_rgba(__read_only image2d_t srcImg,
-	__write_only image2d_t dstImg,
-	float angle)
+	__write_only image2d_t dstImg)
 {
 	const int x = get_global_id(0);
 	const int y = get_global_id(1);

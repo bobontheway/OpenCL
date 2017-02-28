@@ -266,7 +266,6 @@ void scissor(uint8_t *src, uint8_t *des, int orig_width, int orig_height,
 	// rotate
 	err  = clSetKernelArg(rotate_kernel, 0,sizeof(cl_mem), &in_buffer);
 	err |= clSetKernelArg(rotate_kernel, 1,sizeof(cl_mem), &out_buffer);
-	//err |= clSetKernelArg(rotate_kernel, 2,sizeof(float), &radian);
 	if (err != CL_SUCCESS) {
 		printf("Couldn't set an argument for the exposure kernel");
 		exit(EXIT_FAILURE);   
