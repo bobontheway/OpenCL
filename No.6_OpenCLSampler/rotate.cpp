@@ -243,18 +243,16 @@ void rotate(uint8_t *src, uint8_t *des, int w, int h, float angle)
 	image_format.image_channel_order = CL_RGBA;
 	image_format.image_channel_data_type = CL_UNORM_INT8;
 
-	/* pitch 值描述? */
-	in_buffer = clCreateImage(context,
+	in_buffer = clCreateImage2D(context,
 		CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, &image_format,
-		&image_desc, src, &err);
+		w, h, 0, src, &err);
 	if (err < 0) {
 		perror("Couldn't create a img buffer");
 		exit(EXIT_FAILURE);   
 	}
 
-	out_buffer = clCreateImage(context, CL_MEM_WRITE_ONLY, &image_format,
-		&image_desc, NULL, &err);
-
+	out_buffer = clCreateImage2D(context, CL_MEM_WRITE_ONLY, &image_format,
+		w, h, 0, NULL, &err);
 	if (err < 0)  {
 		perror("Couldn't create a out buffer");
 		exit(EXIT_FAILURE);   
