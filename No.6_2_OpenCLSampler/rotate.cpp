@@ -244,39 +244,23 @@ void rotate(uint8_t *src, uint8_t *des, int w, int h, float angle)
 	image_format.image_channel_data_type = CL_UNORM_INT8;
 
 	/* pitch 值描述? */
-#if 1
 	in_buffer = clCreateImage(context,
 		CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, &image_format,
 		&image_desc, src, &err);
-#endif
-#if 0
-	in_buffer = clCreateBuffer(context,
-		CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR,
-		buffer_size, src, &err);
-#endif
 	if (err < 0) {
 		perror("Couldn't create a img buffer");
 		exit(EXIT_FAILURE);   
 	}
 
-#if 1
 	out_buffer = clCreateImage(context, CL_MEM_WRITE_ONLY, &image_format,
 		&image_desc, NULL, &err);
-#endif
-#if 0
-	out_buffer = clCreateBuffer(context, CL_MEM_WRITE_ONLY,
-		buffer_size, NULL, &err);
-#endif
+
 	if (err < 0)  {
 		perror("Couldn't create a out buffer");
 		exit(EXIT_FAILURE);   
 	}
 
 	float radian = angle * PI / 180.0f;
-
-	printf("=====[radian=%f  line=%d]===\n", radian, __LINE__);
-	printf("=====[in_buffer=%d  out_buffer=%d]===\n",
-		in_buffer, out_buffer);
 
 	time_start();
 	// rotate
@@ -288,9 +272,6 @@ void rotate(uint8_t *src, uint8_t *des, int w, int h, float angle)
 		exit(EXIT_FAILURE);   
 	}
 
-
-	printf("=====[line=%d]===\n", __LINE__);
-
 	printf("global_y_size=%d, %d  local_y_size=%d, %d\n",
 		(int)global_y_size[0], (int)global_y_size[1],
 		(int)local_y_size[0], (int)local_y_size[1]);
@@ -301,13 +282,6 @@ void rotate(uint8_t *src, uint8_t *des, int w, int h, float angle)
 	}
 	clFinish(queue);
 
-	printf("=====[line=%d]===\n", __LINE__);
-
-#if 0
-	err = clEnqueueReadBuffer(queue, out_buffer, CL_TRUE, 0,
-		buffer_size, des, 0, NULL, NULL);
-#endif
-	// 该函数待分析，为什么不能使用 ReadBuffer 来读取？（无效内对对象）
 	size_t origin[3] = {0 , 0, 0};
 	size_t region[3] = {w, h, 1};
 	err = clEnqueueReadImage(queue, out_buffer, CL_TRUE, origin, region, 0,
@@ -317,8 +291,6 @@ void rotate(uint8_t *src, uint8_t *des, int w, int h, float angle)
 		exit(EXIT_FAILURE);   
 	} 
 	time_end("opencl sampler rotate");
-
-	printf("=====[line=%d]===\n", __LINE__);
 
 	clReleaseKernel(rotate_kernel);
 	clReleaseMemObject(in_buffer);
