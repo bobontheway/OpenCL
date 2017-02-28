@@ -7,16 +7,20 @@
 #include <CL/cl.h>
 #endif
 
-#include "rotate.h"
 #include "util.h"
+
+extern void scissor(uint8_t *src, uint8_t *des, int orig_width, int orig_height,
+	int new_width, int new_height);
 
 int main()
 {
 	/* RGBA image format */
-	uint width = 512,
-	     height = 512,
-	     size = width * height * 4;
-	float angle = 30;
+	uint orig_width = 512,
+	     orig_height = 512,
+	     size = orig_width * orig_height * 4;
+
+	uint new_width = 256,
+	     new_height = 256;
 
 	uint8_t *img_buffer;
 	uint8_t *out_buffer;
@@ -37,10 +41,11 @@ int main()
 	load_data(img_file, img_buffer, size);
 
 	// 4.旋转图像
-	rotate(img_buffer, out_buffer, width, height, angle);
+	scissor(img_buffer, out_buffer, orig_width, orig_height,
+		new_width, new_height);
 
 	// 5.把旋转后的图像数据保存到输出文件中
-	store_data(out_file, out_buffer, size);
+	store_data(out_file, out_buffer, 384 * 384 * 4);
 
 	// 6.释放缓冲区
 	free(img_buffer);

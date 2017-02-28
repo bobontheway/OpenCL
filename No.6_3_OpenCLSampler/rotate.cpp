@@ -122,6 +122,7 @@ void get_devices_info(cl_device_id *devices, int num)
 /**
  * 读取 kernel 代码，存放到缓冲区中
  */
+//void init_opencl(cl_context *context, cl_command_queue *queue, cl_program *program)
 void init_opencl(cl_context *c, cl_command_queue *q, cl_program *p)
 {
 	int err;
@@ -231,7 +232,6 @@ void rotate(uint8_t *src, uint8_t *des, int w, int h, float angle)
 		exit(EXIT_FAILURE);
 	}
 
-	// xbdong, OpenCL 1.1 not used
 	cl_image_desc image_desc;
 	memset((void *)&image_desc, 0, sizeof(cl_image_desc));
 	image_desc.image_type = CL_MEM_OBJECT_IMAGE2D;
@@ -243,16 +243,18 @@ void rotate(uint8_t *src, uint8_t *des, int w, int h, float angle)
 	image_format.image_channel_order = CL_RGBA;
 	image_format.image_channel_data_type = CL_UNORM_INT8;
 
-	in_buffer = clCreateImage2D(context,
+	/* pitch 值描述? */
+	in_buffer = clCreateImage(context,
 		CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, &image_format,
-		w, h, 0, src, &err);
+		&image_desc, src, &err);
 	if (err < 0) {
 		perror("Couldn't create a img buffer");
 		exit(EXIT_FAILURE);   
 	}
 
-	out_buffer = clCreateImage2D(context, CL_MEM_WRITE_ONLY, &image_format,
-		w, h, 0, NULL, &err);
+	out_buffer = clCreateImage(context, CL_MEM_WRITE_ONLY, &image_format,
+		&image_desc, NULL, &err);
+
 	if (err < 0)  {
 		perror("Couldn't create a out buffer");
 		exit(EXIT_FAILURE);   
