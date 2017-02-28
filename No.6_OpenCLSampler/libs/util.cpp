@@ -1,4 +1,4 @@
-#include "../include/util.h"
+#include "util.h"
 
 /**
  * 将文件中的数据加载到缓冲区中
