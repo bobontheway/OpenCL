@@ -19,8 +19,8 @@ int main()
 	     orig_height = 512,
 	     size = orig_width * orig_height * 4;
 
-	uint new_width = 384,
-	     new_height = 384;
+	uint new_width = 256,
+	     new_height = 256;
 
 	uint8_t *img_buffer;
 	uint8_t *out_buffer;
