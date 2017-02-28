@@ -8,10 +8,6 @@
 
 FREE_IMAGE_FORMAT g_format;
 int g_width, g_height;
-#if 0
-FREE_IMAGE_FORMAT g_format = (FREE_IMAGE_FORMAT)13;
-int g_width = 512, g_height = 512;
-#endif
 
 /**
  * 将图像文件保存到二进制文件中
