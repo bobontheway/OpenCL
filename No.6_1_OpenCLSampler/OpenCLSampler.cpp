@@ -12,7 +12,7 @@
 
 int main()
 {
-	/* RGBA */
+	/* RGBA image format */
 	uint width = 512,
 	     height = 512,
 	     size = width * height * 4;

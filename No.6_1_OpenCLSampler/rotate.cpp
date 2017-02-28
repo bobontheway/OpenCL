@@ -122,7 +122,6 @@ void get_devices_info(cl_device_id *devices, int num)
 /**
  * 读取 kernel 代码，存放到缓冲区中
  */
-//void init_opencl(cl_context *context, cl_command_queue *queue, cl_program *program)
 void init_opencl(cl_context *c, cl_command_queue *q, cl_program *p)
 {
 	int err;
@@ -232,6 +231,7 @@ void rotate(uint8_t *src, uint8_t *des, int w, int h, float angle)
 		exit(EXIT_FAILURE);
 	}
 
+	// xbdong, OpenCL 1.1 not used
 	cl_image_desc image_desc;
 	memset((void *)&image_desc, 0, sizeof(cl_image_desc));
 	image_desc.image_type = CL_MEM_OBJECT_IMAGE2D;
