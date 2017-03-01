@@ -132,7 +132,7 @@ void init_opencl(cl_context *c, cl_command_queue *q, cl_program *p)
 	cl_command_queue queue;
 	cl_program program;
 
-	char *rotate;
+	char *buffer;
 
 	// get platform
 	err = clGetPlatformIDs(1, &platform, NULL);
@@ -163,20 +163,20 @@ void init_opencl(cl_context *c, cl_command_queue *q, cl_program *p)
 		exit(EXIT_FAILURE);
 	}
 
-	rotate = package_program("kernel_rotate.cl");
-	if (!rotate) {
+	buffer = package_program("kernel_scissor.cl");
+	if (!buffer) {
 		printf("alloc program buffer fail\n");
 		exit(EXIT_FAILURE);
 
 	}
 
 	// create program
-	program = clCreateProgramWithSource(context, 1, (const char **)&rotate, NULL, &err);
+	program = clCreateProgramWithSource(context, 1, (const char **)&buffer, NULL, &err);
 	if (program == NULL) {
 		printf("create program fail\n");
 		exit(EXIT_FAILURE);
 	}
-	free(rotate);
+	free(buffer);
 
 	// build program
 	err = clBuildProgram(program, 1, &device, NULL, NULL, NULL);
@@ -212,7 +212,7 @@ void scissor(uint8_t *src, uint8_t *des, int orig_width, int orig_height,
 	cl_context context;
 	cl_command_queue queue;
 	cl_program program;
-	cl_kernel rotate_kernel;
+	cl_kernel scissor_kernel;
 
 	init_opencl(&context, &queue, &program);
 
@@ -225,7 +225,7 @@ void scissor(uint8_t *src, uint8_t *des, int orig_width, int orig_height,
 	cl_int err;
 	cl_mem in_buffer, out_buffer;
 
-	rotate_kernel = clCreateKernel(program, "rotate_rgba", &err);
+	scissor_kernel = clCreateKernel(program, "scissor_rgba", &err);
 	if (err != CL_SUCCESS) {
 		printf("Couldn't create kernel(%d)\n", err);
 		exit(EXIT_FAILURE);
@@ -260,12 +260,10 @@ void scissor(uint8_t *src, uint8_t *des, int orig_width, int orig_height,
 		exit(EXIT_FAILURE);   
 	}
 
-	//float radian = angle * PI / 180.0f;
-
 	time_start();
-	// rotate
-	err  = clSetKernelArg(rotate_kernel, 0,sizeof(cl_mem), &in_buffer);
-	err |= clSetKernelArg(rotate_kernel, 1,sizeof(cl_mem), &out_buffer);
+	// scissor
+	err  = clSetKernelArg(scissor_kernel, 0,sizeof(cl_mem), &in_buffer);
+	err |= clSetKernelArg(scissor_kernel, 1,sizeof(cl_mem), &out_buffer);
 	if (err != CL_SUCCESS) {
 		printf("Couldn't set an argument for the exposure kernel");
 		exit(EXIT_FAILURE);   
@@ -274,7 +272,7 @@ void scissor(uint8_t *src, uint8_t *des, int orig_width, int orig_height,
 	printf("global_y_size=%d, %d  local_y_size=%d, %d\n",
 		(int)global_y_size[0], (int)global_y_size[1],
 		(int)local_y_size[0], (int)local_y_size[1]);
-	err = clEnqueueNDRangeKernel(queue, rotate_kernel, 2, NULL, global_y_size, local_y_size, 0, NULL, NULL);   
+	err = clEnqueueNDRangeKernel(queue, scissor_kernel, 2, NULL, global_y_size, local_y_size, 0, NULL, NULL);
 	if (err != CL_SUCCESS) {
 		printf("Couldn't enqueue the exposure kernel(%d)\n", err);
 		exit(EXIT_FAILURE);   
@@ -290,9 +288,9 @@ void scissor(uint8_t *src, uint8_t *des, int orig_width, int orig_height,
 		printf("Couldn't read the buffer: %d\n", err);
 		exit(EXIT_FAILURE);   
 	} 
-	time_end("opencl sampler rotate");
+	time_end("opencl sampler scissor");
 
-	clReleaseKernel(rotate_kernel);
+	clReleaseKernel(scissor_kernel);
 	clReleaseMemObject(in_buffer);
 	clReleaseMemObject(out_buffer);
 	clReleaseProgram(program);
