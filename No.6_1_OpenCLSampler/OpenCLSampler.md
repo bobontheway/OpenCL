@@ -92,6 +92,7 @@ err = clEnqueueReadImage(queue, out_buffer, CL_TRUE, origin, region, 0,
 <img src="image/lenna.png" width="40%" height="40%">
 
 **目标图像**
+
 <img src="image/lenna_target.png" width="20%" height="20%">
 
 ## 参考
