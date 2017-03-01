@@ -51,13 +51,11 @@ __kernel void rotate_rgba(__read_only image2d_t srcImg,
 #### 2.1采样器
 采样器对象描述了读取图像数据时如何对图像进行采样。图像读取函数 `read_imageX` 包含一个采样器参数，该参数可以在主机端通过 OpenCL API 函数创建，然后使用 `clSetKernelArg` 传递给内核；也可以在内核程序中声明，在内核程序中声明的采样器对象为 `sampler_t` 类型的常量。采样器对象包含了一些属性，这些属性描述了在读取图像对象的像素时如何采样。分别是规格化浮点坐标，寻址模式和过滤模式。
 - 规格化坐标：指定传递的 x、y 和 z 坐标值是规格化浮点坐标还是非规格化坐标值。可以是 `CLK_NORMALIZED_COORDS_TRUE` 或者 `CLK_NORMALIZED_COORDS_FALSE` 枚举类型的值；
-
 - 寻址模式：指定图像的寻址模式。即，当传递的坐标值超过图像坐标区域时该如何处理。可以是下面的枚举类型的值：
 CLK_ADDRESS_MIRRORED_REPEAT：图像区域外的坐标设置为区域内坐标的反射值对应的颜色；
 CLK_ADDRESS_REPEAT：图像区域外的坐标重复区域内坐标的颜色，只对规格化坐标有效；
 CLK_ADDRESS_CLAMP_TO_EDGE：图像区域外的坐标返回图像边缘的颜色；
 CLK_ADDRESS_CLAMP：图像区域外坐标返回的颜色和边框颜色保持一致；
-
 - 过滤模式：指定使用的过滤模式。可以是 `CLK_FILTER_NEAREST` 或 `CLK_FILTER_LINEAR` 枚举类型值，分别表示最近邻插值和双线性插值。
 
 ##### 边框的颜色
