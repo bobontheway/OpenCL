@@ -6,8 +6,8 @@
 
 #include "util.h"
 
-FREE_IMAGE_FORMAT g_format;
-int g_width, g_height;
+FREE_IMAGE_FORMAT g_format = (FREE_IMAGE_FORMAT)13;
+int g_width = 512, g_height = 512;
 
 /**
  * 将图像文件保存到二进制文件中
@@ -110,11 +110,13 @@ int main()
 	const char *file_name = "lenna_rgba.bin";
 	const char *dst_name = "lenna_target.png";
 
+#if 0
 	ret = load_image(image_name, file_name);
 	if (ret) {
 		printf("load image file fail\n");
 		exit(EXIT_FAILURE);
 	}
+#endif
 
 	ret = store_image(file_name, dst_name);
 	if (ret) {

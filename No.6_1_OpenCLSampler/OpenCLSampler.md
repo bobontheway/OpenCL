@@ -69,6 +69,8 @@ CLK_ADDRESS_CLAMP：图像区域外坐标返回的颜色和边框颜色保持一
 - 如果图像颜色通道是 CL_A，CL_INTENSITY，CL_Rx，CL_RA，CL_RGx，CL_RGBx，CL_ARGB，CL_BGRA 或 CL_RGBA，边框颜色为 （0.0f，0.0f， 0.0f，0.0f）；
 - 如果图像颜色的通道是 CL_R，CL_RG，CL_RGB 或 CL_LUMINANCE，边框颜色为（0.0f，0.0f，0.0f，1.0f）。
 
+CL_RGBA 的颜色通道中，如果是全 0 则表示黑色，全 0xFF 表示白色。Alpha 通道如果是 1，则不透明，如果是 0 则全透明。
+
 #### 2.2坐标
 在图像读写函数 `read_imageX` 和 `write_imageX`  中，对于 2D 图像对象，传递的 x 坐标范围是 `[0, width-1]`，y 坐标范围是 `[0, height-1]`，坐标原点 `[0, 0]` 对应图像的左下角。
 

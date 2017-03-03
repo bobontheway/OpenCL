@@ -70,14 +70,20 @@ __kernel void rotate_rgba(__read_only image2d_t srcImg,
 
 <img src="image/lenna.png" width="40%" height="40%">
 
-**目标图像**
+**旋转后图像**
 
-<img src="image/lenna_target.png" width="20%" height="20%">
+<img src="image/lenna_target.png" width="40%" height="20%">
+
+
+顺时针和逆时针的区别：
+如果从 A 取值，写到 A'，为逆时针旋转；
+如果是从 A' 采样，写到 A，则是顺时针旋转，可以对这两个点的坐标值分别采样。
 
 ## 参考
 
 问题：
 旋转后图像的背景颜色是什么，怎么解释？
+- 怎么让旋转后的图像背景是黑色？
 
 
 
