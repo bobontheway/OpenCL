@@ -90,7 +90,7 @@ err = clEnqueueReadImage(queue, out_buffer, CL_TRUE, origin, region, 0,
 - origin：图像中的偏移（x，y，z），以像素为单位的。如果 `image` 是 2D 图像对象，origin[2] 必须为 0；
 - region：定义 1D，2D 或 3D 图像的矩形区域，属性为（width，height，depth）。如果 image 是 2D 图像对象， region[2] 必须是 1。
 
-## 显示效果
+## 结果
 该程序运行后，经过 `No.2_2_FreeImage` 处理显示效果如下图所示。
 
 **原始图像**

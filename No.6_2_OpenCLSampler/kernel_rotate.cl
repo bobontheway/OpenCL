@@ -16,7 +16,7 @@ __kernel void rotate_rgba(__read_only image2d_t srcImg,
 	int ox = width / 2;
 	int oy = height / 2;
 
-	// 相对于圆心的点，临时变量（将圆心看做坐标原点）
+	// 相对于圆心的点，临时变量（将圆心看作坐标原点）
 	int xt = x - ox;
 	int yt = y - oy;
 
