@@ -85,6 +85,8 @@ __kernel void rotate_rgba(__read_only image2d_t srcImg,
 旋转后图像的背景颜色是什么，怎么解释？
 - 怎么让旋转后的图像背景是黑色？
 
+在 6_3 中使用 FillImage 将图像清除为黑色。
+
 
 
 
