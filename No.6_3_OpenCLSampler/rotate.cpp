@@ -255,6 +255,17 @@ void rotate(uint8_t *src, uint8_t *des, int w, int h, float angle)
 	out_buffer = clCreateImage(context, CL_MEM_WRITE_ONLY, &image_format,
 		&image_desc, NULL, &err);
 
+	int color[4] = {0, 0, 0, 1};
+	size_t origin[3] = {0, 0, 0};
+	size_t region[3] = {w, h, 1};
+
+	err = clEnqueueFillImage(queue, out_buffer, color,
+		origin, region, NULL, NULL, NULL);
+	if(err < 0) {
+		printf("Couldn't file the image: %d\n", err);
+		exit(EXIT_FAILURE);
+	}
+
 	if (err < 0)  {
 		perror("Couldn't create a out buffer");
 		exit(EXIT_FAILURE);   
