@@ -11,18 +11,17 @@
 #include <FreeImage.h>
 
 #include "rotate.h"
-#include "util.h"
 
 FREE_IMAGE_FORMAT g_format;
 int g_width, g_height;
 	
 /**
- * 将图像文件保存到二进制文件中
+ * 将图像数据加载到缓冲区中
  */
-int load_image(const char *image_name, const char *binary_name)
+int load_image(const char *image_name, uint8_t *buffer)
 {
 	int ret;
-	FIBITMAP *bitmap;
+	FIBITMAP *bitmap, *bitmap_temp;
 
 	// 获取图像的格式，用于图像加载
 	FREE_IMAGE_FORMAT format = FreeImage_GetFileType(image_name);
@@ -35,61 +34,38 @@ int load_image(const char *image_name, const char *binary_name)
 		exit(EXIT_FAILURE);
 	}
 
-	// 将位图转换为 32 位格式，返回的位图对象拷贝了输入位图对应的数据
+	// 将位图转换为 32 位格式，返回的位图对象拷贝了输入位图
+	bitmap_temp = bitmap;
 	bitmap = FreeImage_ConvertTo32Bits(bitmap);
+	FreeImage_Unload(bitmap_temp);
 
 	unsigned width = FreeImage_GetWidth(bitmap),
 		 height = FreeImage_GetHeight(bitmap);
 
+#if 0
 	printf("nWidth=%u nHeight=%u nFormat=%d\n", width, height, format);
+#endif
 	g_width = width;
 	g_height = height;
 
-	uint8_t *buffer = (unsigned char *)malloc(width * height * 4);
-	if (buffer == NULL) {
-		printf("alloc memory fail\n");
-		exit(EXIT_FAILURE);
-	}
-
 	// 返回指向数据位的指针
 	memcpy(buffer, FreeImage_GetBits(bitmap), width * height * 4);
-	ret = store_data(binary_name, buffer, width * height * 4);
-	if (ret) {
-		printf("store data to file fail: %s\n", binary_name);
-		return EXIT_FAILURE;
-	}
-
 	FreeImage_Unload(bitmap);
-	free(buffer);
 
 	return ret;
 }
 
 /**
- * 把二进制文件中的数据保存为图像文件
+ * 把缓冲区中的数据保存为图像文件
  */
-int store_image(const char *binary_name, const char *image_name)
+int store_image(uint8_t *buffer, const char *image_name)
 {
 	int i, ret = 0;
-
-	uint8_t *buffer = (unsigned char *)malloc(g_width * g_height * 4);
-	if (buffer == NULL) {
-		printf("alloc memory fail\n");
-		return EXIT_FAILURE;
-	}
-
-	ret = load_data(binary_name, buffer, g_width * g_height * 4);
-	if (ret) {
-		printf("load data from file fail: %s\n", binary_name);
-		free(buffer);
-		return EXIT_FAILURE;
-	}
 
 	// 创建新的位图对象
 	FIBITMAP *bitmap = FreeImage_Allocate(g_width, g_height, 32);
 	if (bitmap == NULL) {
 		printf("alloc bitmap fail\n");
-		free(buffer);
 		return EXIT_FAILURE;
 	}
 
@@ -99,7 +75,6 @@ int store_image(const char *binary_name, const char *image_name)
 
 	FreeImage_Save(g_format, bitmap, image_name);
 	FreeImage_Unload(bitmap);
-	free(buffer);
 
 	return ret;
 }
@@ -110,20 +85,9 @@ int main()
 	int ret;
 
 	const char *image_name = "image/lenna.png";
-	const char *binary_name = "lenna_rgba.bin";
-	const char *binary_rotated_name = "lenna_rotated_rgba.bin";
 	const char *dst_name = "lenna_target.png";
 
-	// 图像文件转换为二进制文件
-	ret = load_image(image_name, binary_name);
-	if (ret) {
-		printf("load image file fail: %s\n", image_name);
-		exit(EXIT_FAILURE);
-	}
-
-
-#if 1 // 将二进制文件旋转后存为二进制文件
-	/* RGBA */
+	/* Bitmap format RGBA */
 	uint width = 512,
 	     height = 512,
 	     size = width * height * 4;
@@ -132,13 +96,7 @@ int main()
 	uint8_t *img_buffer;
 	uint8_t *out_buffer;
 
-#if 0
-	// 1.定义输入文件和输出文件
-	const char *img_file = "/data/local/tmp/lenna_rgba.bin";
-	const char *out_file = "lenna_rgba_target.bin";
-#endif
-
-	// 2.分别为两个文件预分配缓冲区
+	// 1.为两个位图文件预分配缓冲区
 	img_buffer = (uint8_t *)malloc(size);
 	out_buffer = (uint8_t *)malloc(size);
 	if (!img_buffer || !out_buffer) {
@@ -146,26 +104,26 @@ int main()
 		exit(EXIT_FAILURE);
 	}
 
-	// 3.将输入文件保存到缓冲区中
-	load_data(binary_name, img_buffer, size);
+	// 2.将图像数据加载到缓冲区
+	ret = load_image(image_name, img_buffer);
+	if (ret) {
+		printf("load image file fail: %s\n", image_name);
+		exit(EXIT_FAILURE);
+	}
 
-	// 4.旋转图像
+	// 3.旋转图像
 	rotate(img_buffer, out_buffer, width, height, angle);
 
-	// 5.把旋转后的图像数据保存到输出文件中
-	store_data(binary_rotated_name, out_buffer, size);
-
-	// 6.释放缓冲区
-	free(img_buffer);
-	free(out_buffer);
-#endif
-
-	// 将二进制文件转换为图像文件
-	ret = store_image(binary_rotated_name, dst_name);
+	// 4.将缓冲区中的数据保存为图像文件
+	ret = store_image(out_buffer, dst_name);
 	if (ret) {
 		printf("store image file fail\n");
 		exit(EXIT_FAILURE);
 	}
+
+	// 5.释放缓冲区
+	free(img_buffer);
+	free(out_buffer);
 
 	return 0;
 }
