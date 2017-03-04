@@ -76,27 +76,9 @@ __kernel void rotate_rgba(__read_only image2d_t srcImg,
 <img src="image/lenna_target.png" width="40%" height="20%">
 
 ### 旋转方向
-如果是从 A' 采样，写到 A，则是顺时针旋转。`旋转后图像`的四个角中，由于`原始图像`的采样点在图像区域的外面，所以是边框的颜色。在 [No.6_3_OpenCLSampler](../No.6_3_OpenCLSampler/OpenCLSampler.md) 中，采样的时候，如果采样区域在图像外面，把它设置为黑色。
+如果是从 A' 采样，写到 A，则是顺时针旋转。`旋转后图像`的四个角中，由于`原始图像`的采样点在图像区域的外面，所以是边框的颜色。在 [No.6_3_OpenCLSampler](../No.6_3_OpenCLSampler/OpenCLSampler.md) 中，采样的时候，如果采样点在图像区域外面，把它设置为黑色。
 
 ## 参考
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
