@@ -243,7 +243,6 @@ void rotate(uint8_t *src, uint8_t *des, int w, int h, float angle)
 	image_format.image_channel_order = CL_RGBA;
 	image_format.image_channel_data_type = CL_UNORM_INT8;
 
-	/* pitch 值描述? */
 	in_buffer = clCreateImage(context,
 		CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, &image_format,
 		&image_desc, src, &err);
@@ -254,18 +253,6 @@ void rotate(uint8_t *src, uint8_t *des, int w, int h, float angle)
 
 	out_buffer = clCreateImage(context, CL_MEM_WRITE_ONLY, &image_format,
 		&image_desc, NULL, &err);
-
-	int color[4] = {0, 0, 0, 1};
-	size_t origin[3] = {0, 0, 0};
-	size_t region[3] = {w, h, 1};
-
-	err = clEnqueueFillImage(queue, out_buffer, color,
-		origin, region, NULL, NULL, NULL);
-	if(err < 0) {
-		printf("Couldn't file the image: %d\n", err);
-		exit(EXIT_FAILURE);
-	}
-
 	if (err < 0)  {
 		perror("Couldn't create a out buffer");
 		exit(EXIT_FAILURE);   

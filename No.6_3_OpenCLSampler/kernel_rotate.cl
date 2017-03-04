@@ -27,5 +27,10 @@ __kernel void rotate_rgba(__read_only image2d_t srcImg,
 
 	// 根据旋转后坐标读取元素图像元素值
 	float4 value = read_imagef(srcImg, sampler, readCoord);
-	write_imagef(dstImg, (int2)(x, y), value);
+	if ((readCoord.x > get_global_size(0) || readCoord.y >
+		get_global_size(1)) || (readCoord.x < -0.0f ||
+		readCoord.y < -0.0f))
+		write_imagef(dstImg, (int2)(x, y), (float4)(0.0, 0.0, 0.0, 1.0));
+	else
+		write_imagef(dstImg, (int2)(x, y), value);
 }

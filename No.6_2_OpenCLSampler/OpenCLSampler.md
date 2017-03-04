@@ -62,6 +62,7 @@ __kernel void rotate_rgba(__read_only image2d_t srcImg,
 	write_imagef(dstImg, (int2)(x, y), value);
 }
 ```
+采样器的寻址模式为 `CLK_ADDRESS_CLAMP`，超过图像区域的坐标返回边框的颜色。由于图像的颜色通道是 CL_RGBA，对应的边框颜色为 （0.0f，0.0f， 0.0f，0.0f），它的 Alpha 通道为 0，表示全透明。当像素点的 Alpha 通道为全透明时，则什么也看不见。
 
 ## 结果
 该程序运行后，经过 `No.2_2_FreeImage` 处理显示效果如下图所示。
@@ -74,18 +75,10 @@ __kernel void rotate_rgba(__read_only image2d_t srcImg,
 
 <img src="image/lenna_target.png" width="40%" height="20%">
 
-
-顺时针和逆时针的区别：
-如果从 A 取值，写到 A'，为逆时针旋转；
-如果是从 A' 采样，写到 A，则是顺时针旋转，可以对这两个点的坐标值分别采样。
+### 旋转方向
+如果是从 A' 采样，写到 A，则是顺时针旋转。`旋转后图像`的四个角中，由于`原始图像`的采样点在图像区域的外面，所以是边框的颜色。在 [No.6_3_OpenCLSampler](../No.6_3_OpenCLSampler/OpenCLSampler.md) 中，采样的时候，如果采样区域在图像外面，把它设置为黑色。
 
 ## 参考
-
-问题：
-旋转后图像的背景颜色是什么，怎么解释？
-- 怎么让旋转后的图像背景是黑色？
-
-在 6_3 中使用 FillImage 将图像清除为黑色。
 
 
 
