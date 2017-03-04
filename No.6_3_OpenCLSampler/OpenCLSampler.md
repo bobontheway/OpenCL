@@ -2,7 +2,7 @@
 该程序基于 [No.6_2_OpenCLSampler](../No.6_2_OpenCLSampler/OpenCLSampler.md)，功能保持不变，对图像执行旋转操作。不同的是在 Ubuntu 下运行，GPU 为 AMD RX 460，支持 OpenCL 1.2 版本。
 
 ## 实现
-该程序在 No.6_2_OpenCLSampler 的基础上做了一些修改，改进如下：
+本程序在 No.6_2_OpenCLSampler 的基础上做了一些修改，改进如下：
 - 使用 clCreateImage 来创建图像对象；
 - 增加对 FreeImage 的接口调用；
 - 如果采样点的区域在图像外，将颜色设置为黑色。
@@ -32,7 +32,7 @@ in_buffer = clCreateImage(context,
 由于 FreeImage 开原图形库已增加了对 Ubuntu 系统支持，该程序中可直接调用其接口，无需再使用 [No.2_2_FreeImage](../tools/No.2_2_FreeImage/FreeImage.md) 工具执行位图文件和图像数据之间的转换。[No.2_1_FreeImage](../tools/No.2_1_FreeImage/FreeImage.md) 示例中包含了对 FreeImage 接口的使用说明。
 
 ### 3.内核代码
-由于采样器的寻址模式为 `CLK_ADDRESS_CLAMP`，超过图像区域的坐标返回边框的颜色，CL_RGBA 边框颜色中 Alpha 通道对应的透明为全透明。为了看起来舒服一些，在内核代码的实现中，如果采样点的区域在图像外，将颜色设置为黑色。相关代码如下：
+由于采样器的寻址模式为 `CLK_ADDRESS_CLAMP`，超过图像区域的坐标返回边框的颜色，CL_RGBA 边框颜色中 Alpha 通道对应的透明为全透明。为了看起来舒服一些，在内核代码实现时，如果采样点的区域在图像外，将颜色设置为黑色。相关代码如下：
 ```c
 __constant  sampler_t sampler = CLK_NORMALIZED_COORDS_FALSE |
 	CLK_FILTER_NEAREST | CLK_ADDRESS_CLAMP;
