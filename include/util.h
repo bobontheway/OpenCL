@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/time.h>
+#include <time.h>
 
 typedef unsigned char uint8_t;
 typedef unsigned int uint32_t;

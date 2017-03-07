@@ -60,7 +60,7 @@ void time_start(void)
 void time_end(const char *str)
 {
 	int64_t t = system_time() - g_time;
-	double ds = ((double)t) / 1e6;
-	printf("Test: %s, %f ms\n", str, ds);
+	double ds = ((double)t) / 1e3;
+	printf("Test: %s, %f us\n", str, ds);
 
 }

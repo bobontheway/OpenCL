@@ -132,10 +132,17 @@ int main()
 #endif
 
 	// create memory object
+	mem_obj1 = clCreateBuffer(context, CL_MEM_READ_WRITE, size,
+		NULL, &err);
+	mem_obj2 = clCreateBuffer(context, CL_MEM_READ_WRITE, size,
+		NULL, &err);
+#if 0
+	// create memory object
 	mem_obj1 = clCreateBuffer(context, CL_MEM_HOST_WRITE_ONLY, size,
 		NULL, &err);
 	mem_obj2 = clCreateBuffer(context, CL_MEM_HOST_WRITE_ONLY, size,
 		NULL, &err);
+#endif
 	if (mem_obj1 == NULL || mem_obj2 == NULL) {
 		printf("create memory buffer fail: %d\n", err);
 		exit(EXIT_FAILURE);
@@ -147,6 +154,7 @@ int main()
 		exit(EXIT_FAILURE);
 	}
 	
+	// block write
 	time_start();
 	err = clEnqueueWriteBuffer(queue, mem_obj1, CL_TRUE, 0,
 		size, buffer, 0, NULL, NULL);
@@ -158,6 +166,20 @@ int main()
 		size, buffer, 0, NULL, NULL);
 	check_error(err, __LINE__);
 	time_end("write memory object2");
+
+	// non-block write
+	time_start();
+	err = clEnqueueWriteBuffer(queue, mem_obj1, CL_FALSE, 0,
+		size, buffer, 0, NULL, NULL);
+	check_error(err, __LINE__);
+	time_end("write memory object1 non-block");
+
+	time_start();
+	err = clEnqueueWriteBuffer(queue, mem_obj1, CL_FALSE, 0,
+		size, buffer, 0, NULL, NULL);
+	check_error(err, __LINE__);
+	time_end("write memory object2 non-block");
+
 #if 0
 	// create kernel
 	kernel = clCreateKernel(program, "tolower", &err);
