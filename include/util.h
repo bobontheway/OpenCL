@@ -3,6 +3,8 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <sys/time.h>
 
 typedef unsigned char uint8_t;
 typedef unsigned int uint32_t;
@@ -12,5 +14,7 @@ typedef unsigned int uint32_t;
  */
 int load_data(const char *file, uint8_t *addr, uint32_t size);
 int store_data(const char *file, void *addr, uint32_t size);
+void time_start(void);
+void time_end(const char *str);
 
 #endif /* _UTIL_H_ */

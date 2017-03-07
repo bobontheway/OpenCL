@@ -38,3 +38,29 @@ int store_data(const char *file, void *addr, uint32_t size)
 	}
 	return ret;
 }
+
+/**
+ * 计算程序执行时间
+ */
+static int64_t g_time;
+
+static int64_t system_time()
+{
+	struct timespec t;
+	t.tv_sec = t.tv_nsec = 0;
+	clock_gettime(CLOCK_MONOTONIC, &t);
+	return (int64_t)(t.tv_sec)*1000000000LL + (int64_t)t.tv_nsec;
+}
+
+void time_start(void)
+{
+	g_time = system_time();
+}
+
+void time_end(const char *str)
+{
+	int64_t t = system_time() - g_time;
+	double ds = ((double)t) / 1e6;
+	printf("Test: %s, %f ms\n", str, ds);
+
+}
