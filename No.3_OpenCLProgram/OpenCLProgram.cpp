@@ -86,7 +86,6 @@ int main()
 	int err;
 	cl_uint device_num;
 	cl_platform_id platform;
-	cl_device_id *devices; // xbdong
 	cl_device_id device;
 
 	// should be release

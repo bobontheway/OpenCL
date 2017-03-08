@@ -356,7 +356,6 @@ void init_opencl(cl_context *c, cl_command_queue *q, cl_program *p)
 	program_buffer[1] = rotate_uv;
 
 	// create program
-	// xbdong - 2 program
 	program = clCreateProgramWithSource(context, 2, (const char **)program_buffer, NULL, &err);
 	if (program == NULL) {
 		printf("create program fail\n");
