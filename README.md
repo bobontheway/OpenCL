@@ -41,3 +41,6 @@ git push -f origin master
 
 ### No.6_3_OpenCLSampler
 基于 No.6_2_OpenCLSampler，移植到 Ubuntu 系统中执行
+
+### No.7_1_OpenCLSyncHost
+主机端命令队列同步
