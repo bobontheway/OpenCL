@@ -7,6 +7,8 @@
 #include <CL/cl.h>
 #endif
 
+#include "util.h"
+
 void check_error(int error, int line)
 {
 	if (error != CL_SUCCESS) {
@@ -95,7 +97,9 @@ int main()
 	cl_kernel kernel;
 	char *program_buf;
 
-	cl_mem input, output;
+	//cl_mem input, output;
+	cl_mem mem_obj1, mem_obj2;
+	int *data_buffer;
 	const char *upper_case = "Hello OpenCL, I like U";
 
 	// get platform
@@ -119,9 +123,7 @@ int main()
 		exit(EXIT_FAILURE);
 	}
 
-	// create command queue
-	//queue = clCreateCommandQueue(context, device, 0, &err);
-	// Q: third arg is 0 or NULL
+	// create command 
 	queue = clCreateCommandQueue(context, device, 0, &err);
 	if (queue == NULL) {
 		printf("create command queue fail\n");
@@ -156,14 +158,22 @@ int main()
 	}
 
 	// create memory object
-	input = clCreateBuffer(context, CL_MEM_READ_ONLY |
-		CL_MEM_COPY_HOST_PTR, strlen(upper_case), (void *)upper_case, &err);
-	output = clCreateBuffer(context, CL_MEM_WRITE_ONLY, strlen(upper_case),
+	mem_obj1 = clCreateBuffer(context, CL_MEM_READ_WRITE, size,
 		NULL, &err);
-	if (input == NULL || output == NULL) {
+	mem_obj2 = clCreateBuffer(context, CL_MEM_READ_WRITE, size,
+		NULL, &err);
+	if (mem_obj1 == NULL || mem_obj2 == NULL) {
 		printf("create memory buffer fail: %d\n", err);
 		exit(EXIT_FAILURE);
 	}
+
+	data_buffer = (int *)malloc(size);
+	if (!buffer) {
+		printf("alloc memory fail\n");
+		exit(EXIT_FAILURE);
+	}
+
+	
 
 	// create kernel
 	kernel = clCreateKernel(program, "tolower", &err);
@@ -171,6 +181,19 @@ int main()
 		printf("create kernel fail: %d\n", err);
 		exit(EXIT_FAILURE);
 	}
+
+	// block write
+	time_start();
+	err = clEnqueueWriteBuffer(queue, mem_obj1, CL_TRUE, 0,
+		size, buffer, 0, NULL, NULL);
+	check_error(err, __LINE__);
+	time_end("write memory object1");
+
+	time_start();
+	err = clEnqueueWriteBuffer(queue, mem_obj1, CL_TRUE, 0,
+		size, buffer, 0, NULL, NULL);
+	check_error(err, __LINE__);
+	time_end("write memory object2");
 
 	// set kernel argument
 	err = clSetKernelArg(kernel, 0, sizeof(cl_mem), &input);
@@ -196,9 +219,9 @@ int main()
 	printf("lower case is: %s\n", outBuf);
 
 	clReleaseKernel(kernel);
-	clReleaseMemObject(input);
+	clReleaseMemObject(mem_obj1);
 	clReleaseMemObject(output);
-	clReleaseProgram(program);
+	clReleaseProgram((mem_obj2);
 	clReleaseCommandQueue(queue);
 	clReleaseContext(context);
 

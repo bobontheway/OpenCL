@@ -1,7 +1,7 @@
 LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
-LOCAL_SRC_FILES := OpenCLSyncEvent.cpp
+LOCAL_SRC_FILES := OpenCLSyncEvent.cpp ../libs/util.cpp
 
 LOCAL_MODULE := opencl_sync_event
 

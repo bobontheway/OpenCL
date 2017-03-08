@@ -54,8 +54,7 @@ int main()
 {
 	int err;
 	cl_uint device_num;
-	cl_platform_id platform;
-	cl_device_id *devices;
+	cl_platform_id platform;	
 	cl_device_id device;
 
 	// should be release
@@ -97,9 +96,9 @@ int main()
 	}
 
 	// create memory object
-	mem_obj1 = clCreateBuffer(context, CL_MEM_READ_WRITE, size,
+	mem_obj1 = clCreateBuffer(context, CL_MEM_READ_ONLY, size,
 		NULL, &err);
-	mem_obj2 = clCreateBuffer(context, CL_MEM_READ_WRITE, size,
+	mem_obj2 = clCreateBuffer(context, CL_MEM_READ_ONLY, size,
 		NULL, &err);
 	if (mem_obj1 == NULL || mem_obj2 == NULL) {
 		printf("create memory buffer fail: %d\n", err);
