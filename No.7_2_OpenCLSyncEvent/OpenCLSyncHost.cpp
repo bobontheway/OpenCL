@@ -50,6 +50,11 @@ void get_devices_info(cl_device_id *devices, int num)
 	}
 }
 
+void event_callback(cl_event event, cl_int status, void *user_data)
+{
+	printf("status=%d\n", status);
+}
+ 
 int main()
 {
 	int err;
@@ -64,6 +69,8 @@ int main()
 	cl_kernel kernel;
 
 	cl_mem mem_obj1, mem_obj2;
+	cl_event event1;
+	cl_int status;
 	int *buffer;
 	size_t size = sizeof(int) * 10 * 1024 * 1024; /* 50MB */
 
@@ -111,35 +118,71 @@ int main()
 		exit(EXIT_FAILURE);
 	}
 	
-	// block write
-	time_start();
-	err = clEnqueueWriteBuffer(queue, mem_obj1, CL_TRUE, 0,
-		size, buffer, 0, NULL, NULL);
-	check_error(err, __LINE__);
-	time_end("write memory object1");
-
-	time_start();
-	err = clEnqueueWriteBuffer(queue, mem_obj2, CL_TRUE, 0,
-		size, buffer, 0, NULL, NULL);
-	check_error(err, __LINE__);
-	time_end("write memory object2");
-
 	// non-block write
 	time_start();
 	err = clEnqueueWriteBuffer(queue, mem_obj1, CL_FALSE, 0,
-		size, buffer, 0, NULL, NULL);
+		size, buffer, 0, NULL, &event1);
 	check_error(err, __LINE__);
-	time_end("write memory object1 non-block");
+	
+	printf("=====[add wait for event]========\n");
 
-	time_start();
-	err = clEnqueueWriteBuffer(queue, mem_obj2, CL_FALSE, 0,
-		size, buffer, 0, NULL, NULL);
-	check_error(err, __LINE__);
-	time_end("write memory object2 non-block");
+	clSetEventCallback(event1, CL_COMPLETE, event_callback, NULL);
+#if 0
+	clWaitForEvents(1, &event1);
 
-	time_start();
+	printf("=====[xbdong 1]========\n");
+
+	int i;
+up_do:
+	for (i = 0;; i++) {
+		err = clGetEventInfo(event1,
+			CL_EVENT_COMMAND_EXECUTION_STATUS, sizeof(status),
+			&status, NULL);
+		check_error(err, __LINE__);
+		switch (status) {
+		case CL_QUEUED:
+			printf("write memory object enqueued: %d\n", i);
+			break;
+		case CL_SUBMITTED:
+			printf("write memory object submitted: %d\n", i);
+			break;
+		case CL_RUNNING:
+			printf("write memory object running: %d\n", i);
+			break;
+		case CL_COMPLETE:
+			printf("write memory object complete: %d\n", i);
+			break;
+		default:
+			printf("write memory object: %d\n", i);
+			break;
+		}
+#if 0
+		if (status == CL_QUEUED) {
+			printf("write memory object enqueued: %d\n", i);
+			continue;
+		} else if (status == CL_SUBMITTED) {
+			printf("write memory object submitted: %d\n", i);
+			continue;
+		} else if (status == CL_RUNNING) {
+			printf("write memory object running: %d\n", i);
+			continue;
+		} else if (status == CL_COMPLETE) {
+			printf("write memory object complete: %d\n", i);
+			break;
+		}
+#endif
+
+		if (i == 1000) {
+			printf("=====[xbdong =>]========\n");
+			goto up_do;
+		}
+	}
+#endif
+	clReleaseEvent(event1);
+
+	time_end("write memory object1");
+
 	clFinish(queue);
-	time_end("finish command queue");
 
 	free(buffer);
 	clReleaseMemObject(mem_obj1);
