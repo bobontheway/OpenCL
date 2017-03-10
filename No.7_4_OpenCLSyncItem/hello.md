@@ -43,3 +43,70 @@ CLK_GLOBAL_MEM_FENCE - barrier 函数将存放一个内存 fence 来保证对全
 必须执行这个函数
 
 工作组中的所有工作项 必须执行
+
+//======================
+在 OpenCL 中，如果数组的长度不确定，编译错误（设备端）。
+======================
+
+1|shell@HWFRD:/data/local/tmp/sync/item $ ./opencl_sync_item                   
+build log:
+<source>:7:20: error: variable length arrays are not supported in OpenCL
+        __local int buffer[size];
+                          ^
+
+error: Compiler frontend failed (error code 59)
+
+//== 数组
+
+__kernel void kernel_dot(__global int *dst, __global int *src1,  __global int *src2)
+{
+        int index = get_global_id(0);
+        // size 值通过函数调用动态获取，是否会发生错误？
+        int size = get_global_size(0);
+        //__local int buffer[WORKITEM_SIZE];
+        __local int buffer[size];
+
+        // 缓冲区填充完成
+        buffer[index] = src1[index] * src2[index];
+
+        // 所有的工作项执行到这里。等待对局部缓冲区的访问完成
+        barrier(CLK_LOCAL_MEM_FENCE);
+
+        // 只有在第一个工作项执行的时候获取结果
+        if (index == 0) {
+                int sum = 0;
+                //for (int i = 0; i < WORKITEM_SIZE; i++) {
+                for (int i = 0; i < size; i++) {
+                        sum += buffer[i];
+                }
+                dst[0] = sum;
+        }
+}
+
+===
+
+最大工作项为 256，max_work_group_size = 256。由于内核代码中
+使用 __local int buffer[size]; 由于 __local
+变量定义局部内存（在同一工作组之间共享），当工作项定义为 512
+时，会使用两个工作组（跨工作组），此时 buffer 跨工作组不能共享。
+及结果只包含前 256 个工作项的数据。
+
+如果将 "__local int buffer[size]" 定义为 "__global int buffer[size]"
+会发生错误。构建时，说变量不能在全局地址空间声明。
+也就是说全局地址空间的都是内存对象。
+
+==========
+/opencl_sync_item                                                             <
+build log:
+<source>:5:15: error: variable cannot be declared in global address space
+        __global int buffer[WORKITEM_SIZE];
+                     ^
+
+error: Compiler frontend failed (error code 59)
+
+==========
+
+及，只能在 256 个工作项之间同步（单个工作组），如果需要在多个工作组之间同步怎么办？
+
+
+

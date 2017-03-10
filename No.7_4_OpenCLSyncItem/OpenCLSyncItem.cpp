@@ -83,6 +83,7 @@ char *package_program(const char *filename)
 	return buf;
 }
 
+size_t global_item_size;
 void init_opencl(cl_platform_id *plt, cl_device_id *d, cl_context *c, cl_command_queue *q, cl_program *p)
 {
 	int err;
@@ -139,8 +140,9 @@ void init_opencl(cl_platform_id *plt, cl_device_id *d, cl_context *c, cl_command
 	}
 	free(kernel_source);
 
-	// build program
-	err = clBuildProgram(program, 1, &device, NULL, NULL, NULL);
+	char option[30];
+	sprintf(option, "-D WORKITEM_SIZE=%d", (int)global_item_size);
+	err = clBuildProgram(program, 1, &device, option, NULL, NULL);
 	if (CL_SUCCESS != err) {
 		size_t bufSize = 1024;
 		char buf[bufSize];
@@ -170,13 +172,14 @@ int main()
 	cl_context context;
 	cl_command_queue queue;
 	cl_program program;
-	cl_kernel kernel_add, kernel_mul;
+	cl_kernel kernel_dot;
 	char *program_buf;
 
 	cl_mem mem_obj1, mem_obj2, mem_dst_obj;
 	cl_event event1, event2;
 	int *host_data, *dst_buffer;
-	size_t size = sizeof(int) * 10 * 1024 * 1024; /* 50MB */
+	global_item_size = 256;
+	size_t size = global_item_size * sizeof(int);
 
 	init_opencl(&platform, &device, &context, &queue, &program);
 
@@ -220,17 +223,16 @@ int main()
 	}
 
 	// create and set kernel argument (add)
-	kernel_add = clCreateKernel(program, "kernel_add", &err);
-	if (kernel_add == NULL) {
+	kernel_dot = clCreateKernel(program, "kernel_dot", &err);
+	if (kernel_dot == NULL) {
 		printf("create kernel fail: %d\n", err);
 		exit(EXIT_FAILURE);
 	}
-	err = clSetKernelArg(kernel_add, 0, sizeof(cl_mem), &mem_dst_obj);
-	err |= clSetKernelArg(kernel_add, 1, sizeof(cl_mem), &mem_obj1);
-	err |= clSetKernelArg(kernel_add, 2, sizeof(cl_mem), &mem_obj2);
+	err = clSetKernelArg(kernel_dot, 0, sizeof(cl_mem), &mem_dst_obj);
+	err |= clSetKernelArg(kernel_dot, 1, sizeof(cl_mem), &mem_obj1);
+	err |= clSetKernelArg(kernel_dot, 2, sizeof(cl_mem), &mem_obj2);
 	check_error(err, __LINE__);
 
-	size_t global_size = size / sizeof(int);
 	size_t max_work_group_size;
 	clGetDeviceInfo(device, CL_DEVICE_MAX_WORK_GROUP_SIZE,
 		sizeof(max_work_group_size), &max_work_group_size, NULL);
@@ -244,30 +246,12 @@ int main()
 	clReleaseEvent(event2);
 
 	// execute kernel. Memory object should be ready
-	err = clEnqueueNDRangeKernel(queue, kernel_add, 1,
-		0, &global_size, &max_work_group_size,
+	err = clEnqueueNDRangeKernel(queue, kernel_dot, 1,
+		0, &global_item_size, &max_work_group_size,
 		0, NULL, &event1);
 
-	// create and set kernel argument (mul)
-	kernel_mul = clCreateKernel(program, "kernel_mul", &err);
-	if (kernel_mul == NULL) {
-		printf("create kernel fail: %d\n", err);
-		exit(EXIT_FAILURE);
-	}
-
-	err = clSetKernelArg(kernel_mul, 0, sizeof(cl_mem), &mem_dst_obj);
-	err |= clSetKernelArg(kernel_mul, 1, sizeof(cl_mem), &mem_obj1);
-	err |= clSetKernelArg(kernel_mul, 2, sizeof(cl_mem), &mem_obj2);
-	check_error(err, __LINE__);
-
-	// execute (mul) kernel, is event2, wait for event1 to prepary data
-	err = clEnqueueNDRangeKernel(queue, kernel_mul, 1,
-		0, &global_size, &max_work_group_size,
-		1, &event1, &event2);
-	check_error(err, __LINE__);
-
 	// create destination buffer
-	dst_buffer = (int *)malloc(size);
+	dst_buffer = (int *)malloc(sizeof(int));
 	if (!dst_buffer) {
 		printf("alloc memory fail\n");
 		exit(EXIT_FAILURE);
@@ -275,25 +259,22 @@ int main()
 
 	// read destination memory object to buffer, and wait for event2
 	err = clEnqueueReadBuffer(queue, mem_dst_obj, CL_TRUE, 0,
-		size, dst_buffer, 1, &event2, NULL);
+		4, dst_buffer, 1, &event1, NULL);
+		//size, dst_buffer, 1, &event1, NULL);
 	check_error(err, __LINE__);
 	time_end("finish read data");
 
-	// get buffer data
-	for (int i = 0; i < (int)(size/sizeof(int)); i++) {
-		int data = host_data[i] + host_data[i]; /* dst = src1 + src2 */
-		data = data * host_data[i] - host_data[i];/*dst * src1 - src2*/
-		if (data != dst_buffer[i]) {
-			printf("get result error. index: %d, result:%d",
-				i, dst_buffer[i]);
-			exit(EXIT_FAILURE);
-		}
-	}
+	int sum = 0;
+	for (int i = 0; i < (int)global_item_size; i++)
+		sum += host_data[i] * host_data[i];
 
-	printf("Success\n");
+	if (sum == *dst_buffer)
+		printf("Success.\n");
+	else
+		printf("Result error. sum: %d, dst_data: %d\n",
+			sum, *dst_buffer);
 
-	clReleaseKernel(kernel_add);
-	clReleaseKernel(kernel_mul);
+	clReleaseKernel(kernel_dot);
 	clReleaseMemObject(mem_obj1);
 	clReleaseMemObject(mem_obj2);
 	clReleaseMemObject(mem_dst_obj);

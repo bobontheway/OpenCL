@@ -1,9 +1,9 @@
 LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
-LOCAL_SRC_FILES := OpenCLSyncEvent.cpp ../libs/util.cpp
+LOCAL_SRC_FILES := OpenCLSyncItem.cpp ../libs/util.cpp
 
-LOCAL_MODULE := opencl_sync_event
+LOCAL_MODULE := opencl_sync_item
 
 LOCAL_SHARED_LIBRARIES := libcutils libutils libOpenCL
 LOCAL_MODULE_TAGS := eng optional tests
