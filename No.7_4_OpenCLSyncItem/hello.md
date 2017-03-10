@@ -46,6 +46,7 @@ CLK_GLOBAL_MEM_FENCE - barrier 函数将存放一个内存 fence 来保证对全
 
 //======================
 在 OpenCL 中，如果数组的长度不确定，编译错误（设备端）。
+P255 中，OpenCL C 中不支持像 C99 那样定义可变长数组。
 ======================
 
 1|shell@HWFRD:/data/local/tmp/sync/item $ ./opencl_sync_item                   
