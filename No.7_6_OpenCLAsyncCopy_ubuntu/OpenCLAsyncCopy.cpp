@@ -178,7 +178,8 @@ int main()
 	cl_mem mem_obj1, mem_obj2, mem_dst_obj;
 	cl_event event1, event2;
 	int *host_data, *dst_buffer;
-	global_item_size = 4096;
+	//global_item_size = 4096;
+	global_item_size = 512;
 	size_t size = global_item_size * sizeof(int);
 
 	init_opencl(&platform, &device, &context, &queue, &program);
@@ -263,6 +264,8 @@ int main()
 	time_end("finish read data");
 
 	for (int i = 0; i < (int)global_item_size; i++) {
+		if ((i % 256) == 0)
+			printf("===========\n");
 		if ((2 * host_data[i]) == dst_buffer[i])
 			printf("Success.\n");
 		else
