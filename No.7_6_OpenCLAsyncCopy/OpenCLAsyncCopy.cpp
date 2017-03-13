@@ -83,7 +83,7 @@ char *package_program(const char *filename)
 	return buf;
 }
 
-size_t global_item_size;
+size_t global_max_work_group_size;
 void init_opencl(cl_platform_id *plt, cl_device_id *d, cl_context *c, cl_command_queue *q, cl_program *p)
 {
 	int err;
@@ -141,7 +141,8 @@ void init_opencl(cl_platform_id *plt, cl_device_id *d, cl_context *c, cl_command
 	free(kernel_source);
 
 	char option[30];
-	sprintf(option, "-D WORKITEM_SIZE=%d", (int)global_item_size);
+
+	sprintf(option, "-D WORKITEM_SIZE=%d", (int)global_max_work_group_size);
 	err = clBuildProgram(program, 1, &device, option, NULL, NULL);
 	if (CL_SUCCESS != err) {
 		size_t bufSize = 1024;
@@ -178,7 +179,8 @@ int main()
 	cl_mem mem_obj1, mem_obj2, mem_dst_obj;
 	cl_event event1, event2;
 	int *host_data, *dst_buffer;
-	global_item_size = 4096;
+
+	size_t global_item_size = 4096;
 	size_t size = global_item_size * sizeof(int);
 
 	init_opencl(&platform, &device, &context, &queue, &program);
@@ -237,6 +239,7 @@ int main()
 	clGetDeviceInfo(device, CL_DEVICE_MAX_WORK_GROUP_SIZE,
 		sizeof(max_work_group_size), &max_work_group_size, NULL);
 	printf("max_work_group_size = %d\n", (int)max_work_group_size);
+	global_max_work_group_size = max_work_group_size;
 
 	// wait for event
 	cl_event event[2] = {event1, event2};
@@ -261,7 +264,7 @@ int main()
 
 	// read destination memory object to buffer, and wait for event2
 	err = clEnqueueReadBuffer(queue, mem_dst_obj, CL_TRUE, 0,
-		4, dst_buffer, 0, NULL, NULL);
+		size, dst_buffer, 0, NULL, NULL);
 	check_error(err, __LINE__);
 	time_end("finish read data");
 
@@ -271,7 +274,6 @@ int main()
 		else
 			printf("Error index:%d host_data:%d dst_data:%d\n",
 				i, host_data[i], dst_buffer[i]);
-	
 	}
 
 	clReleaseKernel(kernel_dot);
