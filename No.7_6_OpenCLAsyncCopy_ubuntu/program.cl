@@ -24,5 +24,4 @@ __kernel void kernel_dot(__global int *dst, __global int *src1,  __global int *s
 
 	// 等待异步拷贝完成
 	wait_group_events(1, &event);
-#endif
 }
