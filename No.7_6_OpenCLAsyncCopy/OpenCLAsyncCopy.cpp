@@ -142,7 +142,8 @@ void init_opencl(cl_platform_id *plt, cl_device_id *d, cl_context *c, cl_command
 
 	char option[30];
 
-	sprintf(option, "-D WORKITEM_SIZE=%d", (int)global_max_work_group_size);
+	//sprintf(option, "-D WORKITEM_SIZE=%d", (int)global_max_work_group_size);
+	sprintf(option, "-D WORKITEM_SIZE=%d", (int)256);
 	err = clBuildProgram(program, 1, &device, option, NULL, NULL);
 	if (CL_SUCCESS != err) {
 		size_t bufSize = 1024;
