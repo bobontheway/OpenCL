@@ -111,18 +111,17 @@ void init_opencl(cl_platform_id *plt, cl_device_id *d, cl_context *c, cl_command
 		check_error(err, __LINE__);
 	}
 	//get_devices_info(&device, 1);
-	{
-		size_t max_work_group_size;
-		clGetDeviceInfo(device, CL_DEVICE_MAX_WORK_GROUP_SIZE,
-			sizeof(max_work_group_size), &max_work_group_size, NULL);
-		printf("max_work_group_size = %d\n", (int)max_work_group_size);
-		global_work_group_size = max_work_group_size;
 
-		size_t max_compute_unit;
-		clGetDeviceInfo(device, CL_DEVICE_MAX_COMPUTE_UNITS,
-			sizeof(max_compute_unit), &max_compute_unit, NULL);
-		printf("max_compute_unit= %d\n", (int)max_compute_unit);
-	}
+	size_t max_work_group_size;
+	clGetDeviceInfo(device, CL_DEVICE_MAX_WORK_GROUP_SIZE,
+		sizeof(max_work_group_size), &max_work_group_size, NULL);
+	printf("max_work_group_size = %d\n", (int)max_work_group_size);
+	global_work_group_size = max_work_group_size;
+
+	size_t max_compute_unit;
+	clGetDeviceInfo(device, CL_DEVICE_MAX_COMPUTE_UNITS,
+		sizeof(max_compute_unit), &max_compute_unit, NULL);
+	printf("max_compute_unit= %d\n", (int)max_compute_unit);
 
 	// create context
 	context = clCreateContext(NULL, 1, &device, NULL, NULL, &err);
@@ -153,7 +152,7 @@ void init_opencl(cl_platform_id *plt, cl_device_id *d, cl_context *c, cl_command
 	}
 	free(kernel_source);
 
-	char option[30];
+	char option[100];
 	sprintf(option, "-D WORKITEM_SIZE=%d -D COMPUTE_UINIT_NUM=%d",
 		(int)max_work_group_size, (int)max_compute_unit);
 	err = clBuildProgram(program, 1, &device, option, NULL, NULL);
@@ -186,15 +185,16 @@ int main()
 	cl_context context;
 	cl_command_queue queue;
 	cl_program program;
-	cl_kernel kernel_dot;
+	cl_kernel kernel_groups;
 	char *program_buf;
 
 	cl_mem mem_obj1, mem_obj2, mem_dst_obj;
 	cl_event event1, event2;
 	int *host_data, *dst_buffer;
 	/* 10MB * 4*/
-	global_item_size = 10 * 1024 * 1024;
+	//global_item_size = 10 * 1024 * 1024;
 	//global_item_size = 4096;
+	global_item_size = 1024;
 	size_t size = global_item_size * sizeof(int);
 
 	init_opencl(&platform, &device, &context, &queue, &program);
@@ -239,14 +239,14 @@ int main()
 	}
 
 	// create and set kernel argument (add)
-	kernel_dot = clCreateKernel(program, "kernel_dot", &err);
-	if (kernel_dot == NULL) {
+	kernel_groups = clCreateKernel(program, "kernel_groups", &err);
+	if (kernel_groups == NULL) {
 		printf("create kernel fail: %d\n", err);
 		exit(EXIT_FAILURE);
 	}
-	err = clSetKernelArg(kernel_dot, 0, sizeof(cl_mem), &mem_dst_obj);
-	err |= clSetKernelArg(kernel_dot, 1, sizeof(cl_mem), &mem_obj1);
-	err |= clSetKernelArg(kernel_dot, 2, sizeof(cl_mem), &mem_obj2);
+	err = clSetKernelArg(kernel_groups, 0, sizeof(cl_mem), &mem_dst_obj);
+	err |= clSetKernelArg(kernel_groups, 1, sizeof(cl_mem), &mem_obj1);
+	err |= clSetKernelArg(kernel_groups, 2, sizeof(cl_mem), &mem_obj2);
 	check_error(err, __LINE__);
 
 	// wait for event
@@ -258,8 +258,8 @@ int main()
 
 	// execute kernel. Memory object should be ready
 	// xbdong
-	err = clEnqueueNDRangeKernel(queue, kernel_dot, 1,
-		0, &global_item_size, &max_work_group_size,
+	err = clEnqueueNDRangeKernel(queue, kernel_groups, 1,
+		0, &global_item_size, &global_work_group_size,
 		0, NULL, &event1);
 
 	// create destination buffer
@@ -285,7 +285,7 @@ int main()
 		printf("Result error. sum: %d, dst_data: %d\n",
 			sum, *dst_buffer);
 
-	clReleaseKernel(kernel_dot);
+	clReleaseKernel(kernel_groups);
 	clReleaseMemObject(mem_obj1);
 	clReleaseMemObject(mem_obj2);
 	clReleaseMemObject(mem_dst_obj);
