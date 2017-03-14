@@ -29,7 +29,7 @@ void get_platform_info(cl_platform_id *platform, int num)
 			NULL);
 		check_error(err, __LINE__);
 		printf("platform name: %s\n", buf);
-	
+
 		printf("\n");
 	}
 }
@@ -45,7 +45,7 @@ void get_devices_info(cl_device_id *devices, int num)
 		err = clGetDeviceInfo(devices[i], CL_DEVICE_NAME, len, buf, NULL);
 		check_error(err, __LINE__);
 		printf("device name: %s\n", buf);
-	
+
 		printf("\n");
 	}
 }
