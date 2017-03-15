@@ -1,5 +1,5 @@
 ## 概述
-使用 OpenCL 实现将大写字母转换为小写字母，然后输出。例如，输入字符串为`Hello OpenCL, I like U`，经转换后的输出是`hello opencl, i like u`。具体流程如下图所示：
+使用 OpenCL 实现将大写字母转换为小写字母，然后输出。例如，输入字符串为`Hello OpenCL, I like U`，经转换后的输出是`hello opencl, i like u`。具体执行流程如下图所示：
 
 ![](image/OpenCL_Pipeline.png)
 
