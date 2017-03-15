@@ -11,7 +11,7 @@ git push -f origin master
 
 强制执行 push 操作。其中 origin 是远程的 repo 仓库，后面的 master 表示分支。
 
-## 示例说明
+## OpenCL 编程实践
 ### No.1_HelloOpenCL
 简单的 OpenCL 程序，包含一些基本的操作，便于学习 OpenCL 编程。
 
