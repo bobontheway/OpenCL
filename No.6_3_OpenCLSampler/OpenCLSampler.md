@@ -1,8 +1,9 @@
 ## 简介
-该程序基于 [No.6_2_OpenCLSampler](../No.6_2_OpenCLSampler/OpenCLSampler.md)，功能保持不变，对图像执行旋转操作。不同的是在 Ubuntu 下运行，GPU 为 AMD RX 460，支持 OpenCL 1.2 版本。
+该程序基于 [No.6_2_OpenCLSampler](../No.6_2_OpenCLSampler/OpenCLSampler.md)，功能保持不变，对图像执行旋转操作。不同的是运行环境为 Ubuntu，GPU 是 AMD RX 460，支持 OpenCL 1.2 版本。
 
 ## 实现
 本程序在 No.6_2_OpenCLSampler 的基础上做了一些修改，改进如下：
+
 - 使用 clCreateImage 来创建图像对象；
 - 增加对 FreeImage 的接口调用；
 - 如果采样点的区域在图像外，将颜色设置为黑色。
