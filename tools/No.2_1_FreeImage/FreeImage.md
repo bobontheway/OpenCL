@@ -125,7 +125,11 @@ FreeImage_Unload(bitmap)
 
 **旋转后图像**
 
-<img src="lenna_target.png" width="40%" height="20%">
+<img src="image/lenna_target.png" width="40%" height="20%">
+
+## 参考
+
+- FreeImage3170.pdf
 
 
 
