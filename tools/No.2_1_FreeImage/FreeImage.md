@@ -1,5 +1,7 @@
+## 概述
 该程序使用 FreeImage 来对图像执行旋转操作。FreeImage 是一款免费的开源图形库，它可以用于 Windows，Linux 和 Mac OS X 系统。
 
+## 实现
 ### 1.获取位图格式
 ```c
 FREE_IMAGE_FORMAT format = FreeImage_GetFileType(image_name);
