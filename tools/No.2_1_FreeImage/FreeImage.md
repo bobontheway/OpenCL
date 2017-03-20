@@ -5,6 +5,7 @@
 FREE_IMAGE_FORMAT format = FreeImage_GetFileType(image_name);
 ```
 从位图文件获取位图格式。该函数从位图文件中读取 16 字节内容并对其分析，从而得到位图格式。返回值 `FREE_IMAGE_FORMAT` 在加载或存储位图文件时，用于标识位图格式，可以是下面的常量值：
+
 FIF           | Description
 --------------|------------
 FIF_UNKNOWN   |Unknown format (returned value only, never use it as input value)
@@ -67,12 +68,14 @@ bitmap = FreeImage_ConvertTo32Bits(bitmap);
 bitmap = FreeImage_RotateEx(bitmap, 30.0, 0, 0, x_orig, y_orig, TRUE);
 ```
 对 8 位灰度，24 或 32 位图像执行旋转或平移操作，旋转后的图像保持原始图像的宽度和高度。
+
 - angle：表示旋转的角度。注意，这里以角度为单位，而在三角函数中参数通常以弧度为单位；
 - x_shift/y_shift：水平方向和垂直方向图像平移的大小，以像素为单位；
 - x_origin/y_origin：旋转中心。旋转时图像绕着旋转中心以 CCW 方向（逆时针）旋转，旋转中心的表示也以像素为单位；
 - use_mask：当 use_mask 设置为 TRUE，图像外的部分设置为黑色，否则按照镜像技术来设置图像外部分的颜色。
 
 当同时设置了旋转和平移时，实验表明图像是先执行旋转操作后再平移。
+
 > 函数 FreeImage_Rotate 和 FreeImage_RotateEx 类似，也执行旋转操作。不同的是该函数旋转后的图像大小和原始图像大小并不一致，而是保持一定的长宽比，通常会变得更大。因此，函数 FreeImage_Rotate 更适用于对图像旋转 90 度、180度和 270 度时的场景。
 
 ### 5.转换类型
@@ -80,6 +83,7 @@ bitmap = FreeImage_RotateEx(bitmap, 30.0, 0, 0, x_orig, y_orig, TRUE);
 bitmap = FreeImage_ConvertToType(bitmap_temp, FIT_BITMAP);
 ```
 将图像从一种类型转换为另一种类型。这里将 32 位字节流转换为位图格式。`FREE_IMAGE_TYPE` 用来指定 `FIBITMAP` 的位图类型（数据类型），可以是下面的常量值：
+
 FIF           | Description
 --------------|------------
 FIF_UNKNOWN   |Unknown format (returned value only, never use it as input value)
