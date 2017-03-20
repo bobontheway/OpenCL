@@ -116,6 +116,17 @@ FreeImage_Unload(bitmap)
 ```
 从内存中删除前面加载的 `FIBITMAP` 对象。一个位图对象是对地址空间中某个内存区域的引用。
 
+## 结果
+该程序运行后，显示效果如下图所示：
+
+**原始图像**
+
+<img src="image/lenna.png" width="40%" height="40%">
+
+**旋转后图像**
+
+<img src="lenna_target.png" width="40%" height="20%">
+
 
 
 
