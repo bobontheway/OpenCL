@@ -11,7 +11,6 @@
 +FREE_IMAGE_FORMAT g_format = (FREE_IMAGE_FORMAT)13;
 +int g_width = 256, g_height = 256;
 ```
-完整代码参见 [No.6_1_OpenCLSampler](xxx)。
 
 ### 1.创建图像对象
 缓冲区对象和图像对象都是内存对象，内存对象是对全局内存区域的引用。不同的是图像对象除了像素数据，还包含了对图像格式及图像属性的描述信息，例如图像宽度、高度，以及深度等。
@@ -107,24 +106,6 @@ err = clEnqueueReadImage(queue, out_buffer, CL_TRUE, origin, region, 0,
 <img src="image/lenna_target.png" width="20%" height="20%">
 
 ## 参考
+
 - https://streamcomputing.eu/blog/2011-11-19/difference-between-opencl-1-2-and-1-1/
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
