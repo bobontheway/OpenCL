@@ -1,5 +1,5 @@
 ## 简介
-FreeImage 是一款免费的开源图形库，它可以用于 Windows，Linux 和 Mac OS X 系统。本文基于 [No.2_1_FreeImage](../No.2_1_FreeImage/FreeImage.md)，在 Android 系统下通过调用 `OpenCL API` 执行旋转操作。由于 Android 系统不支持 FreeImage，[No.6_1_OpenCLSampler](../../No.6_1_OpenCLSampler/OpenCLSampler.md) 在对图像做旋转操作时，先在 Ubuntu 中通过调用 FreeImage 库函数将位图文件转换为图像数据保存在二进制文件中。然后在 Android 系统中加载该二进制文件，调用 OpenCL API 旋转图像，将旋转后的图像也保存为二进制文件。最后在 Ubuntu 中加载旋转后的二进制文件，通过 FreeImage 接口将其存储为位图文件，由此得到旋转后的位图文件。具体执行流程如下图所示：
+FreeImage 是一款免费的开源图形库，它可以用于 Windows，Linux 和 Mac OS X 系统。本文基于 [No.2_1_FreeImage](../No.2_1_FreeImage/FreeImage.md)，No.2_1_FreeImage 程序在 Android 系统下通过调用 `OpenCL API` 执行旋转操作。由于 Android 系统不支持 FreeImage，[No.6_1_OpenCLSampler](../../No.6_1_OpenCLSampler/OpenCLSampler.md) 在对图像做旋转操作时，先在 Ubuntu 中通过调用 FreeImage 库函数将位图文件转换为图像数据保存在二进制文件中。然后在 Android 系统中加载该二进制文件，调用 OpenCL API 旋转图像，将旋转后的图像也保存为二进制文件。最后在 Ubuntu 中加载旋转后的二进制文件，通过 FreeImage 接口将其存储为位图文件，由此得到旋转后的位图文件。具体执行流程如下图所示：
 
 **执行流程**
 
