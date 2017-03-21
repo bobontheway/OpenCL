@@ -5,6 +5,7 @@ AMD APP（Accelerated Parallel Processing） 利用 GPU 强大的处理能力，
 <img src="image/app_software_ecosystem.bmp" width="70%" height="70%">
 
 AMD APP 软件栈为终端用户和开发人员提供了一套完整、灵活的工具包，以充分利用 AMD GPUs 的处理能力。软件包括下面的部分：
+
 - OpenCL 编译器和运行库；
 - 调试和性能分析工具，AMD CodeXL；
 - 高性能库。AMD APP 数学库（APPML），以优化 NDRange 相关的算法。
@@ -63,7 +64,8 @@ else
 
 例2：如果 t 是一个循环中执行单次迭代所花费的时间；在一个 wavefront 中，除了一个工作项执行 100 次循环，其它的所有工作项执行一次这个循环，则执行整个 wavefront 所花费的时间为 100t。
 
-## 硬件概述（一）
+## 硬件概述
+### Evergreen 和 Northern Islands 系列设备
 这部分 Evergreen 和 Northern Islands 系列的设备进行描述，它们按照 VLIW 方式执行指令。
 
 一个普通的 OpenCL 设备包含多个计算单元，每个计算单元拥有多个处理元素，每个处理元素执行一个工作项。计算单元中的处理元素使用 SIMD 方式按照 lock-step 执行，各个计算单元之间的执行相互独立。如下图所示：
@@ -82,7 +84,7 @@ GPU 计算设备包括一组计算单元。每个计算单元包括多个处理�
 
 不同系列的 GPU 计算设备拥有不同数量的处理元素。例如，ATI HD 5870 GPU 拥有 20 个计算单元，每个计算单元包含 16 个处理元素，每个处理元素包含了 5 个 ALUs，在物理上就拥有 1600 个 ALUs。
 
-## 硬件概述（二）
+### Southern Islands 系列设备
 这部分对 Southern Islands 系列的设备进行介绍，它们对应 AMD GCN 架构。
 
 OpenCL 设备包括多个计算单元（CUs），每个计算单元拥有一些子模块，最终由 ALUs 组成。工作项在 ALU 上执行，如下图所示：
@@ -98,4 +100,24 @@ OpenCL 设备包括多个计算单元（CUs），每个计算单元拥有一些�
 正如上图所示，AMD HD 79XX 设备也包含一个标量单元，指令流同时包含标量和向量指令。每个周期，它选择一条标量指令和一条向量指令（如果可用，也会选择一个内存操作和分支操作），将其中的一条指令发射到标量单元，另一条发射到向量单元，总共需要 4 个周期来发送完到整个 4 个向量核（相当与 4 个周期完成后，16 个单元执行 64 个工作项）。
 
 在 Southern Islands（AMD HD 7XXX） 系列中，这些 ALUs 组织到 4 个 SIMD 阵列中，每个包含 16 个处理元素。然而在 Northern Islands 设备（VLIW） 描述中，对于 16 个工作项为单位的每个块中，每个阵列只能执行一条指令。在 Southern Island 系列的设备中，4 个流处理器（stream core）可以执行来自 4 个不同 wavefront 的代码。
+
+## GPU 计算设备调度
+
+GPU 计算设备在并行处理大量的工作项时非常的高效，整个过程对应用程序透明。每个 GPU 计算设备使用大量的 wavefronts 来隐藏内存访问的延迟。在一个计算单元中，正在执行的 wavefront 等待内存访问完成时，可以通过资源调度器切换到另一个活动的 wavefront 执行。隐藏内存访问的延迟要求在内存执行加载/存储操作时，每个工作项包含大量的 ALU 操作。
+
+下图显示了在单个计算单元中，简化了的 wavefronts 的执行时序。在开始的 `0` 时刻，wavefronts 排入队列中，等待执行。这
+个例子中，只有 4 个 wavefronts（T0...T3）用于计算单元调度。硬件限制了程序执行过程中活动 wavefront 的数量，这依赖资源的使用情况（例如活动寄存器使用的数量），优秀的可编程计算设备通常拥有多个活动的 wavefronts。
+
+<img src="image/wavefront_first.bmp" width="80%" height="80%">
+
+开始执行后，wavefront T0 执行到 20 个时钟周期。这时，由于内存访问请求发生了一个 stall，调度器接着开始执行下一个 wavefront T1。Wavefront T1 执行后，直到它被 stall 或执行完成。新的 wavefronts 开始执行，这个过程一直持续，直到达到可以执行的 wavefronts 的数量。最后调度器然后返回第一个 wavefront 执行 T0。
+
+如果 wavefront T0 等待的数据已返回，T0 将继续执行。在上图的例子中，数据已经准备就绪，因此 T0 继续开始执行。由于有足够
+的 wavefronts 和处理元素操作来填充较长的内存延迟访问，计算单元并不会进入空闲状态。该内存延迟隐藏的方法帮助 GPU 计算单元获得了最大的性能。
+
+如果 T0-T3 中没有一个处于运行状态（就绪状态），计算单元将等待（stall），直到 T0-T3 中有一个 wavefront 处于就绪状态。在
+下图中，T0 第一个开始继续执行：
+
+<img src="image/wavefront_second.bmp" width="80%" height="80%">
+
 
