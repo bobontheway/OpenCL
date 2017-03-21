@@ -1,4 +1,4 @@
-# AMD APP 对 OpenCL 的支持
+## AMD APP 对 OpenCL 的支持
 
 AMD APP（Accelerated Parallel Processing） 利用 GPU 强大的处理能力，来为广泛的高性能、数据并行计算应用提供服务。AMD APP 系统包括一个软件栈、AMD GPUs 和多核 AMD CPUs。下图描述了 AMD APP 中不同组成部分之间的关系：
 
