@@ -50,9 +50,16 @@ void get_devices_info(cl_device_id *devices, int num)
 	}
 }
 
+cl_event g_event;
+
 void event_callback(cl_event event, cl_int status, void *user_data)
 {
-	printf("status=%d\n", status);
+	cl_int st;
+	printf("event callback status: %d\n", status);
+
+	clGetEventInfo(g_event, CL_EVENT_COMMAND_EXECUTION_STATUS,
+		sizeof(cl_int), &st, NULL);
+	printf("get event status: %d\n", st);
 }
  
 int main()
@@ -119,70 +126,17 @@ int main()
 	}
 	
 	// non-block write
-	time_start();
 	err = clEnqueueWriteBuffer(queue, mem_obj1, CL_FALSE, 0,
 		size, buffer, 0, NULL, &event1);
+	g_event = event1;
 	check_error(err, __LINE__);
 	
-	printf("=====[add wait for event]========\n");
-
 	clSetEventCallback(event1, CL_COMPLETE, event_callback, NULL);
-#if 0
-	clWaitForEvents(1, &event1);
-
-	printf("=====[xbdong 1]========\n");
-
-	int i;
-up_do:
-	for (i = 0;; i++) {
-		err = clGetEventInfo(event1,
-			CL_EVENT_COMMAND_EXECUTION_STATUS, sizeof(status),
-			&status, NULL);
-		check_error(err, __LINE__);
-		switch (status) {
-		case CL_QUEUED:
-			printf("write memory object enqueued: %d\n", i);
-			break;
-		case CL_SUBMITTED:
-			printf("write memory object submitted: %d\n", i);
-			break;
-		case CL_RUNNING:
-			printf("write memory object running: %d\n", i);
-			break;
-		case CL_COMPLETE:
-			printf("write memory object complete: %d\n", i);
-			break;
-		default:
-			printf("write memory object: %d\n", i);
-			break;
-		}
-#if 0
-		if (status == CL_QUEUED) {
-			printf("write memory object enqueued: %d\n", i);
-			continue;
-		} else if (status == CL_SUBMITTED) {
-			printf("write memory object submitted: %d\n", i);
-			continue;
-		} else if (status == CL_RUNNING) {
-			printf("write memory object running: %d\n", i);
-			continue;
-		} else if (status == CL_COMPLETE) {
-			printf("write memory object complete: %d\n", i);
-			break;
-		}
-#endif
-
-		if (i == 1000) {
-			printf("=====[xbdong =>]========\n");
-			goto up_do;
-		}
-	}
-#endif
 	clReleaseEvent(event1);
 
-	time_end("write memory object1");
-
+	//time_start();
 	clFinish(queue);
+	//time_end("finish write memory object1");
 
 	free(buffer);
 	clReleaseMemObject(mem_obj1);
