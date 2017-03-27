@@ -1,10 +1,11 @@
-## No.7_2 事件同步
+## No.7_2 事件回调函数
 
 在调用 `clEnqueueXXXX` 系列函数时，会传递一个指向 cl_event 对象的指针。该指针接收事件对象，用来标识执行的命令。可以使用该事件对象来查询命令的执行状态，例如命令是否已经执行完成；也可以用来在其它的命令执行前等待事件对象对应的命令执行完成。
 
-下面的函数对给定命令的执行状态注册一个回调函数。当命令执行状态和函数中的 `command_exec_callback_type` 参数一致时，会调用回调函数。命令的执行状态参见下表`命令状态及描述`：
+下面的 clSetEventCallback 函数对给定命令的执行状态注册一个回调函数。当命令执行状态和函数中的 `command_exec_callback_type` 参数一致时，会调用回调函数。命令的执行状态参见下表`命令状态及描述`：
 ```c
-cl_int (cl_event event,
+cl_int clSetEventCallback(
+	cl_event event,
 	cl_int  command_exec_callback_type,
 	void (CL_CALLBACK  *pfn_event_notify)
 		(cl_event event, cl_int event_command_exec_status, void *user_data),
