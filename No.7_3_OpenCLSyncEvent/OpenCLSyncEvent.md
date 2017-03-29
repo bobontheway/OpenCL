@@ -1,29 +1,64 @@
-## 概述
-MAC OS
-CL_QUEUED 和 CL_SUBMITTED 在主机端维护，而 CL_RUNNING 和 CL_COMPLETE
-在设备端维护。需要通过 clFinish 或 clWaitForEvents 将设备端的事件同步到主机端
-（CL_XXXX 指状态，事件还是要用 event ?）
+## OpenCL 同步——事件同步
 
-而在 Windows 或 Linux 下，如果使用 AMD 的 OpenCL 实现，在主机端可以捕获到
-CL_COMPLETE 状态，而不能捕获 CL_RUNNING 状态
+## 简介
+clFinish 会进入阻塞状态，直到前面提交到命令队列的 OpenCL 命令发送到和命令队列关联的设备，并且执行完成。它作为一个同步点，会等待命令队列中所有的 OpenCL 命令执行完成，该操作对某些时候只需两个命令的同步或少数几个命令的同步来说开销较大。使用事件对象来同步就很好的解决了该问题，它用于某些指定事件的同步。
 
-Android
-在 ARM Mali 下，非阻塞的方式，一直处于 CL_ENQUEUED 状态；如果是以阻塞的方式，
-首次调用时，直接显示 CL_COMPLETE 状态；（为什么非阻塞状态时间不变呢）
+## 执行内核
+在介绍具体示例之前，先通过 `clEnqueueNDRangeKernel` 函数来介绍事件对象。
+```bash
+cl_int clEnqueueNDRangeKernel(cl_command_queue command_queue,
+ 	cl_kernel kernel,
+ 	cl_uint work_dim,
+ 	const size_t *global_work_offset,
+ 	const size_t *global_work_size,
+ 	const size_t *local_work_size,
+ 	cl_uint num_events_in_wait_list,
+ 	const cl_event *event_wait_list,
+ 	cl_event *event)
+```
+相关参数描述如下：
 
-调用 clEnqueueWriteBuffer 所在的线程必须与调用 clGetEventInfo
-在同一个线程，如果在不同的线程中可能引发异常；
+- command_queue：命令队列。内核程序将被提交到这个命令队列，并且在和该命令队列关联的设备上执行；
+- kernel：内核对象。`kernel` 和 `command_queue` 关联的 OpenCL 上下文必须相同；
+- work_dim：维度数，每个维度有单独全局工作项和工作组中的工作项。`work_dim` 必须大于 0，并小于 CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS；
+- global_work_offset：对应 ` work_dim` 的数组。用来描述每个维度中全局工作项开始的 ID 标识。如果 global_work_offset 为 NULL，全局 ID 标识对应的偏移为（0,0……0）；
+- global_work_size：对应 ` work_dim` 的数组。用来描述每个维度中全局工作项的数目。总的全局工作项数目计算方式为， global_work_size[0] *...* global_work_size[work_dim-1]；
+- local_work_size：对应 ` work_dim` 的数组。用来描述每个工作组中工作项的数目，又称作工作组的大小。一个工作组中工作项的总数计算方式为，local_work_size[0] \*...\* local_work_size[work_dim-1]。工作组中工作项的数目必须小于或等于 CL_DEVICE_MAX_WORK_GROUP_SIZE 的大小，并且 local_work_size[0]... local_work_size[work_dim-1] 中工作项的数目必须小于或等于 CL_DEVICE_MAX_WORK_ITEM_SIZES[0]... CL_DEVICE_MAX_WORK_ITEM_SIZES[work_dim-1] 中对应的值。local_work_size 的值可以为 NULL，在这种情况下，由 OpenCL 的实现来决定如何将工作项划分到不同的工作组；
+- event_wait_list/num_events_in_wait_list：指定在这个命令执行之前需要完成的事件。如果 event_wait_list 为 NULL，那么该命令执行之前无需等待任何命令。如果 event_wait_list 为 NULL，num_events_in_wait_list 必须为 0。如果 event_wait_list 不为 NULL，event_wait_list 列表中指向的事件必须有效，并且 num_events_in_wait_list 必须大于 0。event_wait_list 列表中的事件作为一个同步点。`event_wait_list` 和 `command_queue` 必须关联同一个上下文。和 event_wait_list 关联的内存在函数返回后，可以重新使用或释放；
+- event：返回一个事件对象，用来标识执行的内核实例。事件对象是唯一的，并且在随后可以用来标识一个特定的内核执行实例。如果 `event` 为 NULL，执行的内核实例不会创建对应的事件，这样应用程序将不能查询它的执行情况，也不能在命令队列中等待该实例执行完成。
 
-使用异步方式来跟踪事件状态变化（状态每次变化后都会调用？），
+在该函数中，输入的事件对象存放在 `event_wait_list` ，表示在该命令执行之前需要等待哪些命令执行完成。输出的事件对象 `event` 用来标识执行的命令，应用程序可以通过该事件对象查询命令的执行状态；其它命令在执行之前可以通过该事件对象等待命令执行完成。
 
-通过事件对象做命令之间的同步
+## 事件对象的操作
 
-只等待主机端的某些命令（不是全部）完成后，才继续往下执行，可以使用
-clWaitForEvents
-函数。它会将主机端的命令挂起，直到事件列表（event_list）中的所有事件已经完成为止
+### 增加事件引用计数
+```bash
+cl_int clRetainEvent(cl_event event)
+```
+参数 `event` 表示需要增加引用计数的事件对象，如果成功执行返回 CL_SUCCESS。
 
-标签用来标识某些对象（表示特定语义）
+> 注意：OpenCL 命令在返回一个事件对象时，执行了隐式的引用计数增加操作。
+
+### 减少事件引用计数
+```bash
+cl_int clReleaseEvent(cl_event event)
+```
+参数 `event` 表示需要释放引用计数的事件对象。一旦引用计数降低为 0，事件对象将删除。
+
+## 示例程序
+该示例程序创建了两个输入缓冲区对象，一个输出缓冲区对象。OpenCL 内核接收输入缓冲区对象中的数据，运算之后将结果存放到输出缓冲区，然后主机端读取结果到内存中。整个过程需要保证主机端在读取输出缓冲区中的内容时，内核已将完整的数据存放到输出缓冲区。本文使用事件对象在这两个操作之间执行同步。
 
 
 
-## 实现
+
+
+
+
+
+
+
+
+
+
+
+
