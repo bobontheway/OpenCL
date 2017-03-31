@@ -156,7 +156,7 @@ void init_opencl(cl_platform_id *plt, cl_device_id *d, cl_context *c, cl_command
 
 	char option[30];
 
-	sprintf(option, "-D WORKITEM_SIZE=%d", (int)global_max_work_group_size);
+	sprintf(option, "-D WORKGROUP_SIZE=%d", (int)global_max_work_group_size);
 	err = clBuildProgram(program, 1, &device, option, NULL, NULL);
 	if (CL_SUCCESS != err) {
 		size_t bufSize = 1024;
@@ -270,7 +270,7 @@ int main()
 	// read destination memory object to buffer, and wait for event2
 	err = clEnqueueReadBuffer(queue, mem_dst_obj, CL_TRUE, 0,
 		4, dst_buffer, 1, &event1, NULL);
-		//size, dst_buffer, 1, &event1, NULL);
+	clReleaseEvent(event1);
 	check_error(err, __LINE__);
 	time_end("finish read data");
 
