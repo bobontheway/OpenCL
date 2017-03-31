@@ -193,7 +193,7 @@ int main()
 	cl_mem mem_obj1, mem_obj2, mem_dst_obj;
 	cl_event event1, event2;
 	int *host_data, *dst_buffer;
-	global_item_size = 256;
+	size_t global_item_size = 256;
 	size_t size = global_item_size * sizeof(int);
 
 	init_opencl(&platform, &device, &context, &queue, &program);
