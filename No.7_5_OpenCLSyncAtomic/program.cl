@@ -1,7 +1,7 @@
 __kernel void kernel_dot(__global int *dst, __global int *src1,  __global int *src2)
 {
 	int global_index = get_global_id(0);
-	__local int buffer[WORKITEM_SIZE];
+	__local int buffer[WORKGROUP_SIZE];
 
 	// 以原子方式将 dst 地址中内容清零（只执行一次，使用全局工作项标识）
 	if (global_index == 0)
@@ -19,7 +19,7 @@ __kernel void kernel_dot(__global int *dst, __global int *src1,  __global int *s
 	// 只有在第一个工作项执行的时候获取结果，并将其添加到 dst 指向的位置
 	if (local_index == 0) {
 		int sum = 0;
-		for (int i = 0; i < WORKITEM_SIZE; i++)
+		for (int i = 0; i < WORKGROUP_SIZE; i++)
 			sum += buffer[i];
 		atomic_add(dst, sum);
 	}
