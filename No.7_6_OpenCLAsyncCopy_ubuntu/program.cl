@@ -1,7 +1,7 @@
 __kernel void kernel_dot(__global int *dst, __global int *src1,  __global int *src2)
 {
 	// 定义局部缓冲区，在同一工作组的工作项之间共享
-	local int buffer[WORKITEM_SIZE];
+	__local int buffer[WORKITEM_SIZE];
 
 	// 每个工作组中第一个工作项的偏移
 	const size_t offset = get_group_id(0) * WORKITEM_SIZE;

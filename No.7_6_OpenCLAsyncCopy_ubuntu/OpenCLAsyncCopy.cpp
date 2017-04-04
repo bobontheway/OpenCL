@@ -251,7 +251,10 @@ int main()
 
 	// wait for event
 	cl_event event[2] = {event1, event2};
-	clFinish(queue);
+	clWaitForEvents(2, event);
+
+	clReleaseEvent(event1);
+	clReleaseEvent(event2);
 
 	// execute kernel. Memory object should be ready
 	err = clEnqueueNDRangeKernel(queue, kernel_dot, 1,

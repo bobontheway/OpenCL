@@ -50,7 +50,6 @@ void get_devices_info(cl_device_id *devices, int num)
 	}
 }
 
-//xbdong
 size_t global_max_work_group_size;
 void get_device_attribute(cl_device_id device)
 {
@@ -195,8 +194,7 @@ int main()
 	cl_event event1, event2;
 	int *host_data, *dst_buffer;
 
-	//size_t global_item_size = 4096;
-	size_t global_item_size = 512;
+	size_t global_item_size = 4096;
 	size_t size = global_item_size * sizeof(int);
 
 	init_opencl(&platform, &device, &context, &queue, &program);
@@ -253,10 +251,10 @@ int main()
 
 	// wait for event
 	cl_event event[2] = {event1, event2};
-	//clWaitForEvents(2, event);
+	clWaitForEvents(2, event);
 
-	//clReleaseEvent(event1);
-	//clReleaseEvent(event2);
+	clReleaseEvent(event1);
+	clReleaseEvent(event2);
 
 	// execute kernel. Memory object should be ready
 	err = clEnqueueNDRangeKernel(queue, kernel_dot, 1,
@@ -279,9 +277,7 @@ int main()
 	time_end("finish read data");
 
 	for (int i = 0; i < (int)global_item_size; i++) {
-		if ((2 * host_data[i]) == dst_buffer[i])
-			printf("Success.\n");
-		else
+		if ((2 * host_data[i]) != dst_buffer[i])
 			printf("Error index:%d host_data:%d dst_data:%d\n",
 				i, host_data[i], dst_buffer[i]);
 	}
