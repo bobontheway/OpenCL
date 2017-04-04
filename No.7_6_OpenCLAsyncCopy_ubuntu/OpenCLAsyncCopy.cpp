@@ -60,7 +60,7 @@ void get_device_attribute(cl_device_id device)
 	size_t max_work_group_size;
 	clGetDeviceInfo(device, CL_DEVICE_MAX_WORK_GROUP_SIZE,
 		sizeof(max_work_group_size), &max_work_group_size, NULL);
-	printf("max_work_group_size = %d\n", (int)max_work_group_size);
+	//printf("max_work_group_size = %d\n", (int)max_work_group_size);
 	global_max_work_group_size = max_work_group_size;
 }
 
@@ -251,16 +251,13 @@ int main()
 
 	// wait for event
 	cl_event event[2] = {event1, event2};
-	clWaitForEvents(2, event);
-
-	clReleaseEvent(event1);
-	clReleaseEvent(event2);
 
 	// execute kernel. Memory object should be ready
 	err = clEnqueueNDRangeKernel(queue, kernel_dot, 1,
 		0, &global_item_size, &global_max_work_group_size,
 		2, event, NULL);
-
+	clReleaseEvent(event1);
+	clReleaseEvent(event2);
 	clFinish(queue);
 
 	// create destination buffer
