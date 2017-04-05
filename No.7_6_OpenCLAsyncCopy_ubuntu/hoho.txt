@@ -1,0 +1,79 @@
+Heterogeneous Computing with OpenCL 2.0
+
+Third Edition
+
+作者：David Kaeli, Perhaad Mistry, Dana Schaa, Dong Ping Zhang
+译者：陈晓伟
+
+https://www.gitbook.com/@chenxiaowei
+
+
+执行异步拷贝
+
+event_t async_work_group_copy(__local gentype *dst,
+ 	const __global gentype *src,
+ 	size_t  num_gentypes,
+ 	event_t event)
+
+event_t async_work_group_copy(__global gentype *dst,
+ 	const __local gentype *src,
+ 	size_t num_gentypes,
+ 	event_t event)
+
+
+这些内置函数提供了在全局和局部内存区域之间执行异步拷贝，还有从全局内存的预取操作。
+
+从 `src` 到 `dst` 执行异步拷贝 `num_gentypes` 个元素。工作组中所有工作项都会执行异步拷贝执行，并且这个内置函数必须被工作组
+中所有工作项执行，使用相同的参数执行内核。否则，结果不可预知。
+
+返回一个事件对象，可以被 `wait_group_events` 使用来异步拷贝完成。`event` 参数也可以用来将 async_work_group_copy 和前面的异步拷贝
+调用关联，这就允许一个事件被工作异步拷贝共享。否则，`event` 应该为 0.
+
+如果 `event` 参数为非 0，事件对象将通过 `event` 参数返回。
+
+该函数并没有执行任何隐式的数据源同步，这就在执行拷贝之前需要使用一个 barrier 做同步。
+
+=========================================================================================
+
+等待事件，用来表示 async_work_group_copy 操作已经完成。
+
+void wait_group_events(int num_events, event_t *event_list)
+
+等待事件，用来表示 async_work_group_copy 操作已经完成。在等待执行完成后，event_list 中的事件对象应该被释放。
+
+该函数必须被工作组中所有工作项执行，它们执行内核  使用相同的 `num_events` 和 `event_list` 中指定的事件对象，否则结果不可预知。
+
+> 注意：在退出之前，内核必须使用 `wait_group_events` 内置函数来等待所有的异步拷贝操作完成；否则，行为不可预知。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
