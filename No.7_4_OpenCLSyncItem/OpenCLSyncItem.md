@@ -117,9 +117,7 @@ __kernel void kernel_dot(__global int *dst, __global int *src1,  __global int *s
 	}
 }
 ```
+## 参考
 
-
-
-
-
-
+- OpenCL异构并行计算:原理、机制与优化实践
+- [OpenCL Reference Pages](https://www.khronos.org/registry/OpenCL/sdk/1.2/docs/man/xhtml/)
