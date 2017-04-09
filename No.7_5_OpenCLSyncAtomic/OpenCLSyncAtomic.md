@@ -1,9 +1,9 @@
 ## 原子操作
 
 ## 概述
-当多个线程在不同处理器上执行，同时访问相同内存时，会存在竞态条件，使用原子操作可以避免竞争。原子操作往往会对总线做一次锁步操作（lock-step），让当前总线上的访存操作能按照次序执行。同时又会刷新Cache，使得任一线程对全局变量使用了原子操作之后，其它所有线程都可见。
+当多个线程在不同处理器上执行，同时访问相同内存时会存在竞态条件，使用原子操作可以避免竞争。原子操作往往会对总线做一次锁步操作（lock-step），让当前总线上的访存操作能按照次序执行。同时又会刷新Cache，使得任一线程对全局变量使用了原子操作之后，其它所有线程都可见。
 
-使用原子操作做同步对于执行而言开销是相当大的，但是想对于需要使用更原始的阻塞当前线程执行的同步方式而言又是比较高效的。因此，当对某些特定数据做同步更新时，不需要使用栅栏（fence）等这种更低效的同步处理机制，我们可以直接对那些存储地址采用原子操作。
+使用原子操作做同步开销是相当大的，但是相对于使用更原始的阻塞当前线程执行的同步方式而言又是比较高效的。因此，当对某些特定数据做同步更新时，不需要使用栅栏（fence）等这种更低效的同步处理机制，我们可以直接对那些存储地址采用原子操作。
 
 ## OpenCL 原子操作
 OpenCL 提供了下面一系列原子操作。
@@ -31,8 +31,7 @@ int atomic_inc(volatile __global int *p)
 
 ### 原子比较交换
 ```c
-int atomic_cmpxchg(volatile __global int *p,
-	int cmp, int val)
+int atomic_cmpxchg(volatile __global int *p, int cmp, int val)
 ```
 如果 p 指向位置的内容和 cmp 相等，则将 val 存放 p 指向的位置，否则 p 指向位置的内容不变。返回 p 位置修改前的内容。
 
@@ -50,7 +49,7 @@ int atomic_and (volatile __global int *p, int val)
 以原子的方式执行按位与运算操作。读取 p 指向位置的内容（用作返回值），并将读取的值和 `val` 执行与操作，然后将将结果存入 p 指向的位置。原子按位或操作 `atomic_or` 和原子按位异或 `atomic_xor` 操作与原子按位与操作类似。
 
 ## 示例程序
-该示例程序分别对每个工作组中工作项做点乘运算，然后将它们以原子的方式相加到全局内存变量 `dst` 中，供主机端获取。
+该示例程序以工作组为单位，分别对工作组中每个工作项做点乘运算，然后将运算结果以原子的方式相加到全局内存变量 `dst` 中，供主机端获取。
 ```
 __kernel void kernel_dot(__global int *dst, __global int *src1,  __global int *src2)
 {
@@ -83,3 +82,4 @@ __kernel void kernel_dot(__global int *dst, __global int *src1,  __global int *s
 ## 参考
 
 - OpenCL异构并行计算:原理、机制与优化实践
+- [OpenCL Reference Pages](https://www.khronos.org/registry/OpenCL/sdk/1.2/docs/man/xhtml/)
