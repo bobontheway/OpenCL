@@ -26,7 +26,7 @@ event_t event = async_work_group_copy(&buffer[local_index],
 
 这些异步拷贝函数返回一个 `event_t` 类型的事件对象，`wait_group_events` 可以通过它们来等待异步拷贝操作执行完成。如果有多个异步拷贝操作，可以将它们关联为同一个事件。将前面返回的事件对象 `event` 作为后面 `async_work_group_copy` 调用的参数即可，这就允许一个事件被多个异步拷贝共享。如果不需要共享，在调用 async_work_group_copy 函数时将 `event` 参数设置为 0 即可。如果 `event` 参数为非 0 值，将在调用 `async_work_group_copy`  后返回相同值。
 
-> 该函数并没有执行任何隐式的数据源同步，这就需要在执行拷贝之前使用一个 barrier 来做同步。
+> 注意：该函数并没有执行任何隐式的数据源同步，这就需要在执行拷贝之前使用一个 barrier 来做同步。
 
 ### 事件等待
 等待事件，用来表示 async_work_group_copy 操作已经完成。在该等待事件函数执行返回后，event_list 中的事件对象将被释放。
@@ -44,7 +44,7 @@ void prefetch(const __global gentype *p, size_t num_gentypes)
 ```
 从全局内存区域预取 `num_gentypes` \* sizeof(gentype) 字节到全局高速缓存。该预取指令用于工作组中的某个工作项，而且并不会影响内核函数的功能。
 
-### 示例程序
+## 示例程序
 该示例程序在 Ubuntu 平台上执行，内核代码在局部内存区域声明了一个缓冲区 `buffer`，其长度为工作组大小。然后将全局内存中的数据拷贝到局部内存区域，待拷贝完成后每个工作项根据其局部 ID 标识更新缓冲区。最后以工作组大小为单位再将其拷贝回全局内存区域，内核代码如下：
 ```c
 __kernel void kernel_dot(__global int *dst, __global int *src1,  __global int *src2)
