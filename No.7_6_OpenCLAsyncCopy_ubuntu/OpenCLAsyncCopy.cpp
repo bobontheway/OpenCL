@@ -187,7 +187,7 @@ int main()
 	cl_context context;
 	cl_command_queue queue;
 	cl_program program;
-	cl_kernel kernel_dot;
+	cl_kernel kernel_mul;
 	char *program_buf;
 
 	cl_mem mem_obj1, mem_obj2, mem_dst_obj;
@@ -239,21 +239,21 @@ int main()
 	}
 
 	// create and set kernel argument (add)
-	kernel_dot = clCreateKernel(program, "kernel_dot", &err);
-	if (kernel_dot == NULL) {
+	kernel_mul = clCreateKernel(program, "kernel_mul", &err);
+	if (kernel_mul == NULL) {
 		printf("create kernel fail: %d\n", err);
 		exit(EXIT_FAILURE);
 	}
-	err = clSetKernelArg(kernel_dot, 0, sizeof(cl_mem), &mem_dst_obj);
-	err |= clSetKernelArg(kernel_dot, 1, sizeof(cl_mem), &mem_obj1);
-	err |= clSetKernelArg(kernel_dot, 2, sizeof(cl_mem), &mem_obj2);
+	err = clSetKernelArg(kernel_mul, 0, sizeof(cl_mem), &mem_dst_obj);
+	err |= clSetKernelArg(kernel_mul, 1, sizeof(cl_mem), &mem_obj1);
+	err |= clSetKernelArg(kernel_mul, 2, sizeof(cl_mem), &mem_obj2);
 	check_error(err, __LINE__);
 
 	// wait for event
 	cl_event event[2] = {event1, event2};
 
 	// execute kernel. Memory object should be ready
-	err = clEnqueueNDRangeKernel(queue, kernel_dot, 1,
+	err = clEnqueueNDRangeKernel(queue, kernel_mul, 1,
 		0, &global_item_size, &global_max_work_group_size,
 		2, event, NULL);
 	clReleaseEvent(event1);
@@ -279,7 +279,7 @@ int main()
 				i, host_data[i], dst_buffer[i]);
 	}
 
-	clReleaseKernel(kernel_dot);
+	clReleaseKernel(kernel_mul);
 	clReleaseMemObject(mem_obj1);
 	clReleaseMemObject(mem_obj2);
 	clReleaseMemObject(mem_dst_obj);

@@ -1,4 +1,4 @@
-__kernel void kernel_dot(__global int *dst, __global int *src1,  __global int *src2)
+__kernel void kernel_mul(__global int *dst, __global int *src1,  __global int *src2)
 {
 	// 定义局部缓冲区，在同一工作组的工作项之间共享
 	__local int buffer[WORKGROUP_SIZE];
