@@ -60,7 +60,7 @@ void get_device_attribute(cl_device_id device)
 	size_t max_work_group_size;
 	clGetDeviceInfo(device, CL_DEVICE_MAX_WORK_GROUP_SIZE,
 		sizeof(max_work_group_size), &max_work_group_size, NULL);
-	printf("max_work_group_size = %d\n", (int)max_work_group_size);
+	//printf("max_work_group_size = %d\n", (int)max_work_group_size);
 	global_max_work_group_size = max_work_group_size;
 }
 
@@ -156,7 +156,7 @@ void init_opencl(cl_platform_id *plt, cl_device_id *d, cl_context *c, cl_command
 
 	char option[30];
 
-	sprintf(option, "-D WORKITEM_SIZE=%d", (int)global_max_work_group_size);
+	sprintf(option, "-D WORKGROUP_SIZE=%d", (int)global_max_work_group_size);
 	err = clBuildProgram(program, 1, &device, option, NULL, NULL);
 	if (CL_SUCCESS != err) {
 		size_t bufSize = 1024;
@@ -187,7 +187,7 @@ int main()
 	cl_context context;
 	cl_command_queue queue;
 	cl_program program;
-	cl_kernel kernel_dot;
+	cl_kernel kernel_mul;
 	char *program_buf;
 
 	cl_mem mem_obj1, mem_obj2, mem_dst_obj;
@@ -239,28 +239,25 @@ int main()
 	}
 
 	// create and set kernel argument (add)
-	kernel_dot = clCreateKernel(program, "kernel_dot", &err);
-	if (kernel_dot == NULL) {
+	kernel_mul = clCreateKernel(program, "kernel_mul", &err);
+	if (kernel_mul == NULL) {
 		printf("create kernel fail: %d\n", err);
 		exit(EXIT_FAILURE);
 	}
-	err = clSetKernelArg(kernel_dot, 0, sizeof(cl_mem), &mem_dst_obj);
-	err |= clSetKernelArg(kernel_dot, 1, sizeof(cl_mem), &mem_obj1);
-	err |= clSetKernelArg(kernel_dot, 2, sizeof(cl_mem), &mem_obj2);
+	err = clSetKernelArg(kernel_mul, 0, sizeof(cl_mem), &mem_dst_obj);
+	err |= clSetKernelArg(kernel_mul, 1, sizeof(cl_mem), &mem_obj1);
+	err |= clSetKernelArg(kernel_mul, 2, sizeof(cl_mem), &mem_obj2);
 	check_error(err, __LINE__);
 
 	// wait for event
 	cl_event event[2] = {event1, event2};
-	clWaitForEvents(2, event);
-
-	clReleaseEvent(event1);
-	clReleaseEvent(event2);
 
 	// execute kernel. Memory object should be ready
-	err = clEnqueueNDRangeKernel(queue, kernel_dot, 1,
+	err = clEnqueueNDRangeKernel(queue, kernel_mul, 1,
 		0, &global_item_size, &global_max_work_group_size,
 		2, event, NULL);
-
+	clReleaseEvent(event1);
+	clReleaseEvent(event2);
 	clFinish(queue);
 
 	// create destination buffer
@@ -282,7 +279,7 @@ int main()
 				i, host_data[i], dst_buffer[i]);
 	}
 
-	clReleaseKernel(kernel_dot);
+	clReleaseKernel(kernel_mul);
 	clReleaseMemObject(mem_obj1);
 	clReleaseMemObject(mem_obj2);
 	clReleaseMemObject(mem_dst_obj);
