@@ -29,7 +29,7 @@ event_t async_work_group_copy(__global gentype *dst,
  	event_t event)
 
 以异步方式，从内存区域 `src` 拷贝 `num_gentypes` 个元素到内存区域 `dst`。工作组中所有工作项都会执行异步拷贝操作，
-也就是说该内置函数必须被工作组中的每个工作项执行，而且传递的参数需要保持相同，否则会出现预料之外的错误。例如：
+也就是说该内置函数必须被工作组中的每个工作项执行，而且传递的参数需要保持相同，否则会出现不可预知的错误。例如：
 // 执行异步拷贝操作
 
 local_index = get_local_id(0);
