@@ -32,6 +32,7 @@ out_buffer = clCreateImage2D(context, CL_MEM_WRITE_ONLY, &image_format,
                 new_width, new_height, 0, NULL, &err);
 ```
 其中 cl_image_format 用来定义图像的格式，成员如下：
+
 - image_channel_order：指定每个像素的通道数目和通道布局；
 - image_channel_data_type：描述每个通道的大小，表示的数据类型。
 
@@ -71,13 +72,14 @@ CLK_ADDRESS_CLAMP：图像区域外坐标返回的颜色和边框颜色保持一
 - 如果图像颜色通道是 CL_A，CL_INTENSITY，CL_Rx，CL_RA，CL_RGx，CL_RGBx，CL_ARGB，CL_BGRA 或 CL_RGBA，边框颜色为 （0.0f，0.0f， 0.0f，0.0f）；
 - 如果图像颜色的通道是 CL_R，CL_RG，CL_RGB 或 CL_LUMINANCE，边框颜色为（0.0f，0.0f，0.0f，1.0f）。
 
-CL_RGBA 的颜色通道中，如果是全 0 则表示黑色，全 0xFF 表示白色。Alpha 通道如果是 1，则不透明，如果是 0 则全透明。
+> CL_RGBA 的颜色通道中，如果是全 0 则表示黑色，全 0xFF 表示白色。Alpha 通道如果是 1，则不透明，如果是 0 则全透明。
 
 #### 2.2坐标
 在图像读写函数 `read_imageX` 和 `write_imageX`  中，对于 2D 图像对象，传递的 x 坐标范围是 `[0, width-1]`，y 坐标范围是 `[0, height-1]`，坐标原点 `[0, 0]` 对应图像的左下角。
 
 #### 2.3读写操作
 对于不同的图像对象，函数 `read_imageX` 返回由四个通道组成的颜色值，使用 x、 y、 z 和 w 来表示。x 表示红色，y 表示绿色，z 表示蓝色，w 表示 alpha 通道。函数 `write_imageX` 将四个通道表示的颜色值写入图像对象指定的坐标位置。图像数据类型 `image2d_t`，表示 2D 图像，需要使用如下的限定符来修饰：
+
 - 对于内核执行`读`操作的图像对象，在声明的时候需要使用 `__read_only` 限定符修饰；
 - 对于内核执行`写`操作的图像对象，在声明的时候需要使用 `__write_only` 限定符修饰；
 - 同一个图像对象不能同时支持`读写`操作，限定符使用不当将引发编译错误。
@@ -91,6 +93,7 @@ err = clEnqueueReadImage(queue, out_buffer, CL_TRUE, origin, region, 0,
         0, des, 0, NULL, NULL);
 ```
 部分参数说明如下：
+
 - origin：图像中的偏移（x，y，z），以像素为单位的。如果 `image` 是 2D 图像对象，origin[2] 必须为 0；
 - region：定义 1D，2D 或 3D 图像的矩形区域，属性为（width，height，depth）。如果 image 是 2D 图像对象， region[2] 必须是 1。
 
