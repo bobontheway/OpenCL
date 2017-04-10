@@ -44,6 +44,39 @@ void prefetch(const __global gentype *p, size_t num_gentypes)
 ```
 从全局内存区域预取 `num_gentypes` \* sizeof(gentype) 字节到全局高速缓存。该预取指令用于工作组中的某个工作项，而且并不会影响内核函数的功能。
 
+### 示例程序
+该示例程序在局部内存区域声明了一个缓冲区 `buffer`，其长度为工作组大小。然后将全局内存中的数据拷贝到局部内存区域，待拷贝完成后每个工作项根据其局部 ID 标识更新缓冲区。最后以工作组大小为单位再将其拷贝回全局内存区域，内核代码如下：
+```c
+__kernel void kernel_dot(__global int *dst, __global int *src1,  __global int *src2)
+{
+	// 定义局部缓冲区，在同一工作组的工作项之间共享
+	__local int buffer[WORKGROUP_SIZE];
+
+	// 每个工作组中第一个工作项的偏移
+	const size_t offset = get_group_id(0) * WORKGROUP_SIZE;
+
+	// 执行异步拷贝操作
+	event_t event = async_work_group_copy(buffer, &src1[offset], WORKGROUP_SIZE, 0);
+
+	// 获取工作组中的每个工作项
+	const int index = get_local_id(0);
+
+	// 等待异步拷贝完成
+	wait_group_events(1, &event);
+
+	buffer[index] *= 2;
+
+	// 工作组中所有的工作项执行到这里。等待对局部缓冲区的访问完成
+	barrier(CLK_LOCAL_MEM_FENCE);
+
+	event = async_work_group_copy(&dst[offset], buffer, WORKGROUP_SIZE, 0);
+
+	// 等待异步拷贝完成
+	wait_group_events(1, &event);
+}
+```
+
 ## 参考
 
+- OpenCL异构并行计算:原理、机制与优化实践
 - https://www.khronos.org/registry/OpenCL/sdk/1.1/docs/man/xhtml/
