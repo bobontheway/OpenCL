@@ -34,16 +34,37 @@ git push -f origin master
 在桌面安装 Ubuntu 系统的 AMD RX 460 上执行，而 No.5_1_OpenCLRotate 在 Android 系统的 ARM T-880 上执行。
 
 ### No.6_1_OpenCLSampler
-使用 OpenCL 采样器，从原始图像中截取部分矩形区域（左下角区域开始）
+使用 OpenCL 采样器，从原始图像中截取部分矩形区域（左下角区域开始）。
 
 ### No.6_2_OpenCLSampler
 使用 OpenCL 采样器对图像旋转。
 
 ### No.6_3_OpenCLSampler
-基于 No.6_2_OpenCLSampler，移植到 Ubuntu 系统中执行
+基于 No.6_2_OpenCLSampler，移植到 Ubuntu 系统中执行。
 
 ### No.7_1_OpenCLSyncHost
-主机端命令队列同步
+主机端命令队列同步，clFlush 等操作。
+
+### No.7_2_OpenCLSyncEvent
+事件回调函数，根据命令执行状态来完成任务。
+
+### No.7_3_OpenCLSyncEvent
+事件同步，不同命令之间同步。
+
+### No.7_4_OpenCLSyncItem
+工作项同步，同一个工作组中不同工作项之间同步。
+
+### No.7_5_OpenCLSyncAtomic
+原子操作。可以对全局内存区域变量执行原子操作。
+
+### No.7_6_OpenCLAsyncCopy
+异步拷贝。在局部内存和全局内存区域之间执行异步拷贝操作。
+
+
+
+
+
+
 
 
 ### wiz GCN3
