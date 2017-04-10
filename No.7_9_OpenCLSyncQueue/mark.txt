@@ -1,0 +1,108 @@
+Execution of Kernels and Memory Object Commands
+clEnqueueMarker
+clEnqueueWaitForEvents
+clEnqueueBarrier
+
+[内核执行，以及内存对象命令]
+- s
+- s
+- s
+
+
+
+========================================
+
+将一个标记放到命令队列中。
+
+cl_int clEnqueueMarker(cl_command_queue command_queue,
+ 	cl_event *event)
+
+将一个标记命令放到命令队列 `command_queue` 中。标记命令直到命令队列中在它前面的所有其它命令执行完成之后，它才完成。标记命令返回一个事件对象 `event`，其它命令
+可以等待它执行完成。例如，可以等待这个命令来保证，在标记命令之前的命令队列中的命令完全完成。
+
+如果函数成功执行返回 CL_SUCCESS。
+
+
+和如下函数有什么区别：
+（1）clFinish
+（2）clWaitEvents
+（3）clFlush
+
+========================================
+
+
+cl_int clEnqueueBarrier(cl_command_queue command_queue)
+
+一个同步点，放置一个 barrier 操作。
+
+> clEnqueueBarrier 是一个同步点，它保证所有提交到命令队列 `command_queue` 的命令在下一批命令开始执行前已经执行完成。
+
+成功执行返回 CL_SUCCESS。
+
+
+========================================
+
+
+将一个对应某个事件或一个列表事件的 `等待` 提交到命令队列中，在后面提交到命令队列的命令执行之前。
+
+cl_int clEnqueueWaitForEvents(cl_command_queue command_queue,
+ 	cl_uint num_events,
+ 	const cl_event *event_list)
+
+> 事件列表中对应事件所在的上下文必须和命令队列 `command_queue` 处于同一个上下文。
+
+成功执行返回 CL_SUCCESS。
+
+
+========================================
+当在向命令队列提交命令时，通常需要标识一个同步点，所有在那个点之前的命令在随后的命令开始执行前完成。
+
+在单个命令队列中的命令 —— 做这件事情。
+
+如果函数成功执行，命令返回 CL_SUCCESS。
+========================================
+非常重要， 对于理解命令之间的次序约束。
+
+========================================
+为了定义更通用的点，OpenCL 使用 events 和 marker。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
