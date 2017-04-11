@@ -102,9 +102,18 @@ in-order 和 out-of-order 的区别：
 
 （3）上面的 in-order 和 out-or-order 有什么区别？
 
+The OpenCL Specification
+5.11 以 Out-of-order 方式执行内核和内存对象命令
+
 （4）clFinish 和 clEnqueueBarrier 有什么区别？
 
+- clEnqueueBarrier 应用与 out-of-order 命令队列；
+clFinish 将进入阻塞状态，直到命令队列为空（所有的内核执行/数据传输已经完成）
+clEnqueueBarrier 将立即返回到应用程序（允许执行其它的工作或将更多的内核执行添加到命令队列）
 CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE —— 决定提交的命令队列中的命令，是 in-order 还是 out-of-order 执行；
+
+参考：
+http://stackoverflow.com/questions/13200276/what-is-the-difference-between-clenqueuebarrier-and-clfinish
 
 答：提交到命令队列的函数，入队列时按照函数调用的顺序，但是在执行的时候可以配置为 in-order 或 out-of-order。
 在创建命令队列的时候，clCreateCommandQueue 中的 `properties` 参数可以用来指定执行顺序。
@@ -124,44 +133,7 @@ CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE —— 决定提交的命令队列中的�
 小结：
 对于 clEnqueueNDRangeKernel 函数，并非以阻塞的方式执行；
 
-The OpenCL Specification
-
-5.11 以 Out-of-order 方式执行内核和内存对象命令
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+===============================================================
+===============================================================
+out-or-order 执行，使用 barrier 或 event 对象；
 
