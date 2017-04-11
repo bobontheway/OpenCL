@@ -71,7 +71,9 @@ in-order 和 out-of-order 的区别：
 （1）命令队列中的命令发送到设备执行的顺序；
 （2）命令执行返回的顺序；
 
+[参考： opencl programming guild - chaper 9]
 ==========================================================
+[参考： opencl programming guild - chaper 1]
 起因：定义内存对象的一致性，相对于命令队列中的命令。
 实现：
 （1）内存模型：relaxed consistency model 的修改版本；
