@@ -102,6 +102,33 @@ in-order 和 out-of-order 的区别：
 
 （3）上面的 in-order 和 out-or-order 有什么区别？
 
+（4）clFinish 和 clEnqueueBarrier 有什么区别？
+
+CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE —— 决定提交的命令队列中的命令，是 in-order 还是 out-of-order 执行；
+
+答：提交到命令队列的函数，入队列时按照函数调用的顺序，但是在执行的时候可以配置为 in-order 或 out-of-order。
+在创建命令队列的时候，clCreateCommandQueue 中的 `properties` 参数可以用来指定执行顺序。
+
+如果没有设置命令队列的 `CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE` 属性，提交到命令队列中的命令按照顺序执行。
+
+
+如果设置了命令队列的 `CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE` 属性，不能保证内核 B 开始执行之前，内核 A 已经
+完成。
+
+通过设置命令队列的 CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE 属性，应用程序可以配置提交到命令的名列是否以 out-of-order
+的方式执行。这可以在命令队列创建的时候指定。在 out-of-order 的执行模式下，无法保证提交到命令队列的命令将按照它们
+进入命令队列的顺序执行完成。
+
+类似的，提交到命令队列的读、写、拷贝或映射内存对象命令
+
+小结：
+对于 clEnqueueNDRangeKernel 函数，并非以阻塞的方式执行；
+
+The OpenCL Specification
+
+5.11 以 Out-of-order 方式执行内核和内存对象命令
+
+
 
 
 
