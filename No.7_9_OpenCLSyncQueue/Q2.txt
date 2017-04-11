@@ -1,0 +1,39 @@
+1.in-order 和 out-of-order 的区别；
+以 `out-of-order` 的方式执行内核和内存对象命令
+
+当将 OpenCL 命令提交到命令队列时，是按照函数调用的顺序，但是可以在创建命令队列的时候配置 命令 执行 是 按照 in-order 或 out-of-order 的方式。
+clCreateCommandQueue 函数的 `properties` 参数可以用来指定执行顺序。
+
+如果没有设置命令队列的 CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE 属性，命令提交到命令队列时，按照 in-order 的方式执行。例如，如果一个应用程序
+调用 clEnqueueNDRangeKernel 来执行内核 A，随后调用另一个 clEnqueueNDRangeKernel 来执行内核 B，应用程序可以认为内核 A 首先执行完成，接着内
+核 B 执行完成。如果内核 A 输出的内存对象作为内核 B 的输入，内核 B 将看见内存对象中正确的数据，它是由内核 A 执行时产生的。如果命令队列设置了
+CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE 属性，就不能保证内核 A 在内核 B 开始之前执行完成。
+
+通过设置命令队列的 CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE 属性，应用程序可以配置 命令提交到命令队列后，按照 out-of-order 的方式执行，这可以
+在命令队列创建时指定。在 out-or-order 模式下，不能保证提交到命令队列中的命令是按照它们提交的顺序执行。由于不能保证内核将按照顺序执行，例如，
+基于 clEnqueueNDRangeKernel 调用顺序，这就有可能一个较早调用 clEnqueueNDRangeKernel 来执行内核 A 使用事件 A 来标识，在执行时，可能在后面
+调用 clEnqueueNDRangeKernel 来执行内核 B 的后面完成。为了保证一个在执行内核时以一个特定的顺序，一个等待，用来等待特定事件（在这种情况下，是
+事件 A）可以使用。等待事件 A 可以在调用 clEnqueueNDRangeKernel 执行内核 B 的 `event_wait_list` 参数中指定。
+
+还有，等待事件（clEnqueueWaitForEvents）或者屏障 barrier（clEnqueueBarrier）命令也可以提交到命令队列。等待事件命令保证之前提交到命令队列的
+命令（使用一个列表的事件来标识）需要等待的命令已经完成，在下一批命令执行之前。屏障（barrier）命令保证前面提交到命令队列的命令已经执行完成，在
+在下一批命令执行之前。
+
+同理，在 clEnqueueNDRangeKernel, clEnqueueTask or clEnqueueNativeKernel 之后，提交到命令队列的读、写、拷贝、映射内存对象命令，并不能保证
+会等待内核执行已经完成（如果设置了 CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE 属性）。为了保证正确的命令执行顺序，clEnqueueNDRangeKernel,
+clEnqueueTask 或 clEnqueueNativeKernel 返回的事件对象可以用来将一个等待事件提交到命令读列，或者一个屏障（barrier）命令提交到命令队列，以
+保证在读或写内存对象之前这些名利必须完成。
+
+
+
+2.函数描述
+
+2.clFinish 和 clEnqueueBarrier 的区别；
+- 一个会以阻塞的方式等待，一个会立即返回；主线程可以执行其它的任务；
+3.clEnqueueMarker 和 clEnqueuelWaitForEvents 搭配；
+4.clWaitForEvents 和 clEnqueuelWaitForEvents 的区别；
+- 和 `2` 中类似，一个会以阻塞的方式等待，一个会立即返回；
+
+https://www.khronos.org/registry/OpenCL/specs/
+https://www.khronos.org/registry/OpenCL/specs/opencl-1.1.pdf
+
