@@ -12,56 +12,10 @@ clEnqueueBarrier
 
 ========================================
 
-将一个标记放到命令队列中。
-
-cl_int clEnqueueMarker(cl_command_queue command_queue,
- 	cl_event *event)
-
-将一个标记命令放到命令队列 `command_queue` 中。标记命令直到命令队列中在它前面的所有其它命令执行完成之后，它才完成。标记命令返回一个事件对象 `event`，其它命令
-可以等待它执行完成。例如，可以等待这个命令来保证，在标记命令之前的命令队列中的命令完全完成。
-
-如果函数成功执行返回 CL_SUCCESS。
-
-
 和如下函数有什么区别：
 （1）clFinish
 （2）clWaitEvents
 （3）clFlush
-
-========================================
-
-
-cl_int clEnqueueBarrier(cl_command_queue command_queue)
-
-一个同步点，放置一个 barrier 操作。
-
-> clEnqueueBarrier 是一个同步点，它保证所有提交到命令队列 `command_queue` 的命令在下一批命令开始执行前已经执行完成。
-
-成功执行返回 CL_SUCCESS。
-
-
-========================================
-
-
-将一个对应某个事件或一个列表事件的 `等待` 提交到命令队列中，在后面提交到命令队列的命令执行之前。
-
-cl_int clEnqueueWaitForEvents(cl_command_queue command_queue,
- 	cl_uint num_events,
- 	const cl_event *event_list)
-
-> 事件列表中对应事件所在的上下文必须和命令队列 `command_queue` 处于同一个上下文。
-
-成功执行返回 CL_SUCCESS。
-
-
-========================================
-当在向命令队列提交命令时，通常需要标识一个同步点，所有在那个点之前的命令在随后的命令开始执行前完成。
-
-在单个命令队列中的命令 —— 做这件事情。
-
-如果函数成功执行，命令返回 CL_SUCCESS。
-========================================
-非常重要， 对于理解命令之间的次序约束。
 
 ========================================
 为了定义更通用的点，OpenCL 使用 events 和 marker。
@@ -98,42 +52,6 @@ in-order 和 out-of-order 的区别：
 - 对于了解命令之间的顺序约束非常重要；
 - 同步点，内存一致性模型；
 
-（2）clEnqueueWaitForEvent() 和 clWaitForEvents 有什么区别？分别用于什么场景？
-
-（3）上面的 in-order 和 out-or-order 有什么区别？
-
-The OpenCL Specification
-5.11 以 Out-of-order 方式执行内核和内存对象命令
-
-（4）clFinish 和 clEnqueueBarrier 有什么区别？
-
-- clEnqueueBarrier 应用与 out-of-order 命令队列；
-clFinish 将进入阻塞状态，直到命令队列为空（所有的内核执行/数据传输已经完成）
-clEnqueueBarrier 将立即返回到应用程序（允许执行其它的工作或将更多的内核执行添加到命令队列）
-CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE —— 决定提交的命令队列中的命令，是 in-order 还是 out-of-order 执行；
-
-参考：
-http://stackoverflow.com/questions/13200276/what-is-the-difference-between-clenqueuebarrier-and-clfinish
-
-答：提交到命令队列的函数，入队列时按照函数调用的顺序，但是在执行的时候可以配置为 in-order 或 out-of-order。
-在创建命令队列的时候，clCreateCommandQueue 中的 `properties` 参数可以用来指定执行顺序。
-
-如果没有设置命令队列的 `CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE` 属性，提交到命令队列中的命令按照顺序执行。
-
-
-如果设置了命令队列的 `CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE` 属性，不能保证内核 B 开始执行之前，内核 A 已经
-完成。
-
-通过设置命令队列的 CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE 属性，应用程序可以配置提交到命令的名列是否以 out-of-order
-的方式执行。这可以在命令队列创建的时候指定。在 out-of-order 的执行模式下，无法保证提交到命令队列的命令将按照它们
-进入命令队列的顺序执行完成。
-
-类似的，提交到命令队列的读、写、拷贝或映射内存对象命令
-
 小结：
 对于 clEnqueueNDRangeKernel 函数，并非以阻塞的方式执行；
-
-===============================================================
-===============================================================
-out-or-order 执行，使用 barrier 或 event 对象；
 

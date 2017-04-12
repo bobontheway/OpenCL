@@ -1,4 +1,4 @@
-out-of-order VS in-order（以 `out-of-order` 的方式执行内核和内存对象命令）
+## out-of-order VS in-order（以 `out-of-order` 的方式执行内核和内存对象命令）
 
 调用 OpenCL 函数将命令提交到命令队列时，命令在命令队列中是按照函数调用顺序存放的。但是在命令执行时，其执行顺序并不一定和命令提交到命令队列
 的顺序一致。在创建命令队列的时候，可以通过设置 clCreateCommandQueue 函数的 `properties` 参数来指定命令队列中的命令是以 `in-order`
@@ -24,21 +24,51 @@ clEnqueueNativeKernel 命令之后提交到命令队列的读、写、拷贝和�
 clEnqueueNDRangeKernel、clEnqueueTask 和 clEnqueueNativeKernel 返回的事件对象可以用来将一个`等待事件`提交到命令队列，或者将一个`屏障`命令
 提交到命令队列，以保证在读或写内存对象之前内核已经执行完成。
 
-2.函数描述
+## 函数描述
 
-2.clFinish 和 clEnqueueBarrier 的区别；
-- 一个会以阻塞的方式等待，一个会立即返回；主线程可以执行其它的任务；
-No.7_1_OpenCLSyncHost - 中有对 clFinish 的描述。
+### 标记
+将标记命令提交到命令队列。
+```c
+cl_int clEnqueueMarker(cl_command_queue command_queue,
+ 	cl_event *event)
+```
+将标记命令提交到命令队列 `command_queue` 中。当标记命令执行后，在它之前提交到命令队列的命令也执行完成。该函数返回一个事件对象 `event`，在它后面提交到命令队列的命
+令可以等待该事件。例如，随后的命令可以等待该事件以确保标记之前的命令已经执行完成。如果函数成功执行返回 CL_SUCCESS。
+
+### 屏障
+提交屏障命令到命令队列。
+```c
+cl_int clEnqueueBarrier(cl_command_queue command_queue)
+```
+表示一个同步点，保证所有在它之前提交到命令队列 `command_queue` 的命令，在随后的命令执行之前已经执行完成。成功执行返回 CL_SUCCESS。
+和 clFinish 不同的是该命令会异步执行，在 clEnqueueBarrier 返回后，线程可以执行其它任务，例如分配内存、创建内核等。而 clFinish 会
+阻塞当前线程，直到命令队列为空（所有的内核执行/数据对象操作已完成）。对 clFinish 的描述参见 [No.7_1_OpenCLSyncHost]()。
+
+### 等待事件
+
+将等待事件命令提交到命令队列。
+
+```c
+cl_int clEnqueueWaitForEvents(cl_command_queue command_queue,
+ 	cl_uint num_events,
+ 	const cl_event *event_list)
+```
+将 `等待事件` 命令提交到命令队列 `command_queue` 中。当该命令执行完后，事件列表 `event_list` 中对应的命令也已经执行完成。
+事件列表 `event_list` 中对应的事件必须和命令队列 `command_queue` 处于同一个上下文。成功执行返回 CL_SUCCESS。
+
+和 clWaitForEvents 不同的是该命令执行后会立即返回，线程可以在不阻塞的情况下接着执行其它任务。而 clWaitForEvents 会进入阻塞状态，
+直到事件列表 `event_list` 中对应的事件处于 CL_COMPLETE 状态。
 
 3.clEnqueueMarker 和 clEnqueuelWaitForEvents 搭配；
-4.clWaitForEvents 和 clEnqueuelWaitForEvents 的区别；
-- 和 `2` 中类似，一个会以阻塞的方式等待，一个会立即返回；
+
 
 https://www.khronos.org/registry/OpenCL/specs/
 https://www.khronos.org/registry/OpenCL/specs/opencl-1.1.pdf
 
 
-
+创建命令队列时，使用了 out-of-order 方式；
+使用 `clEnqueueWaitForEvents` 来替换之前的 `clWaitForEvents` 函数，这样后面的 malloc 分配函数可以继续执行；
+如果去掉 clEnqueueBarrier 动作，则会出现错误；
 
 
 示例程序
@@ -47,4 +77,13 @@ https://www.khronos.org/registry/OpenCL/specs/opencl-1.1.pdf
 
 两个示例程序，一个用于命令队列的同步；另一个用于两个命令队列的同步。涉及到的函数 clEnqueueBarrier，clEnqueueMarker，clEnqueueWaitForEvents，
 关联的函数包括 clFinihs，clWaitForEvents；
+
+
+参考
+- [The OpenCL Specification, Version: 1.1](https://www.khronos.org/registry/OpenCL/specs/opencl-1.1.pdf)
+- OpenCL Programming Guide
+- [clFinish & clEnqueueBarrier](http://stackoverflow.com/questions/13200276/what-is-the-difference-between-clenqueuebarrier-and-clfinish)
+
+
+
 
