@@ -59,11 +59,19 @@ cl_int clEnqueueWaitForEvents(cl_command_queue command_queue,
 和 clWaitForEvents 不同的是该命令执行后会立即返回，线程可以在不阻塞的情况下接着执行其它任务。而 clWaitForEvents 会进入阻塞状态，
 直到事件列表 `event_list` 中对应的事件处于 CL_COMPLETE 状态。
 
-3.clEnqueueMarker 和 clEnqueuelWaitForEvents 搭配；
+## 示例程序
 
-### 创建命令队列
-创建命令队列时，使用了 out-of-order 执行方式；
+本文通过两个示例程序分别介绍 OpenCL 命令队列中命令的同步和命令队列之间的同步。
 
+###命令队列的同步
+
+为了提高任务执行时的并行度，在创建命令队列时，为命令队列设置了 `CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE` 属性，提交到命令队列
+的命令将按照 `out-of-order` 的方式执行。提交到命令队列中的命令如下图所示：
+
+图一
+
+下面抽取部分操作进行描述，完整代码参见。
+#### 1.创建命令队列
 ```c
 cl_command_queue queue;
 
@@ -71,53 +79,76 @@ queue = clCreateCommandQueue(context, device,
 	CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE, &err);
 ```
 
-### 是否方式
+#### 2.等待事件操作
 
-将 No.7_3_OpenCLSyncEvent 中 xx 替换为 yy，这样 malloc 函数可以执行；
-
-```c
-clWaitForEvents(2, event);
-```
+将 No.7_3_OpenCLSyncEvent 中 clWaitForEvents 替换为 clEnqueueWaitForEvents，在调用 clEnqueueWaitForEvents 后立即返回。
+线程不会阻塞，接下来可以通过 malloc 函数分配内存，提高任务并行度。
 
 ```c
+int *dst_buffer;
+
+cl_event event[2] = {event1, event2};
 clEnqueueWaitForEvents(queue, 2, event);
+
+// create destination buffer
+dst_buffer = (int *)malloc(size);
+if (!dst_buffer) {
+        printf("alloc memory fail\n");
+}
 ```
 
-malloc
-
-使用 `clEnqueueWaitForEvents` 来替换之前的 `clWaitForEvents` 函数，这样后面的 malloc 分配函数可以继续执行；
-如果去掉 clEnqueueBarrier 动作，则会出现错误；
-
-### 屏障操作
-
-去掉错误
+#### 3.屏障操作
 ```c
-cl_command_queue queue;
+// execute kernel. Memory object should be ready
+err = clEnqueueNDRangeKernel(queue, kernel_add, 1,
+        0, &global_size, &max_work_group_size,
+        0, NULL, &event3);
 
-clEnqueueBarrier(queue);
+// execute (mul) kernel, wait for event3 to prepary data
+err = clEnqueueNDRangeKernel(queue, kernel_mul, 1,
+        0, &global_size, &max_work_group_size,
+        1, &event3, NULL);
+
+clEnqueueBarrier(queue);  // ①
+
+// read destination memory object to buffer
+err = clEnqueueReadBuffer(queue, mem_dst_obj, CL_TRUE, 0,
+        size, dst_buffer, 0, NULL, NULL);
 ```
-或者
 
-```c
-cl_command_queue queue;
-queue = clCreateCommandQueue(context, device, 0, &err);
-```
+如果将位置 ① 的屏障操作去掉，由于命令队列中的命令按照 out-of-order 方式执行，这时 clEnqueueReadBuffer 命令就
+可能在 clEnqueueNDRangeKernel 之前执行完成，于是从内存对象中读取的数据可能不正确。
 
-正确
-
-
-示例程序
-
-这部分通过两个示例程序分别介绍 OpenCL 命令队列的同步和命令队列之间的同步。
-
-两个示例程序，一个用于命令队列的同步；另一个用于两个命令队列的同步。涉及到的函数 clEnqueueBarrier，clEnqueueMarker，clEnqueueWaitForEvents，
-关联的函数包括 clFinihs，clWaitForEvents；
+###命令队列间同步
+将任务分配到两个设备上，创建了两个命令队列，在两个命令队列间同步。
 
 
 参考
 - [The OpenCL Specification, Version: 1.1](https://www.khronos.org/registry/OpenCL/specs/opencl-1.1.pdf)
 - OpenCL Programming Guide
 - [clFinish & clEnqueueBarrier](http://stackoverflow.com/questions/13200276/what-is-the-difference-between-clenqueuebarrier-and-clfinish)
+
+
+========================
+临时：函数调用
+========================
+
+3.clEnqueueMarker 和 clEnqueuelWaitForEvents 搭配；
+
+kernel_add + kernel_mul
+
+为目标缓冲区分配内存，用来存放从内存对象中读取的内核执行结果。 
+
+clEnqueueWriteBuffer()
+clEnqueueWriteBuffer()
+clEnqueueWaitForEvents()
+clEnqueueNDRangeKernel()
+clEnqueueNDRangeKernel()
+clEnqueueBarrier()
+clEnqueueReadBuffer()
+
+
+
 
 
 
