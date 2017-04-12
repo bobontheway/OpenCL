@@ -61,6 +61,7 @@ cl_int clEnqueueWaitForEvents(cl_command_queue command_queue,
 
 3.clEnqueueMarker 和 clEnqueuelWaitForEvents 搭配；
 
+### 创建命令队列
 创建命令队列时，使用了 out-of-order 执行方式；
 
 ```c
@@ -70,8 +71,39 @@ queue = clCreateCommandQueue(context, device,
 	CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE, &err);
 ```
 
+### 是否方式
+
+将 No.7_3_OpenCLSyncEvent 中 xx 替换为 yy，这样 malloc 函数可以执行；
+
+```c
+clWaitForEvents(2, event);
+```
+
+```c
+clEnqueueWaitForEvents(queue, 2, event);
+```
+
+malloc
+
 使用 `clEnqueueWaitForEvents` 来替换之前的 `clWaitForEvents` 函数，这样后面的 malloc 分配函数可以继续执行；
 如果去掉 clEnqueueBarrier 动作，则会出现错误；
+
+### 屏障操作
+
+去掉错误
+```c
+cl_command_queue queue;
+
+clEnqueueBarrier(queue);
+```
+或者
+
+```c
+cl_command_queue queue;
+queue = clCreateCommandQueue(context, device, 0, &err);
+```
+
+正确
 
 
 示例程序
