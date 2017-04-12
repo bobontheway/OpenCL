@@ -61,19 +61,13 @@ cl_int clEnqueueWaitForEvents(cl_command_queue command_queue,
 
 3.clEnqueueMarker 和 clEnqueuelWaitForEvents 搭配；
 
-
-https://www.khronos.org/registry/OpenCL/specs/
-https://www.khronos.org/registry/OpenCL/specs/opencl-1.1.pdf
-
-
-创建命令队列时，使用了 out-of-order 方式；
+创建命令队列时，使用了 out-of-order 执行方式；
 
 ```c
 cl_command_queue queue;
 
 queue = clCreateCommandQueue(context, device,
 	CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE, &err);
-
 ```
 
 使用 `clEnqueueWaitForEvents` 来替换之前的 `clWaitForEvents` 函数，这样后面的 malloc 分配函数可以继续执行；
