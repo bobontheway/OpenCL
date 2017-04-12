@@ -1,6 +1,4 @@
-out-of-order VS in-order
-
-以 `out-of-order` 的方式执行内核和内存对象命令。
+out-of-order VS in-order（以 `out-of-order` 的方式执行内核和内存对象命令）
 
 调用 OpenCL 函数将命令提交到命令队列时，命令在命令队列中是按照函数调用顺序存放的。但是在命令执行时，其执行顺序并不一定和命令提交到命令队列
 的顺序一致。在创建命令队列的时候，可以通过设置 clCreateCommandQueue 函数的 `properties` 参数来指定命令队列中的命令是以 `in-order`
