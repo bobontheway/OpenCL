@@ -30,7 +30,7 @@ clEnqueueNDRangeKernel、clEnqueueTask 和 clEnqueueNativeKernel 返回的事件
 将标记命令提交到命令队列。
 ```c
 cl_int clEnqueueMarker(cl_command_queue command_queue,
- 	cl_event *event)
+	cl_event *event)
 ```
 将标记命令提交到命令队列 `command_queue` 中。当标记命令执行后，在它之前提交到命令队列的命令也执行完成。该函数返回一个事件对象 `event`，在它后面提交到命令队列的命
 令可以等待该事件。例如，随后的命令可以等待该事件以确保标记之前的命令已经执行完成。如果函数成功执行返回 CL_SUCCESS。
@@ -50,8 +50,8 @@ cl_int clEnqueueBarrier(cl_command_queue command_queue)
 
 ```c
 cl_int clEnqueueWaitForEvents(cl_command_queue command_queue,
- 	cl_uint num_events,
- 	const cl_event *event_list)
+	cl_uint num_events,
+	const cl_event *event_list)
 ```
 将 `等待事件` 命令提交到命令队列 `command_queue` 中。当该命令执行完后，事件列表 `event_list` 中对应的命令也已经执行完成。
 事件列表 `event_list` 中对应的事件必须和命令队列 `command_queue` 处于同一个上下文。成功执行返回 CL_SUCCESS。
