@@ -143,7 +143,7 @@ void init_opencl(cl_context *c, cl_command_queue *q, cl_program *p)
 	// get gpu device
 	err = clGetDeviceIDs(platform, CL_DEVICE_TYPE_GPU, 1, &device, NULL);
 	if (err != CL_SUCCESS) {
-		printf("can' get cpu device, try cpu...\n");
+		printf("can't get gpu device, try cpu...\n");
 		err = clGetDeviceIDs(platform, CL_DEVICE_TYPE_CPU,
 			1, &device, NULL);
 		check_error(err, __LINE__);

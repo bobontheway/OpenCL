@@ -30,7 +30,7 @@ OpenCL 基于 C99 的扩展，它最终会被编译、链接。同一平台上�
 ```c
 err = clGetDeviceIDs(platform, CL_DEVICE_TYPE_GPU, 1, &device, NULL);
 if (err != CL_SUCCESS) {
-        printf("can' get cpu device, try cpu...\n");
+        printf("can't get gpu device, try cpu...\n");
         err = clGetDeviceIDs(platform, CL_DEVICE_TYPE_CPU, 1, &device, NULL);
 }
 ```
