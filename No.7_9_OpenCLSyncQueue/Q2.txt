@@ -30,6 +30,8 @@ clEnqueueNDRangeKernel、clEnqueueTask 和 clEnqueueNativeKernel 返回的事件
 
 2.clFinish 和 clEnqueueBarrier 的区别；
 - 一个会以阻塞的方式等待，一个会立即返回；主线程可以执行其它的任务；
+No.7_1_OpenCLSyncHost - 中有对 clFinish 的描述。
+
 3.clEnqueueMarker 和 clEnqueuelWaitForEvents 搭配；
 4.clWaitForEvents 和 clEnqueuelWaitForEvents 的区别；
 - 和 `2` 中类似，一个会以阻塞的方式等待，一个会立即返回；
