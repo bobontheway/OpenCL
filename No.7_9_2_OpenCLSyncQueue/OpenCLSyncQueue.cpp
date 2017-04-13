@@ -296,10 +296,12 @@ int main()
 
 	// xbdong
 	// gpu-queue wait for event marker
-	clEnqueueBarrier(queue[DEVICE_CPU]);
+	//clEnqueueBarrier(queue[DEVICE_CPU]);
 	clEnqueueWaitForEvents(queue[DEVICE_CPU], 1, &event_marker);
 	//clEnqueueWaitForEvents(queue[DEVICE_GPU], 1, &event_marker);
 
+	// dead block here - CPU command queue can't be empty
+	// CPU 命令队列在等待 event_mark 事件时，没法正常返回；
 	// xbdong
 	wait_queue_empty(queue, 4);
 
