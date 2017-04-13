@@ -83,14 +83,19 @@ char *package_program(const char *filename)
 	return buf;
 }
 
+#define DEVICE_CPU	0
+#define DEVICE_GPU	1
+
 void init_opencl(cl_platform_id *plt, cl_device_id *d, cl_context *c, cl_command_queue *q, cl_program *p)
 {
 	int err;
 	cl_platform_id platform;
+	//cl_device_id device[2];
 	cl_device_id device;
 
 	cl_context context;
-	cl_command_queue queue;
+	cl_command_queue queue[2];
+	//cl_command_queue queue;
 	cl_program program;
 
 	char *kernel_source;
@@ -118,9 +123,12 @@ void init_opencl(cl_platform_id *plt, cl_device_id *d, cl_context *c, cl_command
 	}
 
 	// create command queue
-	queue = clCreateCommandQueue(context, device,
+	queue[DEVICE_CPU] = clCreateCommandQueue(context, device,
 		CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE, &err);
-	if (queue == NULL) {
+
+	queue[DEVICE_GPU] = clCreateCommandQueue(context, device,
+		CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE, &err);
+	if ((queue[DEVICE_CPU] == NULL) || (queue[DEVICE_GPU] == NULL)) {
 		printf("create command queue fail\n");
 		exit(EXIT_FAILURE);
 	}
@@ -141,15 +149,22 @@ void init_opencl(cl_platform_id *plt, cl_device_id *d, cl_context *c, cl_command
 	free(kernel_source);
 
 	// build program
+	//err = clBuildProgram(program, 2, device, NULL, NULL, NULL);
 	err = clBuildProgram(program, 1, &device, NULL, NULL, NULL);
 	if (CL_SUCCESS != err) {
 		size_t bufSize = 1024;
 		char buf[bufSize];
 
-		err = clGetProgramBuildInfo(program, device, CL_PROGRAM_BUILD_LOG,
+		err = clGetProgramBuildInfo(program, device[DEVICE_CPU], CL_PROGRAM_BUILD_LOG,
 			bufSize, buf, NULL);
 		check_error(err, __LINE__);
-		printf("build log:\n%s\n", buf);
+		printf("build for cpu log:\n%s\n", buf);
+
+		err = clGetProgramBuildInfo(program, device[DEVICE_GPU], CL_PROGRAM_BUILD_LOG,
+			bufSize, buf, NULL);
+		check_error(err, __LINE__);
+		printf("build for gpu log:\n%s\n", buf);
+
 		exit(EXIT_FAILURE);
 	}
 
@@ -177,7 +192,7 @@ int main()
 	cl_mem mem_obj1, mem_obj2, mem_dst_obj;
 	cl_event event1, event2, event3;
 	int *host_data, *dst_buffer;
-	size_t size = sizeof(int) * 10 * 1024 * 1024; /* 40MB */
+	size_t size = sizeof(int) * 10 * 1024 * 1024; /* 50MB */
 
 	init_opencl(&platform, &device, &context, &queue, &program);
 
@@ -304,3 +319,8 @@ int main()
 
 	return err;
 }
+
+// 1.首先在同一个设备上创建两个命令队列；
+// 2.接着在 MAC OS 系统上将两个命令队列对应到两个设备上执行；
+
+
