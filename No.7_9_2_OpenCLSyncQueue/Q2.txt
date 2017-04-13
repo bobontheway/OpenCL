@@ -122,6 +122,10 @@ err = clEnqueueReadBuffer(queue, mem_dst_obj, CL_TRUE, 0,
 ###命令队列间同步
 将任务分配到两个设备上，创建了两个命令队列，在两个命令队列间同步。
 
+将 kernel_add 放到 CPU 上执行，将 kernel_mul 放到 GPU 上执行。
+（CPU 执行的慢，放在前面，让 GPU 去等它执行完成）
+
+clEnqueueMarker 和 clEnqueueBarrier 的区别；
 
 参考
 - [The OpenCL Specification, Version: 1.1](https://www.khronos.org/registry/OpenCL/specs/opencl-1.1.pdf)
