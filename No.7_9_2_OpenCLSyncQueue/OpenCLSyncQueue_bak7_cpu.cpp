@@ -187,18 +187,6 @@ void init_opencl(cl_platform_id *plt, cl_device_id *d, cl_context *c,
 	*p = program;
 }
 
-// xbdong
-void wait_queue_empty(cl_command_queue *queue, int i)
-{
-	printf("======> %s\n", __func__);
-	clFinish(queue[DEVICE_CPU]);
-	printf("cpu command-queue is empty: %d\n", i);
-	
-	clFinish(queue[DEVICE_GPU]);
-	printf("gpu command-queue is empty: %d\n", i);
-	printf("<====== %s\n", __func__);
-}
-
 int main()
 {
 	int err;
@@ -240,15 +228,15 @@ int main()
 		host_data[i] = i;
 
 	// non-block write memory object
-	err = clEnqueueWriteBuffer(queue[DEVICE_GPU], mem_obj1, CL_FALSE, 0,
+	err = clEnqueueWriteBuffer(queue[DEVICE_CPU], mem_obj1, CL_FALSE, 0,
 		size, host_data, 0, NULL, NULL);
 	check_error(err, __LINE__);
 
-	err = clEnqueueWriteBuffer(queue[DEVICE_GPU], mem_obj2, CL_FALSE, 0,
+	err = clEnqueueWriteBuffer(queue[DEVICE_CPU], mem_obj2, CL_FALSE, 0,
 		size, host_data, 0, NULL, NULL);
 	check_error(err, __LINE__);
 
-	clEnqueueMarker(queue[DEVICE_GPU], &event_marker);
+	clEnqueueMarker(queue[DEVICE_CPU], &event_marker);
 
 	// create destination memory object
 	mem_dst_obj= clCreateBuffer(context, CL_MEM_READ_WRITE, size,
@@ -294,38 +282,32 @@ int main()
 		exit(EXIT_FAILURE);
 	}
 
-	// xbdong
 	// gpu-queue wait for event marker
-	clEnqueueBarrier(queue[DEVICE_CPU]);
 	clEnqueueWaitForEvents(queue[DEVICE_CPU], 1, &event_marker);
-	//clEnqueueWaitForEvents(queue[DEVICE_GPU], 1, &event_marker);
-
-	// xbdong
-	wait_queue_empty(queue, 4);
 
 	// execute kernel. Memory object should be ready
-	err = clEnqueueNDRangeKernel(queue[DEVICE_GPU], kernel_add, 1,
+	err = clEnqueueNDRangeKernel(queue[DEVICE_CPU], kernel_add, 1,
 		0, &global_size, &max_work_group_size,
 		0, NULL, &event);
 
-	err = clEnqueueNDRangeKernel(queue[DEVICE_GPU], kernel_mul, 1,
+	err = clEnqueueNDRangeKernel(queue[DEVICE_CPU], kernel_mul, 1,
 		0, &global_size, &max_work_group_size,
 		1, &event, NULL);
 	check_error(err, __LINE__);
 
-	clEnqueueBarrier(queue[DEVICE_GPU]);
+	clEnqueueBarrier(queue[DEVICE_CPU]);
 
 	// read destination memory object to buffer
 	printf("======[8]======\n");
 	//err = clEnqueueReadBuffer(queue[DEVICE_CPU], mem_dst_obj, CL_TRUE, 0,
 	//	size, dst_buffer, 0, NULL, NULL);
-	err = clEnqueueReadBuffer(queue[DEVICE_GPU], mem_dst_obj, CL_FALSE, 0,
+	err = clEnqueueReadBuffer(queue[DEVICE_CPU], mem_dst_obj, CL_FALSE, 0,
 		size, dst_buffer, 0, NULL, &event);
 	printf("======[9]======\n");
 	check_error(err, __LINE__);
 
 	//clFlush(queue[DEVICE_CPU]);
-	clFinish(queue[DEVICE_GPU]);
+	clFinish(queue[DEVICE_CPU]);
 	cl_int status;
 	while (1) {
 		clGetEventInfo(event, CL_EVENT_COMMAND_EXECUTION_STATUS,
