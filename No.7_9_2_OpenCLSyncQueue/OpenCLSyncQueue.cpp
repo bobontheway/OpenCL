@@ -302,6 +302,7 @@ int main()
 
 	// dead block here - CPU command queue can't be empty
 	// CPU 命令队列在等待 event_mark 事件时，没法正常返回；
+	// - 试试在两个设备的情况下是否还会进入阻塞状态？（Ubuntu & Mac OS）
 	// xbdong
 	wait_queue_empty(queue, 4);
 
