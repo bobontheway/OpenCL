@@ -86,7 +86,8 @@ char *package_program(const char *filename)
 #define DEVICE_CPU	0
 #define DEVICE_GPU	1
 
-void init_opencl(cl_platform_id *plt, cl_device_id *d, cl_context *c, cl_command_queue *q, cl_program *p)
+void init_opencl(cl_platform_id *plt, cl_device_id *d, cl_context *c,
+	cl_command_queue *q, cl_program *p)
 {
 	int err;
 	cl_platform_id platform;
@@ -155,6 +156,11 @@ void init_opencl(cl_platform_id *plt, cl_device_id *d, cl_context *c, cl_command
 		size_t bufSize = 1024;
 		char buf[bufSize];
 
+		err = clGetProgramBuildInfo(program, device, CL_PROGRAM_BUILD_LOG,
+			bufSize, buf, NULL);
+		check_error(err, __LINE__);
+		printf("build log:\n%s\n", buf);
+#if 0
 		err = clGetProgramBuildInfo(program, device[DEVICE_CPU], CL_PROGRAM_BUILD_LOG,
 			bufSize, buf, NULL);
 		check_error(err, __LINE__);
@@ -164,6 +170,7 @@ void init_opencl(cl_platform_id *plt, cl_device_id *d, cl_context *c, cl_command
 			bufSize, buf, NULL);
 		check_error(err, __LINE__);
 		printf("build for gpu log:\n%s\n", buf);
+#endif
 
 		exit(EXIT_FAILURE);
 	}
@@ -172,7 +179,10 @@ void init_opencl(cl_platform_id *plt, cl_device_id *d, cl_context *c, cl_command
 	*plt = platform;
 	*d = device;
 	*c = context;
-	*q = queue;
+
+	q[DEVICE_CPU] = queue[DEVICE_CPU];
+	q[DEVICE_GPU] = queue[DEVICE_GPU];
+
 	*p = program;
 }
 
@@ -184,7 +194,7 @@ int main()
 
 	// should be release
 	cl_context context;
-	cl_command_queue queue;
+	cl_command_queue queue[2];
 	cl_program program;
 	cl_kernel kernel_add, kernel_mul;
 	char *program_buf;
@@ -194,7 +204,7 @@ int main()
 	int *host_data, *dst_buffer;
 	size_t size = sizeof(int) * 10 * 1024 * 1024; /* 50MB */
 
-	init_opencl(&platform, &device, &context, &queue, &program);
+	init_opencl(&platform, &device, &context, (cl_command_queue *)queue, &program);
 
 	// create memory buffer object
 	mem_obj1 = clCreateBuffer(context, CL_MEM_READ_ONLY, size,
@@ -217,12 +227,12 @@ int main()
 		host_data[i] = i;
 
 	// non-block write memory object, is event1
-	err = clEnqueueWriteBuffer(queue, mem_obj1, CL_FALSE, 0,
+	err = clEnqueueWriteBuffer(queue[DEVICE_CPU], mem_obj1, CL_FALSE, 0,
 		size, host_data, 0, NULL, &event1);
 	check_error(err, __LINE__);
 
 	// is event2, no need to wait for event1
-	err = clEnqueueWriteBuffer(queue, mem_obj2, CL_FALSE, 0,
+	err = clEnqueueWriteBuffer(queue[DEVICE_CPU], mem_obj2, CL_FALSE, 0,
 		size, host_data, 0, NULL, &event2);
 	check_error(err, __LINE__);
 
@@ -265,7 +275,7 @@ int main()
 
 	// wait for event
 	cl_event event[2] = {event1, event2};
-	clEnqueueWaitForEvents(queue, 2, event);
+	clEnqueueWaitForEvents(queue[DEVICE_CPU], 2, event);
 
 	// create destination buffer
 	dst_buffer = (int *)malloc(size);
@@ -275,20 +285,20 @@ int main()
 	}
 
 	// execute kernel. Memory object should be ready
-	err = clEnqueueNDRangeKernel(queue, kernel_add, 1,
+	err = clEnqueueNDRangeKernel(queue[DEVICE_CPU], kernel_add, 1,
 		0, &global_size, &max_work_group_size,
 		0, NULL, &event3);
 
 	// execute (mul) kernel, wait for event3 to prepary data
-	err = clEnqueueNDRangeKernel(queue, kernel_mul, 1,
+	err = clEnqueueNDRangeKernel(queue[DEVICE_CPU], kernel_mul, 1,
 		0, &global_size, &max_work_group_size,
 		1, &event3, NULL);
 	check_error(err, __LINE__);
 
-	clEnqueueBarrier(queue);
+	clEnqueueBarrier(queue[DEVICE_CPU]);
 
 	// read destination memory object to buffer
-	err = clEnqueueReadBuffer(queue, mem_dst_obj, CL_TRUE, 0,
+	err = clEnqueueReadBuffer(queue[DEVICE_CPU], mem_dst_obj, CL_TRUE, 0,
 		size, dst_buffer, 0, NULL, NULL);
 	check_error(err, __LINE__);
 
@@ -314,7 +324,7 @@ int main()
 	clReleaseMemObject(mem_obj2);
 	clReleaseMemObject(mem_dst_obj);
 	clReleaseProgram(program);
-	clReleaseCommandQueue(queue);
+	clReleaseCommandQueue(queue[DEVICE_CPU]);
 	clReleaseContext(context);
 
 	return err;
