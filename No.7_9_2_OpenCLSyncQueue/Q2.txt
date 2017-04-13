@@ -127,6 +127,20 @@ err = clEnqueueReadBuffer(queue, mem_dst_obj, CL_TRUE, 0,
 
 clEnqueueMarker 和 clEnqueueBarrier 的区别；
 
+
+```c
+xbdong@xbdong-opencl:~/Project/github/OpenCL$ ./OpenCLSyncQueue 
+[Platform Infomation]
+platform name: AMD Accelerated Parallel Processing
+
+[Device Infomation]
+device name: Intel(R) Core(TM) i5-4590 CPU @ 3.30GHz
+device name: Baffin
+
+[Result]
+Success
+```
+
 参考
 - [The OpenCL Specification, Version: 1.1](https://www.khronos.org/registry/OpenCL/specs/opencl-1.1.pdf)
 - OpenCL Programming Guide

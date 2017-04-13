@@ -6,7 +6,6 @@
 #else
 #include <CL/cl.h>
 #endif
-#include <unistd.h>
 
 #include "util.h"
 
@@ -46,8 +45,6 @@ void get_devices_info(cl_device_id *devices, int num)
 		err = clGetDeviceInfo(devices[i], CL_DEVICE_NAME, len, buf, NULL);
 		check_error(err, __LINE__);
 		printf("device name: %s\n", buf);
-
-		printf("\n");
 	}
 }
 
@@ -84,20 +81,25 @@ char *package_program(const char *filename)
 	return buf;
 }
 
-#define DEVICE_CPU	0
-#define DEVICE_GPU	1
+enum OPENCL_DEVS {
+	DEVICE_CPU = 0,
+	DEVICE_GPU,
+	DEVICE_NUM
+
+};
+
+//#define DEVICE_CPU	0
+//#define DEVICE_GPU	1
 
 void init_opencl(cl_platform_id *plt, cl_device_id *d, cl_context *c,
 	cl_command_queue *q, cl_program *p)
 {
 	int err;
 	cl_platform_id platform;
-	//cl_device_id device[2];
-	cl_device_id device;
+	cl_device_id device[2];
 
 	cl_context context;
 	cl_command_queue queue[2];
-	//cl_command_queue queue;
 	cl_program program;
 
 	char *kernel_source;
@@ -105,30 +107,30 @@ void init_opencl(cl_platform_id *plt, cl_device_id *d, cl_context *c,
 	// get platform
 	err = clGetPlatformIDs(1, &platform, NULL);
 	check_error(err, __LINE__);
-	//get_platform_info(&platform, 1);
+	get_platform_info(&platform, 1);
 
-	// get gpu device
-	err = clGetDeviceIDs(platform, CL_DEVICE_TYPE_GPU, 1, &device, NULL);
+	// cpu & gpu device
+	err = clGetDeviceIDs(platform, CL_DEVICE_TYPE_CPU, 1,
+		&device[DEVICE_CPU], NULL);
+	err |= clGetDeviceIDs(platform, CL_DEVICE_TYPE_GPU, 1,
+		&device[DEVICE_GPU], NULL);
 	if (err != CL_SUCCESS) {
-		printf("can' get cpu device, try cpu...\n");
-		err = clGetDeviceIDs(platform, CL_DEVICE_TYPE_CPU,
-			1, &device, NULL);
+		printf("can't get cpu or gpu device\n");
 		check_error(err, __LINE__);
 	}
-	//get_devices_info(&device, 1);
+	get_devices_info(device, 2);
 
 	// create context
-	context = clCreateContext(NULL, 1, &device, NULL, NULL, &err);
+	context = clCreateContext(NULL, 2, device, NULL, NULL, &err);
 	if (context == NULL) {
 		printf("create context fail\n");
 		exit(EXIT_FAILURE);
 	}
 
 	// create command queue
-	queue[DEVICE_CPU] = clCreateCommandQueue(context, device,
+	queue[DEVICE_CPU] = clCreateCommandQueue(context, device[DEVICE_CPU],
 		CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE, &err);
-
-	queue[DEVICE_GPU] = clCreateCommandQueue(context, device,
+	queue[DEVICE_GPU] = clCreateCommandQueue(context, device[DEVICE_GPU],
 		CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE, &err);
 	if ((queue[DEVICE_CPU] == NULL) || (queue[DEVICE_GPU] == NULL)) {
 		printf("create command queue fail\n");
@@ -151,17 +153,11 @@ void init_opencl(cl_platform_id *plt, cl_device_id *d, cl_context *c,
 	free(kernel_source);
 
 	// build program
-	//err = clBuildProgram(program, 2, device, NULL, NULL, NULL);
-	err = clBuildProgram(program, 1, &device, NULL, NULL, NULL);
+	err = clBuildProgram(program, 2, device, NULL, NULL, NULL);
 	if (CL_SUCCESS != err) {
 		size_t bufSize = 1024;
 		char buf[bufSize];
 
-		err = clGetProgramBuildInfo(program, device, CL_PROGRAM_BUILD_LOG,
-			bufSize, buf, NULL);
-		check_error(err, __LINE__);
-		printf("build log:\n%s\n", buf);
-#if 0
 		err = clGetProgramBuildInfo(program, device[DEVICE_CPU], CL_PROGRAM_BUILD_LOG,
 			bufSize, buf, NULL);
 		check_error(err, __LINE__);
@@ -171,53 +167,39 @@ void init_opencl(cl_platform_id *plt, cl_device_id *d, cl_context *c,
 			bufSize, buf, NULL);
 		check_error(err, __LINE__);
 		printf("build for gpu log:\n%s\n", buf);
-#endif
 
 		exit(EXIT_FAILURE);
 	}
 
 	// get return value
 	*plt = platform;
-	*d = device;
+	d[DEVICE_CPU] = device[DEVICE_CPU];
+	d[DEVICE_GPU] = device[DEVICE_GPU];
 	*c = context;
-
 	q[DEVICE_CPU] = queue[DEVICE_CPU];
 	q[DEVICE_GPU] = queue[DEVICE_GPU];
-
 	*p = program;
-}
-
-// xbdong
-void wait_queue_empty(cl_command_queue *queue, int i)
-{
-	printf("======> %s\n", __func__);
-	clFinish(queue[DEVICE_CPU]);
-	printf("cpu command-queue is empty: %d\n", i);
-	
-	clFinish(queue[DEVICE_GPU]);
-	printf("gpu command-queue is empty: %d\n", i);
-	printf("<====== %s\n", __func__);
 }
 
 int main()
 {
 	int err;
 	cl_platform_id platform;
-	cl_device_id device;
+	cl_device_id device[DEVICE_NUM];
 
 	// should be release
 	cl_context context;
-	cl_command_queue queue[2];
+	cl_command_queue queue[DEVICE_NUM];
 	cl_program program;
 	cl_kernel kernel_add, kernel_mul;
 	char *program_buf;
 
 	cl_mem mem_obj1, mem_obj2, mem_dst_obj;
-	cl_event event, event_marker;
+	cl_event event_marker, event;
 	int *host_data, *dst_buffer;
-	size_t size = sizeof(int) * 10 * 1024 * 1024; /* 50MB */
+	size_t size = sizeof(int) * 10 * 1024 * 1024; /* 40MB */
 
-	init_opencl(&platform, &device, &context, (cl_command_queue *)queue, &program);
+	init_opencl(&platform, device, &context, queue, &program);
 
 	// create memory buffer object
 	mem_obj1 = clCreateBuffer(context, CL_MEM_READ_ONLY, size,
@@ -234,10 +216,10 @@ int main()
 	if (!host_data) {
 		printf("alloc memory fail\n");
 		exit(EXIT_FAILURE);
+	} else {
+		for (int i = 0; i < (int)(size/sizeof(int)); i++)
+			host_data[i] = i;
 	}
-
-	for (int i = 0; i < (int)(size/sizeof(int)); i++)
-		host_data[i] = i;
 
 	// non-block write memory object
 	err = clEnqueueWriteBuffer(queue[DEVICE_GPU], mem_obj1, CL_FALSE, 0,
@@ -282,10 +264,12 @@ int main()
 	check_error(err, __LINE__);
 
 	size_t global_size = size / sizeof(int);
-	size_t max_work_group_size;
-	clGetDeviceInfo(device, CL_DEVICE_MAX_WORK_GROUP_SIZE,
-		sizeof(max_work_group_size), &max_work_group_size, NULL);
-	//printf("max_work_group_size = %d\n", (int)max_work_group_size);
+	size_t max_work_group_size[DEVICE_NUM];
+
+	clGetDeviceInfo(device[DEVICE_CPU], CL_DEVICE_MAX_WORK_GROUP_SIZE,
+		sizeof(size_t), &max_work_group_size[DEVICE_CPU], NULL);
+	clGetDeviceInfo(device[DEVICE_GPU], CL_DEVICE_MAX_WORK_GROUP_SIZE,
+		sizeof(size_t), &max_work_group_size[DEVICE_GPU], NULL);
 
 	// create destination buffer
 	dst_buffer = (int *)malloc(size);
@@ -294,50 +278,26 @@ int main()
 		exit(EXIT_FAILURE);
 	}
 
-	// xbdong
-	// gpu-queue wait for event marker
-	//clEnqueueBarrier(queue[DEVICE_CPU]);
+	// cpu-queue wait for event marker
 	clEnqueueWaitForEvents(queue[DEVICE_CPU], 1, &event_marker);
-	//clEnqueueWaitForEvents(queue[DEVICE_GPU], 1, &event_marker);
-
-	// dead block here - CPU command queue can't be empty
-	// CPU 命令队列在等待 event_mark 事件时，没法正常返回；
-	// - 试试在两个设备的情况下是否还会进入阻塞状态？（Ubuntu & Mac OS）
-	// 即，确认单个设备时，是否会出现死锁的问题？
-	// xbdong
-	wait_queue_empty(queue, 4);
 
 	// execute kernel. Memory object should be ready
-	err = clEnqueueNDRangeKernel(queue[DEVICE_GPU], kernel_add, 1,
-		0, &global_size, &max_work_group_size,
+	err = clEnqueueNDRangeKernel(queue[DEVICE_CPU], kernel_add, 1,
+		0, &global_size, &max_work_group_size[DEVICE_CPU],
 		0, NULL, &event);
-
-	err = clEnqueueNDRangeKernel(queue[DEVICE_GPU], kernel_mul, 1,
-		0, &global_size, &max_work_group_size,
+	err |= clEnqueueNDRangeKernel(queue[DEVICE_CPU], kernel_mul, 1,
+		0, &global_size, &max_work_group_size[DEVICE_CPU],
 		1, &event, NULL);
 	check_error(err, __LINE__);
 
-	clEnqueueBarrier(queue[DEVICE_GPU]);
+	clEnqueueBarrier(queue[DEVICE_CPU]);
 
 	// read destination memory object to buffer
-	printf("======[8]======\n");
-	//err = clEnqueueReadBuffer(queue[DEVICE_CPU], mem_dst_obj, CL_TRUE, 0,
-	//	size, dst_buffer, 0, NULL, NULL);
-	err = clEnqueueReadBuffer(queue[DEVICE_GPU], mem_dst_obj, CL_FALSE, 0,
-		size, dst_buffer, 0, NULL, &event);
-	printf("======[9]======\n");
+	err = clEnqueueReadBuffer(queue[DEVICE_CPU], mem_dst_obj, CL_TRUE, 0,
+		size, dst_buffer, 0, NULL, NULL);
 	check_error(err, __LINE__);
 
-	//clFlush(queue[DEVICE_CPU]);
-	clFinish(queue[DEVICE_GPU]);
-	cl_int status;
-	while (1) {
-		clGetEventInfo(event, CL_EVENT_COMMAND_EXECUTION_STATUS,
-			sizeof(cl_int), &status, NULL);
-		printf("status=%d\n", (int)status);
-		sleep(1);
-	}
-
+	printf("\n[Result]\n");
 	// get buffer data
 	for (int i = 0; i < (int)(size/sizeof(int)); i++) {
 		int data = host_data[i] + host_data[i]; /* dst = src1 + src2 */
@@ -352,6 +312,7 @@ int main()
 	printf("Success\n");
 
 	clReleaseEvent(event);
+	clReleaseEvent(event_marker);
 	clReleaseKernel(kernel_add);
 	clReleaseKernel(kernel_mul);
 	clReleaseMemObject(mem_obj1);
