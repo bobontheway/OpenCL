@@ -230,6 +230,7 @@ int main()
 	err |= clSetKernelArg(kernel_add, 2, sizeof(cl_mem), &mem_obj2);
 	check_error(err, __LINE__);
 
+	// xbdong
 	// create and set kernel argument (mul)
 	kernel_mul = clCreateKernel(program, "kernel_mul", &err);
 	if (kernel_mul == NULL) {
@@ -259,12 +260,27 @@ int main()
 		exit(EXIT_FAILURE);
 	}
 
+retry:
+	//time_start();
 	// execute kernel. Memory object should be ready
 	err = clEnqueueNDRangeKernel(queue, kernel_add, 1,
 		0, &global_size, &max_work_group_size,
 		0, NULL, &event3);
+#if 0
+	// create and set kernel argument (mul)
+	kernel_mul = clCreateKernel(program, "kernel_mul", &err);
+	if (kernel_mul == NULL) {
+		printf("create kernel fail: %d\n", err);
+		exit(EXIT_FAILURE);
+	}
 
-	// execute (mul) kernel, wait for event3 to prepary data
+	err = clSetKernelArg(kernel_mul, 0, sizeof(cl_mem), &mem_dst_obj);
+	err |= clSetKernelArg(kernel_mul, 1, sizeof(cl_mem), &mem_obj1);
+	err |= clSetKernelArg(kernel_mul, 2, sizeof(cl_mem), &mem_obj2);
+	check_error(err, __LINE__);
+#endif
+
+	// execute (mul) kernel, is event2, wait for event1 to prepary data
 	err = clEnqueueNDRangeKernel(queue, kernel_mul, 1,
 		0, &global_size, &max_work_group_size,
 		1, &event3, NULL);
@@ -272,11 +288,13 @@ int main()
 
 	clEnqueueBarrier(queue);
 
-	// read destination memory object to buffer
+	// read destination memory object to buffer, and wait for event2
 	err = clEnqueueReadBuffer(queue, mem_dst_obj, CL_TRUE, 0,
 		size, dst_buffer, 0, NULL, NULL);
 	check_error(err, __LINE__);
 
+	//clFinish(queue);
+	printf("After cl finish\n");
 	// get buffer data
 	for (int i = 0; i < (int)(size/sizeof(int)); i++) {
 		int data = host_data[i] + host_data[i]; /* dst = src1 + src2 */
@@ -289,10 +307,8 @@ int main()
 	}
 
 	printf("Success\n");
+	goto retry;
 
-	clReleaseEvent(event1);
-	clReleaseEvent(event2);
-	clReleaseEvent(event3);
 	clReleaseKernel(kernel_add);
 	clReleaseKernel(kernel_mul);
 	clReleaseMemObject(mem_obj1);

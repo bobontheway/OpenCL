@@ -259,6 +259,7 @@ int main()
 		exit(EXIT_FAILURE);
 	}
 
+retry:
 	// execute kernel. Memory object should be ready
 	err = clEnqueueNDRangeKernel(queue, kernel_add, 1,
 		0, &global_size, &max_work_group_size,
@@ -272,11 +273,12 @@ int main()
 
 	clEnqueueBarrier(queue);
 
-	// read destination memory object to buffer
+	// read destination memory object to buffer, and wait for event2
 	err = clEnqueueReadBuffer(queue, mem_dst_obj, CL_TRUE, 0,
 		size, dst_buffer, 0, NULL, NULL);
 	check_error(err, __LINE__);
 
+	printf("After cl finish\n");
 	// get buffer data
 	for (int i = 0; i < (int)(size/sizeof(int)); i++) {
 		int data = host_data[i] + host_data[i]; /* dst = src1 + src2 */
@@ -289,6 +291,7 @@ int main()
 	}
 
 	printf("Success\n");
+	goto retry;
 
 	clReleaseEvent(event1);
 	clReleaseEvent(event2);

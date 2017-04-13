@@ -3,7 +3,7 @@ include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES := OpenCLSyncQueue.cpp ../libs/util.cpp
 
-LOCAL_MODULE := opencl_sync_event
+LOCAL_MODULE := opencl_sync_queue
 
 LOCAL_SHARED_LIBRARIES := libcutils libutils libOpenCL
 LOCAL_MODULE_TAGS := eng optional tests
