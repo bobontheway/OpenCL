@@ -1,48 +1,98 @@
-## 简介
-clFinish 会进入阻塞状态，直到前面提交到命令队列的 OpenCL 命令发送到和命令队列关联的设备，并且执行完成。它作为一个同步点，会等待命令队列中所有的 OpenCL 命令执行完成，该操作对某些时候只需两个命令的同步或少数几个命令的同步来说开销较大。使用事件对象来同步就很好的解决了该问题，它用于某些指定事件的同步。
+## out-of-order VS in-order
+调用 OpenCL 函数将命令提交到命令队列时，命令在命令队列中是按照函数调用顺序存放的。但是在命令执行时，其执行顺序并不一定和命令提交到命令队列的顺序一致。在创建命令队列的时候，可以通过设置 clCreateCommandQueue 函数的 `properties` 参数来指定命令队列中的命令是以 `in-order` 还是 `out-of-order` 的方式执行。
 
-## 执行内核
-在介绍具体示例之前，先通过 `clEnqueueNDRangeKernel` 函数来介绍事件对象。
-```bash
-cl_int clEnqueueNDRangeKernel(cl_command_queue command_queue,
- 	cl_kernel kernel,
- 	cl_uint work_dim,
- 	const size_t *global_work_offset,
- 	const size_t *global_work_size,
- 	const size_t *local_work_size,
- 	cl_uint num_events_in_wait_list,
- 	const cl_event *event_wait_list,
- 	cl_event *event)
+创建命令队列时，如果没有为命令队列设置 `CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE` 属性，提交到命令队列的命令将按照 `in-order` 的方式执行。在这种执行方式下，如果应用程序首先调用 `clEnqueueNDRangeKernel` 来执行内核 A，接着又调用 `clEnqueueNDRangeKernel` 来执行内核 B，可以认为内核 A 在 内核 B 之前完成。这时，如果内核 A 输出的内存对象作为内核 B 的输入，内核 B 将正确访问到内核 A 生成的数据。反之，如果在创建命令队列时设置了 `CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE` 属性，则不能保证内核 A 在内核 B 开始之前已经执行完成。
+
+在创建命令队列时，为命令队列设置 `CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE` 属性，应用程序调用 OpenCL 函数把命令提交到命令队列后，将按照 `out-of-order` 的方式执行。在 `out-of-order` 执行模式下，不能保证提交到命令队列中的命令是按照函数调用的顺序执行。例如，上面通过调用 `clEnqueueNDRangeKernel` 来执行内核 A 和内核 B 的阐述中，内核 B 可能在内核 A 之前执行完成。为了保证两个内核以一个特定的顺序执行，可以使用`事件同步`机制。执行内核 A 时使用 event 事件对象来标识该命令，在随后调用 clEnqueueNDRangeKernel 执行内核 B 时，将 event 事件对象作为其 `event_wait_list` 参数成员。
+
+除了`事件同步`可以用于多个内核执行时的同步，clEnqueueWaitForEvents（等待事件） 和 clEnqueueBarrier（屏障） 命令也可以提交到命令队列用于同步。`等待事件`命令保证在随后的命令执行之前，之前提交到命令队列的命令（使用事件列表来标识）已经执行完成；屏障命令保证在后面的命令执行之前，它前面提交到命令队列的命令已经执行完成。
+
+同理，如果为命令队列设置了 `CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE` 属性，OpenCL 函数调用中，在 clEnqueueNDRangeKernel、clEnqueueTask 和 clEnqueueNativeKernel 命令之后提交到命令队列的读、写，拷贝和映射内存对象等命令，并不能保证会等待内核执行完成。为了保证正确的命令执行顺序，clEnqueueNDRangeKernel、clEnqueueTask 和 clEnqueueNativeKernel 返回的事件对象可以用来将一个`等待事件`提交到命令队列，或者将一个`屏障`命令提交到命令队列，以保证在读/写内存对象之前内核已经执行完成。
+
+## 函数描述
+### 标记
+把标记命令提交到命令队列。
+```c
+cl_int clEnqueueMarker(cl_command_queue command_queue,
+	cl_event *event)
 ```
-相关参数描述如下：
+将标记命令提交到命令队列 `command_queue` 中。当标记命令执行后，在它之前提交到命令队列的命令也执行完成。该函数返回一个事件对象 `event`，在它后面提交到命令队列的命令可以等待该事件。例如，随后的命令可以等待该事件以确保标记之前的命令已经执行完成。如果函数成功执行返回 CL_SUCCESS。
 
-- command_queue：命令队列。内核程序将被提交到这个命令队列，并且在和该命令队列关联的设备上执行；
-- kernel：内核对象。`kernel` 和 `command_queue` 关联的 OpenCL 上下文必须相同；
-- work_dim：维度数，每个维度有单独全局工作项和工作组中的工作项。`work_dim` 必须大于 0，并小于 CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS；
-- global_work_offset：对应 ` work_dim` 的数组。用来描述每个维度中全局工作项开始的 ID 标识。如果 global_work_offset 为 NULL，全局 ID 标识对应的偏移为（0,0……0）；
-- global_work_size：对应 ` work_dim` 的数组。用来描述每个维度中全局工作项的数目。总的全局工作项数目计算方式为， global_work_size[0] *...* global_work_size[work_dim-1]；
-- local_work_size：对应 ` work_dim` 的数组。用来描述每个工作组中工作项的数目，又称作工作组的大小。一个工作组中工作项的总数计算方式为，local_work_size[0] \*...\* local_work_size[work_dim-1]。工作组中工作项的数目必须小于或等于 CL_DEVICE_MAX_WORK_GROUP_SIZE 的大小，并且 local_work_size[0]... local_work_size[work_dim-1] 中工作项的数目必须小于或等于 CL_DEVICE_MAX_WORK_ITEM_SIZES[0]... CL_DEVICE_MAX_WORK_ITEM_SIZES[work_dim-1] 中对应的值。local_work_size 的值可以为 NULL，在这种情况下，由 OpenCL 的实现来决定如何将工作项划分到不同的工作组；
-- event_wait_list/num_events_in_wait_list：指定在这个命令执行之前需要完成的事件。如果 event_wait_list 为 NULL，那么该命令执行之前无需等待任何命令。如果 event_wait_list 为 NULL，num_events_in_wait_list 必须为 0。如果 event_wait_list 不为 NULL，event_wait_list 列表中指向的事件必须有效，并且 num_events_in_wait_list 必须大于 0。event_wait_list 列表中的事件作为一个同步点。`event_wait_list` 和 `command_queue` 必须关联同一个上下文。和 event_wait_list 关联的内存在函数返回后，可以重新使用或释放；
-- event：返回一个事件对象，用来标识执行的内核实例。该事件对象是唯一的，并且在随后可以用来标识一个特定的内核执行实例。如果 `event` 为 NULL，执行的内核实例不会创建对应的事件，这样应用程序将不能查询它的执行情况，也不能在命令队列中等待该实例执行完成。
-
-在该函数中，输入的事件对象存放在 `event_wait_list` ，表示在该命令执行之前需要等待哪些命令执行完成。输出的事件对象 `event` 用来标识执行的命令，应用程序可以通过该事件对象查询命令的执行状态；其它命令在执行之前可以通过该事件对象等待命令执行完成。
-
-## 事件对象操作
-
-### 增加事件引用计数
-```bash
-cl_int clRetainEvent(cl_event event)
+### 屏障
+提交屏障命令到命令队列。
+```c
+cl_int clEnqueueBarrier(cl_command_queue command_queue)
 ```
-参数 `event` 表示需要增加引用计数的事件对象，如果成功执行返回 CL_SUCCESS。
+屏障表示一个同步点，保证所有在它之前提交到命令队列 `command_queue` 的命令，在随后的命令执行之前已经执行完成。成功执行返回 CL_SUCCESS。
 
-> 注意：OpenCL 命令在返回一个事件对象时，执行了隐式的引用计数增加操作。
+和 clFinish 不同的是该命令会异步执行，在 clEnqueueBarrier 返回后，线程可以执行其它任务，例如分配内存、创建内核等。而 clFinish 会阻塞当前线程，直到命令队列为空（所有的内核执行/数据对象操作已完成）。对 clFinish 的描述参见  [No.7_1_OpenCLSyncHost]()。
 
-### 减少事件引用计数
-```bash
-cl_int clReleaseEvent(cl_event event)
+### 等待事件
+把等待事件命令提交到命令队列。
+```c
+cl_int clEnqueueWaitForEvents(cl_command_queue command_queue,
+	cl_uint num_events,
+	const cl_event *event_list)
 ```
-参数 `event` 表示需要释放引用计数的事件对象。一旦引用计数降低为 0，事件对象将被删除。
+将`等待事件`命令提交到命令队列 `command_queue` 中。当该命令执行完后，事件列表 `event_list` 中对应的命令也已经执行完成。事件列表 `event_list` 中对应的事件必须和命令队列 `command_queue` 处于同一个上下文。成功执行返回 CL_SUCCESS。
+
+和 clWaitForEvents 不同的是该命令执行后会立即返回，线程可以在不阻塞的情况下接着执行其它任务。而 clWaitForEvents 会进入阻塞状态，直到事件列表 `event_list` 中对应的事件处于 `CL_COMPLETE` 状态。
 
 ## 示例程序
-该示例程序创建了两个输入缓冲区对象，一个输出缓冲区对象。OpenCL 内核接收输入缓冲区对象中的数据，运算之后将结果存放到输出缓冲区，然后主机端将结果读取到内存中。整个过程需要保证主机端在读取输出缓冲区中的内容时，内核已将完整的数据存放到输出缓冲区。本文使用事件对象在多个操作之间执行同步。
+本文通过两个示例程序分别介绍 OpenCL 命令队列中命令的同步和命令队列之间的同步。
+
+###命令队列的同步
+为了提高任务执行时的并行度，在创建命令队列时，为命令队列设置了 `CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE` 属性，提交到命令队列的命令将按照 `out-of-order` 的方式执行。提交到命令队列中的命令顺序如下图所示：
+
+<img src="image/command_queue.png" width="35%" height="35%">
+
+下面摘取部分操作进行描述，完整代码参见 []()。
+
+#### 1.创建命令队列
+在创建命令队列时，为命令队列设置了 `CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE` 属性，提交到命令队列的 OpenCL 命令将按照 `out-of-order` 的方式执行。
+```c
+cl_command_queue queue;
+
+queue = clCreateCommandQueue(context, device,
+	CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE, &err);
+```
+
+#### 2.等待事件操作
+将 [No.7_3_OpenCLSyncEvent]() 中 clWaitForEvents 替换为 clEnqueueWaitForEvents，在调用  clEnqueueWaitForEvents 后将立即返回。这样线程不会阻塞，接下来可以通过 malloc 函数分配内存，提高任务并行度。
+```c
+int *dst_buffer;
+
+cl_event event[2] = {event1, event2};
+clEnqueueWaitForEvents(queue, 2, event);
+
+// create destination buffer
+dst_buffer = (int *)malloc(size);
+if (!dst_buffer) {
+        printf("alloc memory fail\n");
+}
+```
+
+#### 3.屏障操作
+使用屏障命令确保提交到命令队列中的命令按照函数调用顺序执行。
+```c
+// execute kernel. Memory object should be ready
+err = clEnqueueNDRangeKernel(queue, kernel_add, 1,
+        0, &global_size, &max_work_group_size,
+        0, NULL, &event3);
+
+// execute (mul) kernel, wait for event3 to prepary data
+err = clEnqueueNDRangeKernel(queue, kernel_mul, 1,
+        0, &global_size, &max_work_group_size,
+        1, &event3, NULL);
+
+clEnqueueBarrier(queue);  // ①
+
+// read destination memory object to buffer
+err = clEnqueueReadBuffer(queue, mem_dst_obj, CL_TRUE, 0,
+        size, dst_buffer, 0, NULL, NULL);
+```
+如果将位置 ① 的屏障操作去掉，由于命令队列中的命令按照 `out-of-order` 方式执行，这时 clEnqueueReadBuffer 命令就可能在 clEnqueueNDRangeKernel 之前执行完成，这将导致从内存对象中读取的数据可能不正确。
+
+###命令队列间同步
+
 

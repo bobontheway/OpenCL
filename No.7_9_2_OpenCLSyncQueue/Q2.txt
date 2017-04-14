@@ -12,8 +12,9 @@
 在创建命令队列时，为命令队列设置 `CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE` 属性，应用程序调用 OpenCL 函数把命令提交到命令队列后，将按
 照 `out-of-order` 的方式执行。在 `out-of-order` 执行模式下，不能保证提交到命令队列中的命令是按照函数调用的顺序执行。例如，上面通过调用
 `clEnqueueNDRangeKernel` 来执行内核 A 和内核 B 的阐述中，内核 B 可能在内核 A 之前执行完成。为了保证两个内核以一个特定的顺序执行，可以使用
-`事件同步`。执行内核 A 时使用 event 事件对象来标识该命令，在随后调用 clEnqueueNDRangeKernel 执行内核 B 时，将 event 事件对象在其`event_wait_list`
-参数中指定。
+`事件同步`。执行内核 A 时使用 event 事件对象来标识该命令，在随后调用 clEnqueueNDRangeKernel 执行内核 B 时，将 event 事件对象作为
+其 `event_wait_list` 参数成员。
+
 
 除了`事件同步`可以用于多个内核执行时的同步操作，clEnqueueWaitForEvents（等待事件） 和 clEnqueueBarrier（屏障） 命令也可以提交到命令队列用于同步。
 `等待事件`命令保证在随后的命令执行之前，之前提交到命令队列的命令（使用事件列表来标识）已经执行完成；屏障命令保证在后面的命令执行之前，前面提交到
@@ -40,13 +41,13 @@ cl_int clEnqueueMarker(cl_command_queue command_queue,
 ```c
 cl_int clEnqueueBarrier(cl_command_queue command_queue)
 ```
-表示一个同步点，保证所有在它之前提交到命令队列 `command_queue` 的命令，在随后的命令执行之前已经执行完成。成功执行返回 CL_SUCCESS。
+屏障表示一个同步点，保证所有在它之前提交到命令队列 `command_queue` 的命令，在随后的命令执行之前已经执行完成。成功执行返回 CL_SUCCESS。
 和 clFinish 不同的是该命令会异步执行，在 clEnqueueBarrier 返回后，线程可以执行其它任务，例如分配内存、创建内核等。而 clFinish 会
 阻塞当前线程，直到命令队列为空（所有的内核执行/数据对象操作已完成）。对 clFinish 的描述参见 [No.7_1_OpenCLSyncHost]()。
 
 ### 等待事件
 
-将等待事件命令提交到命令队列。
+把等待事件命令提交到命令队列。
 
 ```c
 cl_int clEnqueueWaitForEvents(cl_command_queue command_queue,
@@ -72,6 +73,10 @@ cl_int clEnqueueWaitForEvents(cl_command_queue command_queue,
 
 下面抽取部分操作进行描述，完整代码参见。
 #### 1.创建命令队列
+
+在创建命令队列时，为命令队列设置了 `CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE` 属性，提交到命令队列的 OpenCL 命令将按
+照 `out-of-order` 的方式执行。
+
 ```c
 cl_command_queue queue;
 
