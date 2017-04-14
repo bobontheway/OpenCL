@@ -231,7 +231,6 @@ void rotate(uint8_t *src, uint8_t *des, int w, int h, float angle)
 		exit(EXIT_FAILURE);
 	}
 
-	// xbdong, OpenCL 1.1 not used
 	cl_image_desc image_desc;
 	memset((void *)&image_desc, 0, sizeof(cl_image_desc));
 	image_desc.image_type = CL_MEM_OBJECT_IMAGE2D;

@@ -231,15 +231,6 @@ void scissor(uint8_t *src, uint8_t *des, int orig_width, int orig_height,
 		exit(EXIT_FAILURE);
 	}
 
-#if 0
-	// xbdong, OpenCL 1.1 not used
-	cl_image_desc image_desc;
-	memset((void *)&image_desc, 0, sizeof(cl_image_desc));
-	image_desc.image_type = CL_MEM_OBJECT_IMAGE2D;
-	image_desc.image_width = w;
-	image_desc.image_height = h;
-#endif
-
 	cl_image_format image_format;
 	memset((void *)&image_format, 0, sizeof(cl_image_format));
 	image_format.image_channel_order = CL_RGBA;
