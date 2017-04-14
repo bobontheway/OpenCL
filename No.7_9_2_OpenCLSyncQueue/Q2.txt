@@ -125,12 +125,18 @@ err = clEnqueueReadBuffer(queue, mem_dst_obj, CL_TRUE, 0,
 可能在 clEnqueueNDRangeKernel 之前执行完成，于是从内存对象中读取的数据可能不正确。
 
 ###命令队列间同步
-将任务分配到两个设备上，创建了两个命令队列，在两个命令队列间同步。
+示例程序在 Ubuntu 上运行，该平台包含了两个 OpenCL 设备（CPU 和 GPU）。
+在程序执行时，为两个设备分别创建了命令队列，接着将任务分配到两个设备上执行。
+命令队列间的同步使用了xxx，如下图所示：
 
 将 kernel_add 放到 CPU 上执行，将 kernel_mul 放到 GPU 上执行。
 （CPU 执行的慢，放在前面，让 GPU 去等它执行完成）
 
 clEnqueueMarker 和 clEnqueueBarrier 的区别；
+
+将`标记`命令提交到 GPU 设备对应的命令队列中，用来标识对内存对象的写操作。
+同时，在 CPU 设备对应的命令中提交 `等待事件` 命令，该命令会以异步方式等待`标记`
+命令执行完成，才接着执行命令队列后面的命令。
 
 
 ```c

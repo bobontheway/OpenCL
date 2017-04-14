@@ -1,3 +1,6 @@
+## 概述
+
+
 ## out-of-order VS in-order
 调用 OpenCL 函数将命令提交到命令队列时，命令在命令队列中是按照函数调用顺序存放的。但是在命令执行时，其执行顺序并不一定和命令提交到命令队列的顺序一致。在创建命令队列的时候，可以通过设置 clCreateCommandQueue 函数的 `properties` 参数来指定命令队列中的命令是以 `in-order` 还是 `out-of-order` 的方式执行。
 
@@ -10,7 +13,7 @@
 同理，如果为命令队列设置了 `CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE` 属性，OpenCL 函数调用中，在 clEnqueueNDRangeKernel、clEnqueueTask 和 clEnqueueNativeKernel 命令之后提交到命令队列的读、写，拷贝和映射内存对象等命令，并不能保证会等待内核执行完成。为了保证正确的命令执行顺序，clEnqueueNDRangeKernel、clEnqueueTask 和 clEnqueueNativeKernel 返回的事件对象可以用来将一个`等待事件`提交到命令队列，或者将一个`屏障`命令提交到命令队列，以保证在读/写内存对象之前内核已经执行完成。
 
 ## 函数描述
-### 标记
+#### 1.标记
 把标记命令提交到命令队列。
 ```c
 cl_int clEnqueueMarker(cl_command_queue command_queue,
@@ -18,7 +21,7 @@ cl_int clEnqueueMarker(cl_command_queue command_queue,
 ```
 将标记命令提交到命令队列 `command_queue` 中。当标记命令执行后，在它之前提交到命令队列的命令也执行完成。该函数返回一个事件对象 `event`，在它后面提交到命令队列的命令可以等待该事件。例如，随后的命令可以等待该事件以确保标记之前的命令已经执行完成。如果函数成功执行返回 CL_SUCCESS。
 
-### 屏障
+#### 2.屏障
 提交屏障命令到命令队列。
 ```c
 cl_int clEnqueueBarrier(cl_command_queue command_queue)
@@ -27,7 +30,7 @@ cl_int clEnqueueBarrier(cl_command_queue command_queue)
 
 和 clFinish 不同的是该命令会异步执行，在 clEnqueueBarrier 返回后，线程可以执行其它任务，例如分配内存、创建内核等。而 clFinish 会阻塞当前线程，直到命令队列为空（所有的内核执行/数据对象操作已完成）。对 clFinish 的描述参见  [No.7_1_OpenCLSyncHost]()。
 
-### 等待事件
+#### 3.等待事件
 把等待事件命令提交到命令队列。
 ```c
 cl_int clEnqueueWaitForEvents(cl_command_queue command_queue,
@@ -46,7 +49,7 @@ cl_int clEnqueueWaitForEvents(cl_command_queue command_queue,
 
 <img src="image/command_queue.png" width="35%" height="35%">
 
-下面摘取部分操作进行描述，完整代码参见 []()。
+下面摘取部分操作进行描述，完整代码参见 [xxx]()。
 
 #### 1.创建命令队列
 在创建命令队列时，为命令队列设置了 `CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE` 属性，提交到命令队列的 OpenCL 命令将按照 `out-of-order` 的方式执行。
@@ -94,5 +97,39 @@ err = clEnqueueReadBuffer(queue, mem_dst_obj, CL_TRUE, 0,
 如果将位置 ① 的屏障操作去掉，由于命令队列中的命令按照 `out-of-order` 方式执行，这时 clEnqueueReadBuffer 命令就可能在 clEnqueueNDRangeKernel 之前执行完成，这将导致从内存对象中读取的数据可能不正确。
 
 ###命令队列间同步
+示例程序在 Ubuntu 上运行，该平台包含了两个 OpenCL 设备（CPU 和 GPU）。在程序执行时，为两个设备分别创建了命令队列，接着将任务分配到两个设备上执行。命令队列间的同步使用了`标记`和`等待事件`，以及`事件同步`机制，如下图所示：
+
+<img src="image/command_queues_devices.png" width="75%" height="75%">
+
+摘取部分代码如下。将`标记`命令提交到 GPU 设备对应的命令队列中，用来标识对内存对象的写操作。同时，在 CPU 设备对应的命令中提交 `等待事件` 命令，该命令会以异步方式等待`标记`命令执行完成后，才执行命令队列中它身后的命令。完整代码参见[xxxx]()。
+
+```c
+cl_event event_marker;
+
+clEnqueueMarker(queue[DEVICE_GPU], &event_marker);
+……
+clEnqueueWaitForEvents(queue[DEVICE_CPU], 1, &event_marker);
+```
+
+在 Ubuntu 系统下，该平台包含了两个 OpenCL 设备。程序运行结果如下所示：
+```c
+xbdong@xbdong-opencl:~/Project/github/OpenCL$ ./OpenCLSyncQueue
+[Platform Infomation]
+platform name: AMD Accelerated Parallel Processing
+
+[Device Infomation]
+device name: Intel(R) Core(TM) i5-4590 CPU @ 3.30GHz
+device name: Baffin
+
+[Result]
+Success
+```
+
+## 参考
+- [The OpenCL Specification, Version: 1.1](https://www.khronos.org/registry/OpenCL/specs/opencl-1.1.pdf)
+- OpenCL Programming Guide
+- [clFinish & clEnqueueBarrier](http://stackoverflow.com/questions/13200276/what-is-the-difference-between-clenqueuebarrier-and-clfinish)
+
+
 
 
