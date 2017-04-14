@@ -8,7 +8,7 @@
 
 在创建命令队列时，为命令队列设置 `CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE` 属性，应用程序调用 OpenCL 函数把命令提交到命令队列后，将按照 `out-of-order` 的方式执行。在 `out-of-order` 执行模式下，不能保证提交到命令队列中的命令是按照函数调用的顺序执行。例如，上面通过调用 `clEnqueueNDRangeKernel` 来执行内核 A 和内核 B 的阐述中，内核 B 可能在内核 A 之前执行完成。为了保证两个内核以一个特定的顺序执行，可以使用`事件同步`机制。执行内核 A 时使用 event 事件对象来标识该命令，在随后调用 clEnqueueNDRangeKernel 执行内核 B 时，将 event 事件对象作为其 `event_wait_list` 参数成员。
 
-除了`事件同步`可以用于多个内核执行时的同步，clEnqueueWaitForEvents（等待事件） 和 clEnqueueBarrier（屏障） 命令也可以提交到命令队列用于同步。`等待事件`命令保证在随后的命令执行之前，之前提交到命令队列的命令（使用事件列表来标识）已经执行完成；屏障命令保证在后面的命令执行之前，它前面提交到命令队列的命令已经执行完成。
+除了`事件同步`可以用于多个内核执行时的同步，clEnqueueWaitForEvents（等待事件） 和 clEnqueueBarrier（屏障） 命令也可以提交到命令队列用于同步。`等待事件`命令保证在它之后的命令执行之前，之前提交到命令队列的命令（使用事件列表来标识）已经执行完成；屏障命令保证在后面的命令执行之前，它前面提交到命令队列的命令已经执行完成。
 
 同理，如果为命令队列设置了 `CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE` 属性，OpenCL 函数调用中，在 clEnqueueNDRangeKernel、clEnqueueTask 和 clEnqueueNativeKernel 命令之后提交到命令队列的读、写，拷贝和映射内存对象等命令，并不能保证会等待内核执行完成。为了保证正确的命令执行顺序，clEnqueueNDRangeKernel、clEnqueueTask 和 clEnqueueNativeKernel 返回的事件对象可以用来将一个`等待事件`提交到命令队列，或者将一个`屏障`命令提交到命令队列，以保证在读/写内存对象之前内核已经执行完成。
 
@@ -19,7 +19,7 @@
 cl_int clEnqueueMarker(cl_command_queue command_queue,
 	cl_event *event)
 ```
-将标记命令提交到命令队列 `command_queue` 中。当标记命令执行后，在它之前提交到命令队列的命令也执行完成。该函数返回一个事件对象 `event`，在它后面提交到命令队列的命令可以等待该事件。例如，随后的命令可以等待该事件以确保标记之前的命令已经执行完成。如果函数成功执行返回 CL_SUCCESS。
+将`标记`命令提交到命令队列 `command_queue` 中。当标记命令执行后，在它之前提交到命令队列的命令也执行完成。该函数返回一个事件对象 `event`，在它后面提交到命令队列的命令可以等待该事件。例如，随后的命令可以等待该事件以确保标记之前的命令已经执行完成。如果函数成功执行返回 CL_SUCCESS。
 
 #### 2.屏障
 提交屏障命令到命令队列。
@@ -37,7 +37,7 @@ cl_int clEnqueueWaitForEvents(cl_command_queue command_queue,
 	cl_uint num_events,
 	const cl_event *event_list)
 ```
-将`等待事件`命令提交到命令队列 `command_queue` 中。当该命令执行完后，事件列表 `event_list` 中对应的命令也已经执行完成。事件列表 `event_list` 中对应的事件必须和命令队列 `command_queue` 处于同一个上下文。成功执行返回 CL_SUCCESS。
+将`等待事件`命令提交到命令队列 `command_queue` 中。当该命令执行完后，事件列表 `event_list` 中对应的命令已经执行完成。事件列表 `event_list` 中对应的事件必须和命令队列 `command_queue` 处于同一个上下文。成功执行返回 CL_SUCCESS。
 
 和 clWaitForEvents 不同的是该命令执行后会立即返回，线程可以在不阻塞的情况下接着执行其它任务。而 clWaitForEvents 会进入阻塞状态，直到事件列表 `event_list` 中对应的事件处于 `CL_COMPLETE` 状态。
 
@@ -49,7 +49,7 @@ cl_int clEnqueueWaitForEvents(cl_command_queue command_queue,
 
 <img src="image/command_queue.png" width="35%" height="35%">
 
-下面摘取部分操作进行描述，完整代码参见 [xxx]()。
+下面摘取部分操作进行描述，完整代码参见 [No.1_OpenCLSyncQueue](http://download.csdn.net/detail/bob_dong/9814000)。
 
 #### 1.创建命令队列
 在创建命令队列时，为命令队列设置了 `CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE` 属性，提交到命令队列的 OpenCL 命令将按照 `out-of-order` 的方式执行。
@@ -61,7 +61,7 @@ queue = clCreateCommandQueue(context, device,
 ```
 
 #### 2.等待事件操作
-将 [No.7_3_OpenCLSyncEvent]() 中 clWaitForEvents 替换为 clEnqueueWaitForEvents，在调用  clEnqueueWaitForEvents 后将立即返回。这样线程不会阻塞，接下来可以通过 malloc 函数分配内存，提高任务并行度。
+将 [No.7_3_OpenCLSyncEvent](http://blog.csdn.net/bob_dong/article/details/69664952) 中 clWaitForEvents 替换为 clEnqueueWaitForEvents，在调用  clEnqueueWaitForEvents 后将立即返回。这样线程不会阻塞，接下来可以通过 malloc 函数分配内存，提高任务并行度。
 ```c
 int *dst_buffer;
 
@@ -101,7 +101,7 @@ err = clEnqueueReadBuffer(queue, mem_dst_obj, CL_TRUE, 0,
 
 <img src="image/command_queues_devices.png" width="75%" height="75%">
 
-摘取部分代码如下。将`标记`命令提交到 GPU 设备对应的命令队列中，用来标识对内存对象的写操作。同时，在 CPU 设备对应的命令中提交 `等待事件` 命令，该命令会以异步方式等待`标记`命令执行完成后，才执行命令队列中它身后的命令。完整代码参见[xxxx]()。
+摘取部分代码如下。将`标记`命令提交到 GPU 设备对应的命令队列中，用来标识对内存对象的写操作。同时，在 CPU 设备对应的命令中提交 `等待事件` 命令，该命令会以异步方式等待`标记`命令执行完成后，才执行命令队列中它身后的命令。完整代码参见 [No.2_OpenCLSyncQueue](http://download.csdn.net/detail/bob_dong/9814002)。
 
 ```c
 cl_event event_marker;
