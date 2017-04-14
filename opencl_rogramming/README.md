@@ -60,6 +60,9 @@ git push -f origin master
 ### No.7_6_OpenCLAsyncCopy
 异步拷贝。在局部内存和全局内存区域之间执行异步拷贝操作。
 
+### No.7_7_OpenCLSyncQueue
+提交到命令队列中命令的同步，以及命令队列之间的同步。
+
 
 
 

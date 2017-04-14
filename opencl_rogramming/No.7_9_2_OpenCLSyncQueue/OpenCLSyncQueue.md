@@ -94,7 +94,7 @@ clEnqueueBarrier(queue);  // ①
 err = clEnqueueReadBuffer(queue, mem_dst_obj, CL_TRUE, 0,
         size, dst_buffer, 0, NULL, NULL);
 ```
-如果将位置 ① 的屏障操作去掉，由于命令队列中的命令按照 `out-of-order` 方式执行，这时 clEnqueueReadBuffer 命令就可能在 clEnqueueNDRangeKernel 之前执行完成，这时从内存对象中读取的数据可能不正确。
+如果将位置 ① 的屏障操作去掉，由于命令队列中的命令按照 `out-of-order` 方式执行，这时 clEnqueueReadBuffer 命令就可能在 clEnqueueNDRangeKernel 之前执行完成，这将导致从内存对象中读取的数据可能不正确。
 
 ###命令队列间同步
 示例程序在 Ubuntu 上运行，该平台包含了两个 OpenCL 设备（CPU 和 GPU）。在程序执行时，为两个设备分别创建了命令队列，接着将任务分配到两个设备上执行。命令队列间的同步使用了`标记`和`等待事件`，以及`事件同步`机制，如下图所示：
