@@ -5,7 +5,8 @@
 #include <sys/resource.h>
 
 #include <EGL/egl.h>
-#include <GLES3/gl3.h>
+#include <GLES2/gl2.h>
+#include <GLES2/gl2ext.h>
 
 #include <utils/Timers.h>
 
@@ -68,33 +69,9 @@ static bool checkGlError(const char* op) {
 
 //static EGLSurface surface;
 
-
-//EGLNativeWindowType my_window;
-//sp<Surface> sf;
-
-// EGL variables
-EGLDisplay          eglDisplay;
-EGLConfig	    eglConfig;
-EGLContext          eglContext;
-EGLSurface          eglSurface;
-
-
-// Handles for the two shaders used to draw the triangle, and the program handle which combines them.
-GLuint fragmentShader, vertexShader;
-GLuint shaderProgram;
-
-// Handles for the vertex buffer object
-GLuint              vertexBuffer;
-
-// Should the app still be animating?
-bool                isAnimating;
-
-// Is everything required initialised?
-bool				isInitialised;
-
-// Has an error occurred?
-bool				errorOccurred;
-
+	
+EGLNativeWindowType my_window;
+sp<Surface> sf;
 
 static void initGLSurface(void)
 {
@@ -115,36 +92,60 @@ static void initGLSurface(void)
 
 	sp<SurfaceControl> control =
 		session->createSurface(String8("Triangle"), dinfo.w, dinfo.h,
-			PIXEL_FORMAT_RGBX_8888, ISurfaceComposerClient::eOpaque);
-	//PIXEL_FORMAT_RGB_565);
+			PIXEL_FORMAT_RGB_565);
+			//PIXEL_FORMAT_RGBX_8888, ISurfaceComposerClient::eOpaque);
+	
 	if (control  == NULL || !control ->isValid()) {
 		fprintf(stderr, "Failed to create SurfaceControl\n");
 		return;
 	}
 
 	SurfaceComposerClient::openGlobalTransaction();
-	control->setLayer(0x7FFFFFFF);     // always on top
-	//control->setLayer(0x40000000);
+	//control->setLayer(0x7FFFFFFF);     // always on top
+	control->setLayer(0x40000000);
 	SurfaceComposerClient::closeGlobalTransaction();
 
 	//sp<Surface> surface = control->getSurface();
 	sp<Surface> sf = control->getSurface();
-	eglSurface = eglCreateWindowSurface(eglDisplay, eglConfig, sf.get(), NULL);
+	// xbdong
+	my_window = (EGLNativeWindowType) sf.get();
 }
 
+// EGL variables
+EGLDisplay          eglDisplay;
+EGLConfig	    eglConfig;
+EGLContext          eglContext;
+EGLSurface          eglSurface;
+
+
+	// Handles for the two shaders used to draw the triangle, and the program handle which combines them.
+	GLuint fragmentShader, vertexShader;
+	GLuint shaderProgram;
+	
+	// Handles for the vertex buffer object
+	GLuint              vertexBuffer;
+
+	// Should the app still be animating?
+	bool                isAnimating;
+	
+	// Is everything required initialised?
+	bool				isInitialised;
+
+	// Has an error occurred?
+	bool				errorOccurred;
 
 /*!*****************************************************************************************************************************************
-  @Function		CreateEGLDisplay
-  @Output		eglDisplay				    EGLDisplay created by the function
-  @Return		Whether the function succeeded or not.
-  @Description	Creates an EGLDisplay and initialises it.
- *******************************************************************************************************************************************/
+ @Function		CreateEGLDisplay
+ @Output		eglDisplay				    EGLDisplay created by the function
+ @Return		Whether the function succeeded or not.
+ @Description	Creates an EGLDisplay and initialises it.
+*******************************************************************************************************************************************/
 bool CreateEGLDisplay(EGLDisplay &eglDisplay) 
 {
 	/*	Get an EGL display.
 		EGL uses the concept of a "display" which in most environments corresponds to a single physical screen. After creating a native
 		display for a given windowing system, EGL can use this handle to get a corresponding EGLDisplay handle to it for use in rendering.
-	 */
+	*/
 	eglDisplay = eglGetDisplay((EGLNativeDisplayType)0);
 	if (eglDisplay == EGL_NO_DISPLAY)
 	{
@@ -158,7 +159,7 @@ bool CreateEGLDisplay(EGLDisplay &eglDisplay)
 		and eglGetError need an initialised EGLDisplay. 
 		If an application is not interested in the EGL version number it can just pass NULL for the second and third parameters, but they 
 		are queried here for illustration purposes.
-	 */
+	*/
 	EGLint eglMajorVersion, eglMinorVersion;
 	if (!eglInitialize(eglDisplay, &eglMajorVersion, &eglMinorVersion))
 	{
@@ -171,12 +172,12 @@ bool CreateEGLDisplay(EGLDisplay &eglDisplay)
 }
 
 /*!*****************************************************************************************************************************************
-  @Function		ChooseEGLConfig
-  @Input			eglDisplay                  The EGLDisplay used by the application
-  @Output		eglConfig                   The EGLConfig chosen by the function
-  @Return		Whether the function succeeded or not.
-  @Description	Chooses an appropriate EGLConfig and return it.
- *******************************************************************************************************************************************/
+ @Function		ChooseEGLConfig
+ @Input			eglDisplay                  The EGLDisplay used by the application
+ @Output		eglConfig                   The EGLConfig chosen by the function
+ @Return		Whether the function succeeded or not.
+ @Description	Chooses an appropriate EGLConfig and return it.
+*******************************************************************************************************************************************/
 bool ChooseEGLConfig(EGLDisplay eglDisplay, EGLConfig& eglConfig) 
 {
 	/*	Specify the required configuration attributes.
@@ -185,10 +186,10 @@ bool ChooseEGLConfig(EGLDisplay eglDisplay, EGLConfig& eglConfig)
 		requires so that an appropriate one can be chosen. The first step in doing this is to create an attribute list, which is an array
 		of key/value pairs which describe particular capabilities requested. In this application nothing special is required so we can query
 		the minimum of needing it to render to a window, and being OpenGL ES 3.0 capable.
-Note: Initially there was no way to specify ES3 support at this point, and it has subsequently been added as an extension. However
-for simplicity this still declares the ES2 bit, and the application queries for specific ES 3.0 support when creating the context
-later.
-	 */
+		Note: Initially there was no way to specify ES3 support at this point, and it has subsequently been added as an extension. However
+		for simplicity this still declares the ES2 bit, and the application queries for specific ES 3.0 support when creating the context
+		later.
+	*/
 	const EGLint configurationAttributes[] =
 	{
 		EGL_SURFACE_TYPE,		EGL_WINDOW_BIT,
@@ -200,11 +201,11 @@ later.
 		eglChooseConfig is provided by EGL to provide an easy way to select an appropriate configuration. It takes in the capabilities
 		specified in the attribute list, and returns a list of available configurations that match or exceed the capabilities requested.
 		Details of all the possible attributes and how they are selected for by this function are available in the EGL reference pages here:
-http://www.khronos.org/registry/egl/sdk/docs/man/xhtml/eglChooseConfig.html
-It is also possible to simply get the entire list of configurations and use a custom algorithm to choose a suitable one, as many
-advanced applications choose to do. For this application however, taking the first EGLConfig that the function returns suits
-its needs perfectly, so we limit it to returning a single EGLConfig.
-	 */
+		http://www.khronos.org/registry/egl/sdk/docs/man/xhtml/eglChooseConfig.html
+		It is also possible to simply get the entire list of configurations and use a custom algorithm to choose a suitable one, as many
+		advanced applications choose to do. For this application however, taking the first EGLConfig that the function returns suits
+		its needs perfectly, so we limit it to returning a single EGLConfig.
+	*/
 	EGLint configsReturned;
 	if (!eglChooseConfig(eglDisplay, configurationAttributes, &eglConfig, 1, &configsReturned) || (configsReturned != 1))
 	{
@@ -217,26 +218,25 @@ its needs perfectly, so we limit it to returning a single EGLConfig.
 }
 
 /*!*****************************************************************************************************************************************
-  @Function		CreateEGLSurface
-  @Input			nativeWindow                A native window that's been created
-  @Input			eglDisplay                  The EGLDisplay used by the application
-  @Input			eglConfig                   An EGLConfig chosen by the application
-  @Output		eglSurface					The EGLSurface created from the native window.
-  @Return		Whether the function succeeds or not.
-  @Description	Creates an EGLSurface from a native window
- *******************************************************************************************************************************************/
-//bool CreateEGLSurface(ANativeWindow* nativeWindow, EGLDisplay eglDisplay, EGLConfig eglConfig, EGLSurface& eglSurface) 
-bool CreateEGLSurface(EGLNativeWindowType nativeWindow, EGLDisplay eglDisplay, EGLConfig eglConfig, EGLSurface& eglSurface) 
+ @Function		CreateEGLSurface
+ @Input			nativeWindow                A native window that's been created
+ @Input			eglDisplay                  The EGLDisplay used by the application
+ @Input			eglConfig                   An EGLConfig chosen by the application
+ @Output		eglSurface					The EGLSurface created from the native window.
+ @Return		Whether the function succeeds or not.
+ @Description	Creates an EGLSurface from a native window
+*******************************************************************************************************************************************/
+bool CreateEGLSurface( ANativeWindow* nativeWindow, EGLDisplay eglDisplay, EGLConfig eglConfig, EGLSurface& eglSurface) 
 {
 	/*	Create an EGLSurface for rendering.
 		Using a native window created earlier and a suitable eglConfig, a surface is created that can be used to render OpenGL ES calls to.
 		There are three main surface types in EGL, which can all be used in the same way once created but work slightly differently:
-		- Window Surfaces  - These are created from a native window and are drawn to the screen.
-		- Pixmap Surfaces  - These are created from a native windowing system as well, but are offscreen and are not displayed to the user.
-		- PBuffer Surfaces - These are created directly within EGL, and like Pixmap Surfaces are offscreen and thus not displayed.
+		 - Window Surfaces  - These are created from a native window and are drawn to the screen.
+		 - Pixmap Surfaces  - These are created from a native windowing system as well, but are offscreen and are not displayed to the user.
+		 - PBuffer Surfaces - These are created directly within EGL, and like Pixmap Surfaces are offscreen and thus not displayed.
 		The offscreen surfaces are useful for non-rendering contexts and in certain other scenarios, but for most applications the main
 		surface used will be a window surface as performed below.
-	 */
+	*/
 	eglSurface = eglCreateWindowSurface(eglDisplay, eglConfig, (EGLNativeWindowType)nativeWindow, NULL);
 	if (!checkEglError("eglCreateWindowSurface"))
 	{
@@ -247,21 +247,21 @@ bool CreateEGLSurface(EGLNativeWindowType nativeWindow, EGLDisplay eglDisplay, E
 }
 
 /*!*****************************************************************************************************************************************
-  @Function		SetupEGLContext
-  @Input			eglDisplay                  The EGLDisplay used by the application
-  @Input			eglConfig                   An EGLConfig chosen by the application
-  @Input			eglSurface					The EGLSurface created from the native window.
-  @Output		eglContext                  The EGLContext created by this function
-  @Input			nativeWindow                A native window, used to display error messages
-  @Return		Whether the function succeeds or not.
-  @Description	Sets up the EGLContext, creating it and then installing it to the current thread.
- *******************************************************************************************************************************************/
+ @Function		SetupEGLContext
+ @Input			eglDisplay                  The EGLDisplay used by the application
+ @Input			eglConfig                   An EGLConfig chosen by the application
+ @Input			eglSurface					The EGLSurface created from the native window.
+ @Output		eglContext                  The EGLContext created by this function
+ @Input			nativeWindow                A native window, used to display error messages
+ @Return		Whether the function succeeds or not.
+ @Description	Sets up the EGLContext, creating it and then installing it to the current thread.
+*******************************************************************************************************************************************/
 bool SetupEGLContext( EGLDisplay eglDisplay, EGLConfig eglConfig, EGLSurface eglSurface, EGLContext& eglContext ) 
 {
 	/*	Make OpenGL ES the current API.
 		EGL needs a way to know that any subsequent EGL calls are going to be affecting OpenGL ES,
 		rather than any other API (such as OpenVG).
-	 */
+	*/
 	eglBindAPI(EGL_OPENGL_ES_API);
 	if (!checkEglError("eglBindAPI"))
 	{
@@ -274,7 +274,7 @@ bool SetupEGLContext( EGLDisplay eglDisplay, EGLConfig eglConfig, EGLSurface egl
 		is required for any operations in OpenGL ES.
 		Similar to an EGLConfig, a context takes in a list of attributes specifying some of its capabilities. However in most cases this
 		is limited to just requiring the version of the OpenGL ES context required - In this case, OpenGL ES 3.0.
-	 */
+	*/
 	EGLint contextAttributes[] = 
 	{
 		EGL_CONTEXT_CLIENT_VERSION, 3, 
@@ -292,7 +292,7 @@ bool SetupEGLContext( EGLDisplay eglDisplay, EGLConfig eglConfig, EGLSurface egl
 		Due to the way OpenGL uses global functions, contexts need to be made current so that any function call can operate on the correct
 		context. Specifically, make current will bind the context to the thread it's called from, and unbind it from any others. To use
 		multiple contexts at the same time, users should use multiple threads and synchronise between them.
-	 */
+	*/
 	eglMakeCurrent(eglDisplay, eglSurface, eglSurface, eglContext);
 	if (!checkEglError("eglMakeCurrent"))
 	{
@@ -303,11 +303,11 @@ bool SetupEGLContext( EGLDisplay eglDisplay, EGLConfig eglConfig, EGLSurface egl
 }
 
 /*!*****************************************************************************************************************************************
-  @Function		InitialiseBuffer
-  @Output		vertexBuffer                Handle to a vertex buffer object
-  @Return		Whether the function succeeds or not.
-  @Description	Initialises shaders, buffers and other state required to begin rendering with OpenGL ES
- *******************************************************************************************************************************************/
+ @Function		InitialiseBuffer
+ @Output		vertexBuffer                Handle to a vertex buffer object
+ @Return		Whether the function succeeds or not.
+ @Description	Initialises shaders, buffers and other state required to begin rendering with OpenGL ES
+*******************************************************************************************************************************************/
 bool InitialiseBuffer(GLuint &vertexBuffer) 
 {
 	/*	Concept: Vertices
@@ -315,7 +315,7 @@ bool InitialiseBuffer(GLuint &vertexBuffer)
 		it is. The data used to do this is referred to as vertices, points in 3D space which are usually collected into groups of three 
 		to render as triangles. Fundamentally, any advanced 3D shape in OpenGL ES is constructed from a series of these vertices - each 
 		vertex representing one corner of a polygon.
-	 */
+	*/
 
 	/*	Concept: Buffer Objects
 		To operate on any data, OpenGL first needs to be able to access it. The GPU maintains a separate pool of memory it uses independent
@@ -323,24 +323,23 @@ bool InitialiseBuffer(GLuint &vertexBuffer)
 		allocate memory without having to worry about synchronising with any other processors in the device.
 		To this end, data needs to be uploaded into buffers, which are essentially a reserved bit of memory for the GPU to use. By creating
 		a buffer and giving it some data we can tell the GPU how to render a triangle.
-	 */
+	*/
 
 	// Vertex data containing the positions of each point of the triangle
-	GLfloat vertexData[] = {
-		-0.4f,-0.4f, 0.0f,  // Bottom Left
-		0.4f,-0.4f, 0.0f,  // Bottom Right
-		0.0f, 0.4f, 0.0f}; // Top Middle
+	GLfloat vertexData[] = {-0.4f,-0.4f, 0.0f,  // Bottom Left
+	                         0.4f,-0.4f, 0.0f,  // Bottom Right
+	                         0.0f, 0.4f, 0.0f}; // Top Middle
 
 	// Generate a buffer object
 	glGenBuffers(1, &vertexBuffer);
 
 	// Bind buffer as an vertex buffer so we can fill it with data
 	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-
+	
 	/*	Set the buffer's size, data and usage
 		Note the last argument - GL_STATIC_DRAW. This tells the driver that we intend to read from the buffer on the GPU, and don't intend
 		to modify the data until we're done with it.		
-	 */
+	*/
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertexData), vertexData, GL_STATIC_DRAW);
 
 	if (!checkGlError("glBufferData"))
@@ -353,13 +352,13 @@ bool InitialiseBuffer(GLuint &vertexBuffer)
 
 
 /*!*****************************************************************************************************************************************
-  @Function		InitialiseShaders
-  @Output		fragmentShader              Handle to a fragment shader
-  @Output		vertexShader                Handle to a vertex shader
-  @Output		shaderProgram               Handle to a shader program containing the fragment and vertex shader
-  @Return		Whether the function succeeds or not.
-  @Description	Initialises shaders, buffers and other state required to begin rendering with OpenGL ES
- *******************************************************************************************************************************************/
+ @Function		InitialiseShaders
+ @Output		fragmentShader              Handle to a fragment shader
+ @Output		vertexShader                Handle to a vertex shader
+ @Output		shaderProgram               Handle to a shader program containing the fragment and vertex shader
+ @Return		Whether the function succeeds or not.
+ @Description	Initialises shaders, buffers and other state required to begin rendering with OpenGL ES
+*******************************************************************************************************************************************/
 bool InitialiseShaders( GLuint &fragmentShader, GLuint &vertexShader, GLuint &shaderProgram) 
 {
 	/*	Concept: Shaders
@@ -370,7 +369,7 @@ bool InitialiseShaders( GLuint &fragmentShader, GLuint &vertexShader, GLuint &sh
 		which is usually abbreviated to simply "GLSL ES".
 		Each shader is compiled on-device and then linked into a shader program, which combines a vertex and fragment shader into a form 
 		that the OpenGL ES implementation can execute.
-	 */
+	*/
 
 	/*	Concept: Fragment Shaders
 		In a final buffer of image data, each individual point is referred to as a pixel. Fragment shaders are the part of the pipeline
@@ -379,7 +378,7 @@ bool InitialiseShaders( GLuint &fragmentShader, GLuint &vertexShader, GLuint &sh
 		The reason these are called "fragment" shaders instead of "pixel" shaders is due to a small technical difference between the two
 		concepts. When you colour a fragment, it may not be the final colour which ends up on screen. This is particularly true when 
 		performing blending, where multiple fragments can contribute to the final pixel colour.
-	 */
+	*/
 	const char* const fragmentShaderSource = "\
 									  #version 300 es\n\
 									  layout (location = 0) out lowp vec4 outColour;\
@@ -426,13 +425,13 @@ bool InitialiseShaders( GLuint &fragmentShader, GLuint &vertexShader, GLuint &sh
 		delete[] infoLog;
 		return false;
 	}
-
+	
 	/*	Concept: Vertex Shaders
 		Vertex shaders primarily exist to allow a developer to express how to orient vertices in 3D space, through transformations like 
 		Scaling, Translation or Rotation. Using the same basic layout and structure as a fragment shader, these take in vertex data and 
 		output a fully transformed set of positions. Other inputs are also able to be used such as normals or texture coordinates, and can 
 		also be transformed and output alongside the position data.
-	 */
+	*/
 	// Vertex shader code
 	const char* const vertexShaderSource = "\
 									  #version 300 es\n\
@@ -522,31 +521,31 @@ bool InitialiseShaders( GLuint &fragmentShader, GLuint &vertexShader, GLuint &sh
 		delete[] infoLog;
 		return false;
 	}
-
+	
 	/*	Use the Program
 		Calling glUseProgram tells OpenGL ES that the application intends to use this program for rendering. Now that it's installed into
 		the current state, any further glDraw* calls will use the shaders contained within it to process scene data. Only one program can
 		be active at once, so in a multi-program application this function would be called in the render loop. Since this application only
 		uses one program it can be installed in the current state and left there.
-	 */
+	*/
 	glUseProgram(shaderProgram);
 
 	if (!checkGlError("glUseProgram"))
 	{
 		return false;
 	}
-
+	
 	return true;
 }
 
 /*!*****************************************************************************************************************************************
-  @Function		RenderScene
-  @Input			shaderProgram               The shader program used to render the scene
-  @Input			eglDisplay                  The EGLDisplay used by the application
-  @Input			eglSurface					The EGLSurface created from the native window.
-  @Return		Whether the function succeeds or not.
-  @Description	Renders the scene to the framebuffer. Usually called within a loop.
- *******************************************************************************************************************************************/
+ @Function		RenderScene
+ @Input			shaderProgram               The shader program used to render the scene
+ @Input			eglDisplay                  The EGLDisplay used by the application
+ @Input			eglSurface					The EGLSurface created from the native window.
+ @Return		Whether the function succeeds or not.
+ @Description	Renders the scene to the framebuffer. Usually called within a loop.
+*******************************************************************************************************************************************/
 bool RenderScene( GLuint shaderProgram, EGLDisplay eglDisplay, EGLSurface eglSurface ) 
 {	
 	/*	Set the clear color
@@ -556,19 +555,17 @@ bool RenderScene( GLuint shaderProgram, EGLDisplay eglDisplay, EGLSurface eglSur
 		the intensity of the particular channel, with all 0.0 being transparent black, and all 1.0 being opaque white. Subsequent calls to
 		glClear with the colour bit will clear the frame buffer to this value.
 		The functions glClearDepth and glClearStencil allow an application to do the same with depth and stencil values respectively.
-	 */
+	*/
 	glClearColor(0.6f, 0.8f, 1.0f, 1.0f);
 
 	/*	Clears the color buffer.
 		glClear is used here with the Colour Buffer to clear the colour. It can also be used to clear the depth or stencil buffer using 
 		GL_DEPTH_BUFFER_BIT or GL_STENCIL_BUFFER_BIT, respectively.
-	 */
+	*/
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	// Get the location of the transformation matrix in the shader using its name
 	int matrixLocation = glGetUniformLocation(shaderProgram, "transformationMatrix");
-
-	printf("======> %s matrixLocation=%d\n", __func__, matrixLocation);
 
 	// Matrix used to specify the orientation of the triangle on screen.
 	const float transformationMatrix[] =
@@ -580,7 +577,7 @@ bool RenderScene( GLuint shaderProgram, EGLDisplay eglDisplay, EGLSurface eglSur
 	};
 
 	// Pass the transformationMatrix to the shader using its location
-	glUniformMatrix4fv(matrixLocation, 1, GL_FALSE, transformationMatrix);
+	glUniformMatrix4fv( matrixLocation, 1, GL_FALSE, transformationMatrix);
 	if (!checkGlError("glUniformMatrix4fv"))
 	{
 		return false;
@@ -604,7 +601,7 @@ bool RenderScene( GLuint shaderProgram, EGLDisplay eglDisplay, EGLSurface eglSur
 		some vertices are accessed multiple times, without copying the vertex multiple times.
 		Others include versions of the above that allow the user to draw the same object multiple times with slightly different data, and
 		a version of glDrawElements which allows a user to restrict the actual indices accessed.
-	 */
+	*/
 	glDrawArrays(GL_TRIANGLES, 0, 3);
 	if (!checkGlError("glDrawArrays"))
 	{
@@ -617,13 +614,13 @@ bool RenderScene( GLuint shaderProgram, EGLDisplay eglDisplay, EGLSurface eglSur
 		that OpenGL ES 3.0 has finished rendering a scene, and that the display should now draw to the screen from the new data. At the same
 		time, the front buffer is made available for OpenGL ES 3.0 to start rendering to. In effect, this call swaps the front and back 
 		buffers.
-	 */
+	*/
 	if (!eglSwapBuffers(eglDisplay, eglSurface) )
 	{
 		checkEglError("eglSwapBuffers");
 		return false;
 	}
-
+	
 	return true;
 }
 
@@ -642,21 +639,14 @@ int main(void) {
 		fprintf(stderr, "ChooseEGLConfig error\n");
 	}
 
-
-
-	initGLSurface();
-
-#if 0
-	fprintf(stderr, "====>%s====[3]=====\n", __func__);
 	// 需要获取 Window 窗口用于绘制
 	//if (!CreateEGLSurface(sf.get, eglDisplay, 
 	if (!CreateEGLSurface(my_window, eglDisplay, 
-			eglConfig, eglSurface))
+		eglConfig, eglSurface))
 	{
 		errorOccurred = true;
 		fprintf(stderr, "CreateEGLSurface error\n");
 	}
-#endif
 
 	if (!SetupEGLContext(eglDisplay, eglConfig, eglSurface, eglContext) )
 	{
@@ -673,7 +663,7 @@ int main(void) {
 	if (errorOccurred != true)
 	{
 		if (!InitialiseShaders(fragmentShader, vertexShader, 
-				shaderProgram))
+			shaderProgram) )
 		{
 			errorOccurred = true;
 			fprintf(stderr, "InitialiseShaders error\n");
@@ -681,11 +671,10 @@ int main(void) {
 		else
 		{
 			isInitialised = true;
-			fprintf(stderr, "InitialiseShaders Success\n");
+			fprintf(stderr, "Success error\n");
 		}
 	}
-
-	fprintf(stderr, "====>%s====[7]=====\n", __func__);
+	
 	if (!RenderScene(shaderProgram, eglDisplay, eglSurface))
 	{
 		fprintf(stderr, "RenderScene error\n");
