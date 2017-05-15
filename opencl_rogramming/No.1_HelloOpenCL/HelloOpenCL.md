@@ -86,7 +86,7 @@ if (CL_SUCCESS != err) {
 input = clCreateBuffer(context, CL_MEM_READ_ONLY |
         CL_MEM_COPY_HOST_PTR, strlen(upper_case), upper_case, &err);
 output = clCreateBuffer(context, CL_MEM_WRITE_ONLY, strlen(upper_case),
-        N设备L, &err);
+        NULL, &err);
 if (input == NULL || output == NULL) {
         printf("create memory buffer fail: %d\n", err);
         exit(EXIT_FAILURE);
@@ -126,10 +126,10 @@ clFinish(queue);
 ```
 
 ### 12.获取结果
-获取设备端返回的结果
+获取设备端返回的结果。
 
 ### 13.释放资源
-在程序退出之前，释放前面创建的对象资源
+在程序退出之前，释放前面创建的对象资源。
 ```c
 clReleaseKernel(kernel);
 clReleaseMemObject(input);
