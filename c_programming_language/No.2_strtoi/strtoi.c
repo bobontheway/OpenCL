@@ -2,10 +2,10 @@
 #include <stdlib.h>
 
 #define true	1
-#define	false	0
+#define false	0
 
 // 字符是否为十六进制数字
-int mine_isdigit(char ch)
+int isDigit(char ch)
 {
 	if ((ch >= '0') && (ch <= '9'))
 		return true;
@@ -20,7 +20,7 @@ int mine_isdigit(char ch)
 }
 
 // 字符为 'a' ~ 'h' 或 ‘A’ ~ 'H' 的十六进制数字
-int mine_isxdigit(char ch)
+int isXDigit(char ch)
 {
 	if (((ch >= 'a') && (ch <= 'f')) || ((ch >= 'A') && (ch <= 'F')))
 		return true;
@@ -29,30 +29,44 @@ int mine_isxdigit(char ch)
 }
 
 // 转换为小写字母
-int inline mine_tolower(char ch)
+int inline toLower(char ch)
 {
 	return (ch | 0x20);
 }
 
-// 十六进制
-int htoi(const char *ch)
+// 十六进制、八进制、十进制
+int strtoi(char *ch)
 {
-	int result = 0;
 	int value;
+	int result = 0;
+
+	int base; // 基数
 
 	if (ch[0] == '0') {
-		if ((ch[1] == 'x') || (ch[1] == 'X'))
+		if ((ch[1] == 'x') || (ch[1] == 'X')) {
+			base = 16; // 十六进制
 			ch += 2;
+		} else {
+			base = 8; // 八进制
+		}
+	} else {
+		base = 10; // 十禁止
 	}
 
+	printf("base = %d\n", base);
 	while (*ch != '\0') {
-		if (mine_isdigit(*ch)) {
-			if (mine_isxdigit(*ch))
-				value = 10 + mine_tolower(*ch) - 'a';
+		if (isDigit(*ch)) {
+			if (isXDigit(*ch))
+				value = 10 + toLower(*ch) - 'a';
 			else
 				value = *ch - '0';
 
-			result = result * 16 + value;
+			if (value >= base) {
+				printf("invalide value\n");
+				return EXIT_FAILURE;
+			}
+
+			result = result * base + value;
 		} else {
 			printf("invalide value\n");
 			return EXIT_FAILURE;
@@ -64,9 +78,11 @@ int htoi(const char *ch)
 
 int main(int argc, char *argv[])
 {
-	char *vstr = "0x1987A46";
+	//char *vstr = "017246";
+	//char *vstr = "0X1987A46";
+	char *vstr = "198746";
 
-	int val = htoi(vstr);
+	int val = strtoi(vstr);
 	printf("val = %d hex val=0x%x\n", val, val);
 	return 0;
 }
