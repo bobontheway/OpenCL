@@ -155,3 +155,4 @@ int strtoi(char *ch)
 
 - The C Programming Language
 - https://zhidao.baidu.com/question/61885883.html
+- Linux kenel 3.18（arch/x86/boot/string.c）
