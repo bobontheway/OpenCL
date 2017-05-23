@@ -1,0 +1,13 @@
+5. OpenCL 性能和优化
+本文讨论当为 AMD APP GPU 计算、CPU，以及 GPU 和 CPU 的组合，等设备编程时的性能和优化。和 Southern Islands 系列 GPU 相关的详细细节在本章的
+末尾描述。
+
+5.1 CodeXL GPU Profiler 介绍
+CodeXL GPU Profiler（后面称作 Profiler）是性能分析工具，在 OpenCL 应用程序执行时，用来从 OpenCL run-time 和 AMD Radeon GPUs 获取数据信息。
+这些信息在 AMD 的平台下，用来发现应用程序中的瓶颈，并找到方法以优化应用程序的性能。下面的部分描述 Profiler 支持的操作模式。
+
+5.1.1 收集 OpenCL 应用执行信息
+
+当被剖析的应用程序执行完后，CodeXL 显示会话。
+
+
