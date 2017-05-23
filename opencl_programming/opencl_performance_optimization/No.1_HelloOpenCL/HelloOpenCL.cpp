@@ -7,6 +7,9 @@
 #include <CL/cl.h>
 #endif
 
+#include <sys/time.h>
+#include <time.h>
+
 const char *source =
 "__kernel void tolower(__global char *in, __global char *out)		\n"
 "{								        \n"
@@ -17,6 +20,17 @@ const char *source =
 "	else                                                            \n"
 "		out[g_id] = in[g_id];                             	\n"
 "}								        \n";
+
+static void system_time()
+{
+	struct timespec t;
+	t.tv_sec = t.tv_nsec = 0;
+	clock_gettime(CLOCK_MONOTONIC, &t);
+	//return (int64_t)(t.tv_sec)*1000000000LL + (int64_t)t.tv_nsec;
+
+	unsigned long time = (unsigned long)(t.tv_sec)*1000000000LL + (unsigned long)t.tv_nsec;
+	printf("time=%lu\n", time);
+}
 
 void check_error(int error, int line)
 {
@@ -73,6 +87,8 @@ int main()
 	cl_program program;
 	cl_kernel kernel;
 
+	cl_event event;
+
 	cl_mem input, output;
 	const char *upper_case = "Hello OpenCL, I like U";
 
@@ -100,7 +116,8 @@ int main()
 	// create command queue
 	//queue = clCreateCommandQueue(context, device, 0, &err);
 	// Q: third arg is 0 or NULL
-	queue = clCreateCommandQueue(context, device, 0, &err);
+	//queue = clCreateCommandQueue(context, device, 0, &err);
+	queue = clCreateCommandQueue(context, device, CL_QUEUE_PROFILING_ENABLE, &err);
 	if (queue == NULL) {
 		printf("create command queue fail\n");
 		exit(EXIT_FAILURE);
@@ -154,8 +171,34 @@ int main()
 	size_t local_size[] = {strlen(upper_case)};
 	err = clEnqueueNDRangeKernel(queue, kernel, 1,
 		0, g_size, local_size,
-		0, NULL, NULL);
+		0, NULL, &event);
+		//0, NULL, NULL);
 	clFinish(queue);
+	system_time();
+
+	cl_ulong time_queue, time_submit;
+	cl_ulong time_start, time_end;
+
+	clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_QUEUED,
+		sizeof(cl_ulong), &time_queue, NULL);
+	clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_SUBMIT,
+		sizeof(cl_ulong), &time_submit, NULL);
+
+	// 64-bit 值，当使用 event 标识的命令执行时，描述当前设备的时间
+	// 以纳秒为单位的计数
+	clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_START,
+		sizeof(cl_ulong), &time_start, NULL);
+	// 使用 event 标识的命令，在设备上已经执行完成
+	clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_END,
+		sizeof(cl_ulong), &time_end, NULL);
+
+	cl_ulong kernel_time = time_end - time_start;
+	cl_ulong startup_time = time_submit - time_queue;
+	printf("kernel_time is: %lu(nm)\n", startup_time);
+	printf("kernel_time is: %lu(nm)\n", kernel_time);
+
+	printf("time_end is: %lu(nm)\n", time_end);
+
 
 	char outBuf[strlen(upper_case)+1];
 	outBuf[strlen(upper_case)] = '\0';
