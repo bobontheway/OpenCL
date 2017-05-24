@@ -11,3 +11,41 @@ CodeXL GPU Profiler（后面称作 Profiler）是性能分析工具，在 OpenCL
 当被剖析的应用程序执行完后，CodeXL 显示会话。
 
 
+
+======================
+Performance
+======================
+
+Memory performance
+
+1.read v1, v2, v4, v8, v16
+- workgroup size = NULL
+
+2.read v1
+- workgroup size = 32, 64, 128, 256
+
+
+Compute performance
+1.compute float v1, v2, v4, v8, v16
+- workgroup size = NULL
+
+2.compute float v1
+- workgroup size = 32, 64, 128, 256
+
+======================
+Compute performance
+Peak single precision float 	72.81 GFLOP/s
+Peak integer			81.36 GFLOP/s
+Peak short			152.15GFLOP/s
+
+Memory bandwidth
+Kernel copy		12.30 GB/s
+Kernel write		12.10 GB/s
+Kernel read		8.37 GB/s
+
+General performance
+Kernel latency		0.252 ms
+Accuracy test		passed
+
+
+
