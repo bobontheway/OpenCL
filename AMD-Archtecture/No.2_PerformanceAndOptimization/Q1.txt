@@ -48,4 +48,53 @@ Kernel latency		0.252 ms
 Accuracy test		passed
 
 
+[Linux APP call]
+CLOCK_MONOTONIC
+              Clock that cannot be set and  represents  monotonic  time  since
+              some unspecified starting point.
+
+CLOCK_MONOTONIC 单调递增时间，不能被修改。
+时钟不能被设置，表示单调递增（ monotonic）时间，从某些没有固定的点开始。
+
+
+[Linux kernel call]
+Linux kernel 中使用高精度定时器来实现。
+
+通过 hrtimer_init() 来初始化。
+
+为给定的是时钟初始化高精度定时器。
+
+hrtimer_init - initialize a timer to the given clock
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
