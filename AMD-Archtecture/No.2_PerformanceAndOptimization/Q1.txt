@@ -67,9 +67,9 @@ Linux kernel 中使用高精度定时器来实现。
 hrtimer_init - initialize a timer to the given clock
 
 
+http://btorpey.github.io/blog/2014/02/18/clock-sources-in-linux/
 
-
-
+https://lwn.net/Articles/429925/
 
 
 
