@@ -223,7 +223,7 @@ int main(int argc, char **argv)
 		exit(1);
 	};
 
-	global_size=INSIZE;
+	global_size=INSIZE; // xbdong
 
 	printf("clCreateBuffer\n");
 	input_buffer = clCreateBuffer(context, CL_MEM_READ_ONLY|CL_MEM_COPY_HOST_PTR, INSIZE*sizeof(int), input, &err);    

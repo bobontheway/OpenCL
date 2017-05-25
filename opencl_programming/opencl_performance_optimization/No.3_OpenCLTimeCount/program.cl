@@ -1,4 +1,6 @@
-__kernel void tolower(__global char *in, __global char *out)
+#define INSIZE	8388608 /* 8MB */
+
+__kernel void memory_read_v2(__global int *in, __global int *out)
 {
 	int g_id = get_global_id(0);
 

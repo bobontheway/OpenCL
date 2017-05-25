@@ -7,6 +7,9 @@
 #include <CL/cl.h>
 #endif
 
+#define SIZE	(8*1024*1024)	/* 8MB int32 */
+#define COUNT	300
+
 void check_error(int error, int line)
 {
 	if (error != CL_SUCCESS) {
@@ -96,7 +99,7 @@ int main()
 	char *program_buf;
 
 	cl_mem input, output;
-	const char *upper_case = "Hello OpenCL, I like U";
+	//const char *upper_case = "Hello OpenCL, I like U";
 
 	// get platform
 	err = clGetPlatformIDs(1, &platform, NULL);
@@ -180,20 +183,20 @@ int main()
 	// execute kernel
 	// Q: how to set local size?
 	// A: the size same as the strlen
-	size_t g_size[] = {strlen(upper_case)};
-	size_t local_size[] = {strlen(upper_case)};
+	//size_t g_size[] = {strlen(upper_case)};
+	//size_t local_size[] = {strlen(upper_case)};
 	err = clEnqueueNDRangeKernel(queue, kernel, 1,
 		0, g_size, local_size,
 		0, NULL, NULL);
 	clFinish(queue);
 
-	char outBuf[strlen(upper_case)+1];
-	outBuf[strlen(upper_case)] = '\0';
+	//char outBuf[strlen(upper_case)+1];
+	//outBuf[strlen(upper_case)] = '\0';
 	err = clEnqueueReadBuffer(queue, output, CL_TRUE, 0,
 		strlen(upper_case), outBuf, 0, NULL, NULL);
 	check_error(err, __LINE__);
-	printf("[Result]\n");
-	printf("lower case is: %s\n", outBuf);
+	//printf("[Result]\n");
+	//printf("lower case is: %s\n", outBuf);
 
 	clReleaseKernel(kernel);
 	clReleaseMemObject(input);
