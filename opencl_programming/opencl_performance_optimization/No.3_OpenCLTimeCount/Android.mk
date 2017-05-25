@@ -1,9 +1,9 @@
 LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
-LOCAL_SRC_FILES := OpenCLProgram.cpp
+LOCAL_SRC_FILES := OpenCLTimeCount.cpp
 
-LOCAL_MODULE := opencl_program
+LOCAL_MODULE := opencl_time
 
 LOCAL_SHARED_LIBRARIES := libcutils libutils libOpenCL
 LOCAL_MODULE_TAGS := eng optional tests
