@@ -15,4 +15,46 @@ clEnqueueNativeKernel。这些提交到命令队列的命令使用唯一（特�
 对 OpenCL 命令分析的使能，可以在通过 clCreateCommandQueue 创建命令队列时，为
 其 properties 参数设置 CL_QUEUE_PROFILING_ENABLE 标志。
 
+如果分析使能，下面的函数
+cl_int
+clGetEventProfilingInfo (cl_event event,
+	cl_profiling_info param_name,
+	size_t param_value_size,
+	void *param_value,
+	size_t *param_value_size_ret)
+
+返回和 event 关联的命令的分析信息。
+
+- event：指定事件对象；
+- param_name：指定需要查询的分析数据。支持的 param_name 的类型列表
+和通过 clGetEventProfilingInfo 在 param_value 参数中返回的信息在下面
+的表中描述。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
