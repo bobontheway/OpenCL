@@ -1,4 +1,6 @@
 #include <CL/cl.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 /* Find a GPU or CPU associated with the first available platform */
 cl_device_id create_device() {
