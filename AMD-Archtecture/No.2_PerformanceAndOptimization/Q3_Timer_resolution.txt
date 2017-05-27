@@ -1,0 +1,18 @@
+CL_DEVICE_PROFILING_TIMER_RESOLUTION  -
+描述设备定时器的精度。在测量时以纳秒为单位。
+
+5.12 对内存对象和内核的分析（Profiling）操作
+
+这部分描述对 OpenCL 函数的分析操作，这些函数作为命令提交到命令队列中。
+涉及到的函数包括：
+Enqueue{Read|Write|Map}Image, clEnqueueUnmapMemObject, clEnqueueCopyBuffer,
+clEnqueueCopyBufferRect, clEnqueueCopyImage, clEnqueueCopyImageToBuffer,
+clEnqueueCopyBufferToImage, clEnqueueNDRangeKernel , clEnqueueTask 和
+clEnqueueNativeKernel。这些提交到命令队列的命令使用唯一（特定）的事件对象来
+标识。
+
+事件对象可以用来捕获（获取）分析（Profiling）信息，它们测量了命令的执行时间。
+对 OpenCL 命令分析的使能，可以在通过 clCreateCommandQueue 创建命令队列时，为
+其 properties 参数设置 CL_QUEUE_PROFILING_ENABLE 标志。
+
+
