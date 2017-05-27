@@ -255,7 +255,8 @@ int main()
 
 		// xbdong
 		cl_ulong sum = 0;
-		for (int i = 0; i < MAX_COUNT; i++) {
+		//for (int i = 0; i < MAX_COUNT; i++) {
+		for (int i = 0; i < 2; i++) {
 			err = clEnqueueNDRangeKernel(queue, kernel, 1,
 				//NULL, g_size, local_size,
 				NULL, global_size[index], local_size,
@@ -273,7 +274,35 @@ int main()
 
 			//printf("prof start:%lu  prof_end:%lu\n", prof_start, prof_end);
 			//printf("prof time is:%lu(us)\n", (cl_ulong)(prof_end-prof_start)/1000);
-			sum = sum + (prof_end - prof_start) / 1000;
+
+			//float time = (prof_end - prof_start) / 1e9; // ns
+			float time = (prof_end - prof_start) / 1e9; // ns
+			printf("time=%fs  time_count=%lu\n", time,
+				(prof_end-prof_start));
+
+#if 0
+			double size = SIZE / 1024.0f / 1024.0f / 1024.0f *
+				sizeof(int) * 2; 
+			double sec = (prof_end - prof_start) / 1000000000.0f;
+			double band_width = size / sec;
+
+			printf("size=%lu  time=%lu band_width=%lf\n", size,
+				time, band_width);
+#endif
+			int64_t size = SIZE * sizeof(int) * 2; // bytes
+			//float gsize = SIZE / 1024.0f / 1024.0f / 1024.0f;
+			float gsize = size / 1024.0f / 1024.0f / 1024.0f;
+
+			printf("size=%ldByte  gsize=%fG\n", size, gsize);
+
+			printf("bandwidth=%fG/s\n", gsize/time);
+#if 0
+			float band_width = SIZE * sizeof(int) * 2 / time;
+			printf("band_width=%f\n", band_width);
+#endif
+
+
+			//sum = sum + (prof_end - prof_start) / 1000;
 		}
 		printf("prof time is: sum=%lu  time=%lu(um)\n", sum, (sum/MAX_COUNT));
 

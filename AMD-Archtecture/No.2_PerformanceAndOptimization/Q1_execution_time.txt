@@ -1,0 +1,66 @@
+测量执行时间
+
+当创建命令队列时，通过设置 CL_QUEUE_PROFILING_ENABLE 标识，
+OpenCL 运行库可以提供内置机制来测算（timing）内核执行时间。
+一旦 profiling 使能后，在每次内核和内存操作提交给命令队列
+时，OpenCL 运行库自动记录时间戳信息。
+
+OpenCL 提供了四种时间戳信息：
+- CL_PROFILING_COMMAND_QUEUED：表明在主机端，命令提交到命
+令队列的时间；
+- CL_PROFILING_COMMAND_SUBMIT：表示命令提交给设备设备的时
+间；
+- CL_PROFILING_COMMAND_START：表示命令在请求的设备上开始
+执行的时间；
+- CL_PROFILIGN_COMMAND_END：表示命令在请求的设备上结束执行
+的时间。
+
+下面的示例代码显示了如何计算内核的执行时间（结束-开始）：
+...	...
+
+另一个跟踪的有趣度量是内核的启动时间（Start-Queue）。内核
+启动时间同时包括消耗在用户应用中（执行提交到命令队列，但
+是在提交到设备之前）还有消耗在运行库中用来启动内核的时间。
+对于 CPU 设备，内核的启动时间非常快（几十微秒），但是对于
+独立的 GPU 设备，这时间可能达到几百微秒。在命令中使能
+profiling 功能，对所有的 clEnqueue 调用，会额外添加大约
+10 微秒到 40 微秒的时间消耗。很多 profiling 的消耗影响开始
+（start）时间；因此，这也会影响启动时间。在解释这个测量时
+需要小心。为了降低启动（launch）时间的消耗，AMD 的 OpenCL
+运行库将提交的多个命令合并到到一批处理。提交的一批命令，给
+出类似（similar）的开始时间和相同的结束时间。
+
+5.4.2 使用 OpenCL 定时器和其它的系统定时器
+定时器的精度，以纳秒为单位，可以通过下面的方式获得：
+clGetDEviceInfo(..., CL_DEVICE_PROFILING_TIMER_RESOLUTION...);
+
+AMD CPUs 和 GPUs 提供的定时器精度为 1 ns。AMD OpenCL 设备被要
+求正确的跟踪时间，即使在频率和电源状态发生改变的情况下。还有，
+AMD 的 OpenCL SDK 对平台上的所有的设备使用相同的时钟域
+（time-domain）;因此，profiling 的时间戳可以在 CPU 和 GPU 设备
+之间直接比较。
+
+下面的示例代码可以用来读取 OpenCL 定时器时钟的当前值。该时钟
+和 AMD OpenCL 运行库用来生成时间戳的时钟相同。该函数在用于关联
+其他的程序事件和 OpenCL profiling 时间戳时非常有用。
+。。。
+
+通常的的 CPU time-of-day 程序可以提供一个粗糙的方法来测试 GPU
+内核的执行时间。GPU 内核以非阻塞的方式执行，也就是说调用
+enqueue*Kernel 在 GPU 上的工作完成之前返回到 CPU。对于精确的
+时间值，保证 GPU 已经完成。在 OpenCL 中，可以通过在需要测量的
+时间前后其后面插入一个 clFinish() 来强制 CPU 进入等待状态直到
+GPU 空闲；这增加了 CPU 程序的定时精度。clFinish() 程序阻塞 CPU
+直到前面提交到队列中的 OpenCL 命令执行完成。
+
+
+
+
+
+
+
+
+
+
+
+
