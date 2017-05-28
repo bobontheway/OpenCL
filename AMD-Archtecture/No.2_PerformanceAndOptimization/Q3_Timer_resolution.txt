@@ -29,6 +29,25 @@ clGetEventProfilingInfo (cl_event event,
 - param_name：指定需要查询的分析数据。支持的 param_name 的类型列表
 和通过 clGetEventProfilingInfo 在 param_value 参数中返回的信息在下面
 的表中描述。
+- param_value：指向内存的指针，查询返回的对应结果将被存放在那里。如
+果 param_value 为 NULL，它讲被忽略；
+- param_value_size：用来指定 param_value 指向的内存的大小，以字节为单
+位。该 size 必须 >= 返回类型的大小；
+- param_value_size_ret：返回实际拷贝到 param_value 位置的数据大小，以
+字节为单位。如果 param_value_size_ret 为 NULL，它将被忽略；
+
+CL_PROFILING_COMMAND_QUEUED
+...	...
+
+返回的无符号的 64 位值可以用来测量 OpenCL 命令消耗的时间，以纳秒为单位。
+
+...
+
+如果 clGetEventProfilingInfo 成功执行返回 CL_SUCCESS，同时分析信息被记录
+下来。否则，返回下面的错误值。
+...	...
+
+
 
 
 
