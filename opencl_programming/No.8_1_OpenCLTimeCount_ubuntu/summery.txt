@@ -1,0 +1,259 @@
+=============
+Summery.txt |
+=============
+
+Posix 接口 - 计时功能
+- 之前都使用了该接口；
+- 精度如何，是如何实现的？
+- 如何使用
+
+Profiling - 计时功能；
+- 什么是 Profiling
+## 从 5.12 来看，就是用来统计提交到命令队列中命令，记录其时间戳。然后用来分析该命令的执行时间，及系统性能；
+## 系统性能包括那些东西？
+
+- 如何使用
+- 精度如何，是如何实现的？
+
+两者分别在那些场合下使用，Posix 接口还有没有用？是否有分工
+
+
+
+
+
+
+
+
+
+==================================
+先搭个框架，在逐步增加
+==================================
+
+在 ARM T-880 的平台上，定时器的精度为 1000 纳秒；在 AMD RX-460 的平台上，定时器的精度为 1 纳秒。
+
+==================================
+定时器精度- Q3_Timer_resolution.txt
+==================================
+
+CL_DEVICE_PROFILING_TIMER_RESOLUTION  -
+描述设备定时器的精度。在测量时以纳秒为单位。
+
+5.12 对内存对象和内核的分析（Profiling）操作
+
+这部分描述对 OpenCL 函数的分析操作，这些函数作为命令提交到命令队列中。
+涉及到的函数包括：
+Enqueue{Read|Write|Map}Image, clEnqueueUnmapMemObject, clEnqueueCopyBuffer,
+clEnqueueCopyBufferRect, clEnqueueCopyImage, clEnqueueCopyImageToBuffer,
+clEnqueueCopyBufferToImage, clEnqueueNDRangeKernel , clEnqueueTask 和
+clEnqueueNativeKernel。这些提交到命令队列的命令使用唯一（特定）的事件对象来
+标识。
+
+事件对象可以用来捕获（获取）分析（Profiling）信息，它们测量了命令的执行时间。
+对 OpenCL 命令分析的使能，可以在通过 clCreateCommandQueue 创建命令队列时，为
+其 properties 参数设置 CL_QUEUE_PROFILING_ENABLE 标志。
+
+如果分析使能，下面的函数
+cl_int
+clGetEventProfilingInfo (cl_event event,
+	cl_profiling_info param_name,
+	size_t param_value_size,
+	void *param_value,
+	size_t *param_value_size_ret)
+
+返回和 event 关联的命令的分析信息。
+
+- event：指定事件对象；
+- param_name：指定需要查询的分析数据。支持的 param_name 的类型列表
+和通过 clGetEventProfilingInfo 在 param_value 参数中返回的信息在下面
+的表中描述。
+- param_value：指向内存的指针，查询返回的对应结果将被存放在那里。如
+果 param_value 为 NULL，它讲被忽略；
+- param_value_size：用来指定 param_value 指向的内存的大小，以字节为单
+位。该 size 必须 >= 返回类型的大小；
+- param_value_size_ret：返回实际拷贝到 param_value 位置的数据大小，以
+字节为单位。如果 param_value_size_ret 为 NULL，它将被忽略；
+
+CL_PROFILING_COMMAND_QUEUED
+...	...
+
+返回的无符号的 64 位值可以用来测量 OpenCL 命令消耗的时间，以纳秒为单位。
+
+...
+
+如果 clGetEventProfilingInfo 成功执行返回 CL_SUCCESS，同时分析信息被记录
+下来。否则，返回下面的错误值。
+...	...
+
+==================================
+- Q1.txt
+==================================
+5. OpenCL 性能和优化
+本文讨论当为 AMD APP GPU 计算、CPU，以及 GPU 和 CPU 的组合，等设备编程时的性能和优化。和 Southern Islands 系列 GPU 相关的详细细节在本章的
+末尾描述。
+
+5.1 CodeXL GPU Profiler 介绍
+CodeXL GPU Profiler（后面称作 Profiler）是性能分析工具，在 OpenCL 应用程序执行时，用来从 OpenCL run-time 和 AMD Radeon GPUs 获取数据信息。
+这些信息在 AMD 的平台下，用来发现应用程序中的瓶颈，并找到方法以优化应用程序的性能。下面的部分描述 Profiler 支持的操作模式。
+
+5.1.1 收集 OpenCL 应用执行信息
+
+当被剖析的应用程序执行完后，CodeXL 显示会话。
+
+
+
+======================
+Performance
+======================
+
+Memory performance
+
+1.read v1, v2, v4, v8, v16
+- workgroup size = NULL
+
+2.read v1
+- workgroup size = 32, 64, 128, 256
+
+
+Compute performance
+1.compute float v1, v2, v4, v8, v16
+- workgroup size = NULL
+
+2.compute float v1
+- workgroup size = 32, 64, 128, 256
+
+======================
+Compute performance
+Peak single precision float 	72.81 GFLOP/s
+Peak integer			81.36 GFLOP/s
+Peak short			152.15GFLOP/s
+
+Memory bandwidth
+Kernel copy		12.30 GB/s
+Kernel write		12.10 GB/s
+Kernel read		8.37 GB/s
+
+General performance
+Kernel latency		0.252 ms
+Accuracy test		passed
+
+
+[Linux APP call]
+CLOCK_MONOTONIC
+              Clock that cannot be set and  represents  monotonic  time  since
+              some unspecified starting point.
+
+CLOCK_MONOTONIC 单调递增时间，不能被修改。
+时钟不能被设置，表示单调递增（ monotonic）时间，从某些没有固定的点开始。
+
+
+[Linux kernel call]
+Linux kernel 中使用高精度定时器来实现。
+
+通过 hrtimer_init() 来初始化。
+
+为给定的是时钟初始化高精度定时器。
+
+hrtimer_init - initialize a timer to the given clock
+
+
+http://btorpey.github.io/blog/2014/02/18/clock-sources-in-linux/
+
+https://lwn.net/Articles/429925/
+
+==================================
+- Q1_execution_time.txt
+==================================
+
+测量执行时间
+
+当创建命令队列时，通过设置 CL_QUEUE_PROFILING_ENABLE 标识，
+OpenCL 运行库可以提供内置机制来测算（timing）内核执行时间。
+一旦 profiling 使能后，在每次内核和内存操作提交给命令队列
+时，OpenCL 运行库自动记录时间戳信息。
+
+OpenCL 提供了四种时间戳信息：
+- CL_PROFILING_COMMAND_QUEUED：表明在主机端，命令提交到命
+令队列的时间；
+- CL_PROFILING_COMMAND_SUBMIT：表示命令提交给设备设备的时
+间；
+- CL_PROFILING_COMMAND_START：表示命令在请求的设备上开始
+执行的时间；
+- CL_PROFILIGN_COMMAND_END：表示命令在请求的设备上结束执行
+的时间。
+
+下面的示例代码显示了如何计算内核的执行时间（结束-开始）：
+...	...
+
+另一个跟踪的有趣度量是内核的启动时间（Start-Queue）。内核
+启动时间同时包括消耗在用户应用中（执行提交到命令队列，但
+是在提交到设备之前）还有消耗在运行库中用来启动内核的时间。
+对于 CPU 设备，内核的启动时间非常快（几十微秒），但是对于
+独立的 GPU 设备，这时间可能达到几百微秒。在命令中使能
+profiling 功能，对所有的 clEnqueue 调用，会额外添加大约
+10 微秒到 40 微秒的时间消耗。很多 profiling 的消耗影响开始
+（start）时间；因此，这也会影响启动时间。在解释这个测量时
+需要小心。为了降低启动（launch）时间的消耗，AMD 的 OpenCL
+运行库将提交的多个命令合并到到一批处理。提交的一批命令，给
+出类似（similar）的开始时间和相同的结束时间。
+
+5.4.2 使用 OpenCL 定时器和其它的系统定时器
+定时器的精度，以纳秒为单位，可以通过下面的方式获得：
+clGetDEviceInfo(..., CL_DEVICE_PROFILING_TIMER_RESOLUTION...);
+
+AMD CPUs 和 GPUs 提供的定时器精度为 1 ns。AMD OpenCL 设备被要
+求正确的跟踪时间，即使在频率和电源状态发生改变的情况下。还有，
+AMD 的 OpenCL SDK 对平台上的所有的设备使用相同的时钟域
+（time-domain）;因此，profiling 的时间戳可以在 CPU 和 GPU 设备
+之间直接比较。
+
+下面的示例代码可以用来读取 OpenCL 定时器时钟的当前值。该时钟
+和 AMD OpenCL 运行库用来生成时间戳的时钟相同。该函数在用于关联
+其他的程序事件和 OpenCL profiling 时间戳时非常有用。
+。。。
+
+通常的的 CPU time-of-day 程序可以提供一个粗糙的方法来测试 GPU
+内核的执行时间。GPU 内核以非阻塞的方式执行，也就是说调用
+enqueue*Kernel 在 GPU 上的工作完成之前返回到 CPU。对于精确的
+时间值，保证 GPU 已经完成。在 OpenCL 中，可以通过在需要测量的
+时间前后其后面插入一个 clFinish() 来强制 CPU 进入等待状态直到
+GPU 空闲；这增加了 CPU 程序的定时精度。clFinish() 程序阻塞 CPU
+直到前面提交到队列中的 OpenCL 命令执行完成。
+
+==================================
+- Q2_memory_bandwidth.txt
+==================================
+
+计算内存带宽
+
+内核需要的内存带宽可能是最重要的性能考量指标，计算如下
+
+有效带宽 = (Br + Bw) / T
+
+参数如下：
+- Br：从全局内存区域读取的总的字节数；
+- Wr：写到全局内存区域的总字节数目；
+- T：运行内核程序需要的时间，以纳秒为单位；
+
+如果 Br 和 Bw 使用使用字节来表示，同时 T 以纳秒为单位，
+最后的有效带宽测量以 GB/s 为单位，这适合于当前的 CPUs 和 GPUs，
+当它们的峰值为 20-260 GB/s 时。计算 Br 和 Bw 要求彻底理解内核
+算法，这也是一种高效的方法来优化性能。为了说明目的，考虑一个简
+单的矩阵加法：每个元素在两个源矩阵中只读一次，执行加法操作，然
+后存储到第三个矩阵中。1024x1024 矩阵加法的有效带宽计算如下：
+Br = 2 * (1024 * 1024 * 4 bytes) = 8388608 bytes；
+2 个阵列，1024x1024，每个元素是 4 bytes 的浮点类型
+
+Bw = 1 * (1024 * 1024 * 4 bytes) = 4194304 bytes
+1 个阵列，1024x1024，每个元素是 4 bytes 的浮点类型
+
+如果这次拷贝经过的时间，通过 profiling 定时器报道的时间为
+1000000 ns（1 million ns，或者 0.001 秒）。有效的带宽为：
+（Br + Bw）/ T = (8388608+4194304)/1000000 = 12.6GB/s
+
+
+==================================
+- Q2_memory_bandwidth.txt
+==================================
+对于时间测量可以提供下面的示例，找出重点部分，测算内核启动时间
+/opt/AMDAPPSDK-3.0/samples/opencl/cl/1.x/KernelLaunch/docs
+
