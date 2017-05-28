@@ -6,6 +6,7 @@ Posix 接口 - 计时功能
 - 之前都使用了该接口；
 - 精度如何，是如何实现的？
 - 如何使用
+- timespec 的精度，是否和 Profiling 一致？
 
 Profiling - 计时功能；
 - 什么是 Profiling
@@ -16,6 +17,35 @@ Profiling - 计时功能；
 - 精度如何，是如何实现的？
 
 两者分别在那些场合下使用，Posix 接口还有没有用？是否有分工
+
+时钟和时间相关函数
+
+时钟类型
+
+在 `OpenCL 编程实践`中，为了比较 CPU 和 GPU 的性能，之前统计函数的执行时间使用了 glibc 中提供的时钟和时间相关函数。
+为了得到 `func` 函数的执行时间，在该函数执行前，首先通过调用 system_time() 得到当前的时
+间戳 `time_start`，接着执行 `func` 函数，待其执行完后再次调用 system_time() 得到当前时间戳 `time_end`，使用 time_end 减去
+time_start 就可以得到函数 `func` 的执行时间。代码如下，这里对这些函数做个简单的描述。
+
+```c
+int64_t system_time()
+{
+	struct timespec t;
+
+	clock_gettime(CLOCK_MONOTONIC, &t);
+	return (int64_t)(t.tv_sec) * 1e9 + t.tv_nsec;
+}
+```
+
+clock_gettime 的函数原型如下：
+```c
+int clock_gettime(clockid_t clk_id, struct timespec *tp);
+```
+- clk_id：表示时钟类型。CLOCK_MONOTONIC 为单调递增时钟，
+
+
+
+
 
 
 
