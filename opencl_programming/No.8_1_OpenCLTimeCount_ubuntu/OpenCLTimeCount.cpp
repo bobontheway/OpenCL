@@ -42,12 +42,45 @@ void get_devices_info(cl_device_id *devices, int num)
 	int err;
 	size_t len = 100;
 	char buf[len];
+	cl_uint width;
+
+	int type[] = {
+		CL_DEVICE_PREFERRED_VECTOR_WIDTH_CHAR,
+		CL_DEVICE_PREFERRED_VECTOR_WIDTH_SHORT,
+		CL_DEVICE_PREFERRED_VECTOR_WIDTH_INT,
+		CL_DEVICE_PREFERRED_VECTOR_WIDTH_LONG,
+		CL_DEVICE_PREFERRED_VECTOR_WIDTH_FLOAT,
+		CL_DEVICE_PREFERRED_VECTOR_WIDTH_DOUBLE
+	};
+
+	const char *str_type[] = {
+		"char",
+		"short",
+		"int",
+		"long",
+		"float",
+		"double"
+	};
 
 	printf("[Device Infomation]\n");
 	for (int i = 0; i < num; i++) {
 		err = clGetDeviceInfo(devices[i], CL_DEVICE_NAME, len, buf, NULL);
 		check_error(err, __LINE__);
 		printf("device name: %s\n", buf);
+
+		for (int j = 0; j < (int)(sizeof(type)/sizeof(type[0])); j++) {
+			err = clGetDeviceInfo(devices[i],
+				type[j], sizeof(cl_int), &width, NULL);
+			check_error(err, __LINE__);
+			printf("Preferred vector width %s: %d\n", str_type[j], width);
+		}
+
+		size_t resolution;
+		err = clGetDeviceInfo(devices[i],
+			CL_DEVICE_PROFILING_TIMER_RESOLUTION, sizeof(size_t),
+			&resolution, NULL);
+		check_error(err, __LINE__);
+		printf("Timer resolution: %d\n", (int)resolution);
 
 		printf("\n");
 	}
