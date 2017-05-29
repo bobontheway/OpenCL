@@ -2,6 +2,9 @@
 Summery.txt |
 =============
 
+OpenCL 性能 —— 测量时间
+OpenCL 性能 —— 测量带宽
+
 Posix 接口 - 计时功能
 - 之前都使用了该接口；
 - 精度如何，是如何实现的？
@@ -23,10 +26,9 @@ Profiling - 计时功能；
 时钟类型
 
 在 `OpenCL 编程实践`中，为了比较 CPU 和 GPU 的性能，前面统计函数的执行时间使用了 glibc 中提供的时钟和时间相关函数。
-为了得到 `func` 函数的执行时间，在该函数执行前，首先通过调用 system_time() 得到当前的时
+为了测得到 `func` 函数的执行时间，在待测函数执行前，首先通过调用 system_time() 得到当前的时
 间戳 `time_start`，接着执行 `func` 函数，待其执行完后再次调用 system_time() 得到当前时间戳 `time_end`，使用 time_end 减去
-time_start 就可以得到函数 `func` 的执行时间。代码如下，这里对这些函数做个简单的描述。
-
+time_start 就可以得到函数 `func` 的执行时间。下面是封装后的 system_time 函数：
 ```c
 int64_t system_time()
 {
@@ -40,10 +42,45 @@ int64_t system_time()
 clock_gettime 的函数原型如下：
 ```c
 int clock_gettime(clockid_t clk_id, struct timespec *tp);
+
+struct timespec {
+	time_t   tv_sec;        /* seconds */
+	long     tv_nsec;       /* nanoseconds */
+};
+
+
 ```
-- clk_id：表示时钟类型。CLOCK_MONOTONIC 为单调递增时钟，
+- clk_id：表示时钟类型。CLOCK_MONOTONIC 为单调递增时钟，在系统启动后开始计时，其时间不能手动的被重新设置。
+在 Linux 系统中，CLOCK_MONOTONIC 通过高精度定时器实现，使用 hrtimer_init() 来初始化；
+- tp：指向结构体 timespec 的指针，返回当前的时间戳信息。
 
+在 Linux 系统中，从 `Linux 2.6.28 开始`，支持另一个时钟 CLOCK_BOOTTIME。该时钟和 CLOCK_MONOTONIC 比较类似，
+但是它包含了系统在休眠过程中的时间，这在记录时间戳信息中需要包含休眠过程时非常有用。这些时钟的精度通过 clock_getres()
+获取，其函数原型如下：
+```c
+int clock_getres(clockid_t clk_id, struct timespec *res);
+```
 
+- clk_id：表示对应时钟的类型；
+- res：返回该时钟的精度，以纳秒为单位。
+
+为了精确测量...
+下面是使用的示例代码：
+
+```c
+clFinish(queue);
+int64_t time_start = system_time();
+err = clEnqueueNDRangeKernel(queue, kernel, 1,
+	NULL, g_size, local_size,
+	0, NULL, NULL);
+clFinish(queue);
+int64_t time_end = system_time();
+printf("kernel execute time: %f(um)\n", (time_end-time_start)/1e3);
+```
+
+## 参考
+
+- https://lwn.net/Articles/429925/
 
 
 clock_gettime 来自于 libc 库，Profiling 的精度也是来自通过调用 clock_getres 的调用。
@@ -168,30 +205,6 @@ Kernel read		8.37 GB/s
 General performance
 Kernel latency		0.252 ms
 Accuracy test		passed
-
-
-[Linux APP call]
-CLOCK_MONOTONIC
-              Clock that cannot be set and  represents  monotonic  time  since
-              some unspecified starting point.
-
-CLOCK_MONOTONIC 单调递增时间，不能被修改。
-时钟不能被设置，表示单调递增（ monotonic）时间，从某些没有固定的点开始。
-
-
-[Linux kernel call]
-Linux kernel 中使用高精度定时器来实现。
-
-通过 hrtimer_init() 来初始化。
-
-为给定的是时钟初始化高精度定时器。
-
-hrtimer_init - initialize a timer to the given clock
-
-
-http://btorpey.github.io/blog/2014/02/18/clock-sources-in-linux/
-
-https://lwn.net/Articles/429925/
 
 ==================================
 - Q1_execution_time.txt
