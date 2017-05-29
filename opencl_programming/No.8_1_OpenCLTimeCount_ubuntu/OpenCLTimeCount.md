@@ -1,3 +1,7 @@
+# OpenCL 性能 —— 时间测量
+
+## 时钟和时间
+
 在 `OpenCL 编程实践`中，为了比较 CPU 和 GPU 的性能，前面统计函数的执行时间使用了 `glibc` 中提供的时钟和时间相关函数。为了测得到 `func` 函数的执行时间，在待测函数执行前，首先通过调用 system_time() 得到当前的时间戳 `time_start`，接着执行 `func` 函数，待其执行完后再次调用 system_time() 得到当前时间戳 `time_end`，使用 time_end 减去 time_start 就可以得到函数 `func` 的执行时间。下面是封装后的 system_time() 函数：
 ```c
 int64_t system_time()
@@ -44,3 +48,14 @@ clFinish(queue);
 int64_t time_end = system_time();
 printf("kernel execute time: %f(um)\n", (time_end-time_start)/1e3);
 ```
+
+## Profiling 操作
+
+GPU 在执行命令时，包含了下面四个阶段：
+
+- 主机端将命令提交到命令队列；
+- 命令被发送到 GPU 设备端；
+- 设备开始执行命令；
+- 命令执行完成。
+
+前面介绍的测量方法只能对`函数`的执行时间进行测量，不能更精确的测量`内核`执行时间。如果使用上面的方式来测量内核执行时间，就会带来较大的误差。通过使用 OpenCL 提供的 `Profiling` 机制可以更精确的测量`内核`执行时间，通过使用这种方式可以进一步的测算带宽。
