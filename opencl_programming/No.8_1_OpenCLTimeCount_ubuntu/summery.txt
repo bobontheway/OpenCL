@@ -21,24 +21,6 @@ Profiling - 计时功能；
 
 两者分别在那些场合下使用，Posix 接口还有没有用？是否有分工
 
-
-为了更精确测量内核执行时间，在其前面后后面添加 clFinish() 函数
-下面是为了测量内核的执行时间给出的示例代码：
-
-```c
-clFinish(queue);
-int64_t time_start = system_time();
-err = clEnqueueNDRangeKernel(queue, kernel, 1,
-	NULL, g_size, local_size,
-	0, NULL, NULL);
-clFinish(queue);
-int64_t time_end = system_time();
-printf("kernel execute time: %f(um)\n", (time_end-time_start)/1e3);
-```
-
-
-
-
 通常的的 CPU time-of-day 程序可以提供一个粗糙的方法来测试 GPU
 内核的执行时间。GPU 内核以非阻塞的方式执行，也就是说调用
 enqueue*Kernel 在 GPU 上的工作完成之前返回到 CPU。对于精确的

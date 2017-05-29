@@ -32,3 +32,15 @@ int clock_getres(clockid_t clk_id, struct timespec *res);
 
 - clk_id：表示对应时钟的类型；
 - res：返回该时钟的精度，以纳秒为单位。
+
+在下面的示例代码中，为了更准确的计算函数 `clEnqueueNDRangeKernel` 的执行时间，在其前后分别调用了 clFinish() 函数。在 clEnqueueNDRangeKernel() 的前面调用 clFinish() 函数，可以避免在执行 clEnqueueNDRangeKernel 函数时，提交到命令队列中的其它命令对它产生影响。通过添加 clFinish() 函数能保证在执行 clEnqueueNDRangeKernel() 函数之前，提交到命令队列的其它命令已经执行完成；在 clEnqueueNDRangeKernel() 之后又再次调用了 clFinish() 函数，这由于 `clEnqueueNDRangeKernel` 是异步执行，在函数返回时，该函数并没有执行完成。通过添加 clFinish() 函数就可以让当前的 CPU 进入阻塞状态，直到命令队列中的命令执行完成之后才返回。
+```c
+clFinish(queue);
+int64_t time_start = system_time();
+err = clEnqueueNDRangeKernel(queue, kernel, 1,
+	NULL, g_size, local_size,
+	0, NULL, NULL);
+clFinish(queue);
+int64_t time_end = system_time();
+printf("kernel execute time: %f(um)\n", (time_end-time_start)/1e3);
+```
