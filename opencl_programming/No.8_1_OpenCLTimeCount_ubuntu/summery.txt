@@ -36,6 +36,17 @@ int64_t time_end = system_time();
 printf("kernel execute time: %f(um)\n", (time_end-time_start)/1e3);
 ```
 
+
+
+
+通常的的 CPU time-of-day 程序可以提供一个粗糙的方法来测试 GPU
+内核的执行时间。GPU 内核以非阻塞的方式执行，也就是说调用
+enqueue*Kernel 在 GPU 上的工作完成之前返回到 CPU。对于精确的
+时间值，保证 GPU 已经完成。在 OpenCL 中，可以通过在需要测量的
+时间前后其后面插入一个 clFinish() 来强制 CPU 进入等待状态直到
+GPU 空闲；这增加了 CPU 程序的定时精度。clFinish() 程序阻塞 CPU
+直到前面提交到队列中的 OpenCL 命令执行完成。
+
 ## 参考
 
 - https://lwn.net/Articles/429925/
@@ -214,14 +225,6 @@ AMD 的 OpenCL SDK 对平台上的所有的设备使用相同的时钟域
 和 AMD OpenCL 运行库用来生成时间戳的时钟相同。该函数在用于关联
 其他的程序事件和 OpenCL profiling 时间戳时非常有用。
 。。。
-
-通常的的 CPU time-of-day 程序可以提供一个粗糙的方法来测试 GPU
-内核的执行时间。GPU 内核以非阻塞的方式执行，也就是说调用
-enqueue*Kernel 在 GPU 上的工作完成之前返回到 CPU。对于精确的
-时间值，保证 GPU 已经完成。在 OpenCL 中，可以通过在需要测量的
-时间前后其后面插入一个 clFinish() 来强制 CPU 进入等待状态直到
-GPU 空闲；这增加了 CPU 程序的定时精度。clFinish() 程序阻塞 CPU
-直到前面提交到队列中的 OpenCL 命令执行完成。
 
 ==================================
 - Q2_memory_bandwidth.txt
