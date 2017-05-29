@@ -22,7 +22,7 @@ Profiling - 计时功能；
 
 时钟类型
 
-在 `OpenCL 编程实践`中，为了比较 CPU 和 GPU 的性能，之前统计函数的执行时间使用了 glibc 中提供的时钟和时间相关函数。
+在 `OpenCL 编程实践`中，为了比较 CPU 和 GPU 的性能，前面统计函数的执行时间使用了 glibc 中提供的时钟和时间相关函数。
 为了得到 `func` 函数的执行时间，在该函数执行前，首先通过调用 system_time() 得到当前的时
 间戳 `time_start`，接着执行 `func` 函数，待其执行完后再次调用 system_time() 得到当前时间戳 `time_end`，使用 time_end 减去
 time_start 就可以得到函数 `func` 的执行时间。代码如下，这里对这些函数做个简单的描述。
@@ -46,8 +46,11 @@ int clock_gettime(clockid_t clk_id, struct timespec *tp);
 
 
 
-
-
+clock_gettime 来自于 libc 库，Profiling 的精度也是来自通过调用 clock_getres 的调用。
+xbdong@xbdong-opencl:~/Project/tmp/hello1$ ldd ./hello
+	linux-vdso.so.1 =>  (0x00007ffd7e1fd000)
+	libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007f7924be9000)
+	/lib64/ld-linux-x86-64.so.2 (0x000056475be2f000)
 
 
 
