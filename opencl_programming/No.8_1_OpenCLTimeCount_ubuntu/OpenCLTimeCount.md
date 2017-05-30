@@ -87,3 +87,5 @@ CL_PROFILING_COMMAND_SUBMIT   |表示命令发送给设备的时间戳
 CL_PROFILING_COMMAND_START    |表示命令在请求的设备上开始执行的时间戳
 CL_PROFILIGN_COMMAND_END      |表示命令在设备上执行完成的时间戳
 
+
+
