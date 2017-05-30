@@ -134,6 +134,7 @@ int main()
 	char *program_buf;
 
 	cl_mem input, output;
+	cl_event event;
 	cl_ulong prof_start, prof_end;
 	//const char *upper_case = "Hello OpenCL, I like U";
 
@@ -159,7 +160,9 @@ int main()
 	}
 
 	// create command queue
-	queue = clCreateCommandQueue(context, device, 0, &err);
+	queue = clCreateCommandQueue(context, device, 0, &err); // xbdong
+	//queue = clCreateCommandQueue(context, device,
+	//	CL_QUEUE_PROFILING_ENABLE, &err);
 	if (queue == NULL) {
 		printf("create command queue fail\n");
 		exit(EXIT_FAILURE);
@@ -238,7 +241,7 @@ int main()
 	time_start();
 	err = clEnqueueNDRangeKernel(queue, kernel, 1,
 		NULL, g_size, local_size,
-		0, NULL, NULL);
+		0, NULL, &event);
 	clFinish(queue);
 	time_end("time is");
 
@@ -255,7 +258,6 @@ int main()
 #endif
 
 
-#if 0
 	// 64-bit 值，当使用 event 标识的命令执行时，描述当前设备的时间
 	// 以纳秒为单位的计数
 	clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_START,
@@ -263,7 +265,6 @@ int main()
 	// 使用 event 标识的命令，在设备上已经执行完成
 	clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_END,
 		sizeof(cl_ulong), &prof_end, NULL);
-#endif
 
 	printf("prof start:%lu  prof_end:%lu\n", prof_start, prof_end);
 	printf("prof time is:%lu\n", (cl_ulong)(prof_end-prof_start)/1000);
