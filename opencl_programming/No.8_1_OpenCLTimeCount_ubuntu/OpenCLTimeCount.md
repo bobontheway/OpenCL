@@ -58,3 +58,32 @@ printf("kernel execute time: %f(um)\n", (time_end-time_start)/1e3);
 - 命令执行完成。
 
 前面介绍的测量方法只能对`函数`的执行时间进行测量，不能更精确的测量`内核`执行时间。如果使用上面的方式来测量内核执行时间，会带来较大的误差。使用 OpenCL 提供的 `Profiling` 操作可以更精确的测量`内核`执行时间，这就可以进一步的测算内存带宽。
+
+OpenCL 的 Profiling 操作可以应用于这些函数：Enqueue{Read|Write|Map}Image、clEnqueueUnmapMemObject、clEnqueueCopyBuffer、
+clEnqueueCopyBufferRect、clEnqueueCopyImage、clEnqueueCopyImageToBuffer、clEnqueueCopyBufferToImage、clEnqueueNDRangeKernel、clEnqueueTask 和 clEnqueueNativeKernel，当它们提交到命令队列时，使用特定的事件对象来对其标识。事件对象可以用来获取 Profiling 操作的信息，它记录了命令在不同执行阶段的时间戳。如果要使能 Profiling 操作，在使用 `clCreateCommandQueue` 函数创建命令队列时，将它的 `properties` 参数设置为 CL_QUEUE_PROFILING_ENABLE 即可。这样，在每次将内核以及内存操作命令提交到命令队列时，OpenCL 运行库就会记录命令执行的时间戳信息。当 Profiling 操作使能后，可以通过 `clGetEventProfilingInfo` 函数来获取和事件对象关联的命令的数据信息，数据信息中记录了不同类型的时间戳，其原型如下：
+
+```c
+cl_int
+clGetEventProfilingInfo (cl_event event,
+	cl_profiling_info param_name,
+	size_t param_value_size,
+	void *param_value,
+	size_t *param_value_size_ret)
+```
+下面是参数描述：
+
+- event：事件对象。表示需要获取哪个命令的 Profiling 数据；
+- param_name：数据类型。Profiling 操作支持的数据类型和对应的返回值在下面的列表中描述；
+- param_value：指向内存的指针。用来存放 param_name 类型对应的 Profiling 数据。如果为 NULL，结果将被忽略；
+- param_value_size：表示 param_value 参数指向内存的大小，以字节为单位。该大小不能小于返回类型的大小；
+- param_value_size_ret：返回实际存放到 param_value 参数指向位置的数据大小，以字节为单位。如果为 NULL，结果将被忽略。
+
+数据类型 `param_name` 可以是下表中的值，对应的描述如下：
+
+Data Type                     | Description
+------------------------------|------------
+CL_PROFILING_COMMAND_QUEUED   |在主机端，命令提交到命令队列的时间戳
+CL_PROFILING_COMMAND_SUBMIT   |表示命令发送给设备的时间戳
+CL_PROFILING_COMMAND_START    |表示命令在请求的设备上开始执行的时间戳
+CL_PROFILIGN_COMMAND_END      |表示命令在设备上执行完成的时间戳
+
