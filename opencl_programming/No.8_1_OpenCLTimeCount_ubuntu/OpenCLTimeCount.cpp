@@ -7,10 +7,19 @@
 #include <CL/cl.h>
 #endif
 
-#include "util.h"
+#include <sys/time.h>
+#include <time.h>
 
 #define SIZE	(8*1024*1024)	/* 8MB int32 */
 #define COUNT	300
+
+int64_t system_time()
+{
+	struct timespec t;
+
+	clock_gettime(CLOCK_MONOTONIC, &t);
+	return (int64_t)(t.tv_sec) * 1e9 + t.tv_nsec;
+}
 
 void check_error(int error, int line)
 {
@@ -134,8 +143,6 @@ int main()
 	char *program_buf;
 
 	cl_mem input, output;
-	cl_ulong prof_start, prof_end;
-	//const char *upper_case = "Hello OpenCL, I like U";
 
 	// get platform
 	err = clGetPlatformIDs(1, &platform, NULL);
@@ -235,39 +242,13 @@ int main()
 	size_t local_size[] = {256};
 
 	clFinish(queue);
-	time_start();
+	int64_t time_start = system_time();
 	err = clEnqueueNDRangeKernel(queue, kernel, 1,
 		NULL, g_size, local_size,
 		0, NULL, NULL);
 	clFinish(queue);
-	time_end("time is");
-
-#if 1 /* debug */
-	int *outBuf = (int *)malloc(sizeof(int) * SIZE);
-	err = clEnqueueReadBuffer(queue, output, CL_TRUE, 0,
-		sizeof(int)*SIZE, outBuf, 0, NULL, NULL);
-	check_error(err, __LINE__);
-	printf("[Result]\n");
-
-	for (int i = 0; i < SIZE; i++)
-		;
-	//	printf("%d  ", outBuf[i]);
-#endif
-
-
-#if 0
-	// 64-bit 值，当使用 event 标识的命令执行时，描述当前设备的时间
-	// 以纳秒为单位的计数
-	clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_START,
-		sizeof(cl_ulong), &prof_start, NULL);
-	// 使用 event 标识的命令，在设备上已经执行完成
-	clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_END,
-		sizeof(cl_ulong), &prof_end, NULL);
-#endif
-
-	printf("prof start:%lu  prof_end:%lu\n", prof_start, prof_end);
-	printf("prof time is:%lu\n", (cl_ulong)(prof_end-prof_start)/1000);
-
+	int64_t time_end = system_time();
+	printf("kernel execute time: %f(us)\n", (time_end-time_start)/1e3);
 
 	clReleaseKernel(kernel);
 	clReleaseMemObject(input);

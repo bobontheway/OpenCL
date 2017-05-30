@@ -46,7 +46,7 @@ err = clEnqueueNDRangeKernel(queue, kernel, 1,
 	0, NULL, NULL);
 clFinish(queue);
 int64_t time_end = system_time();
-printf("kernel execute time: %f(um)\n", (time_end-time_start)/1e3);
+printf("kernel execute time: %f(us)\n", (time_end-time_start)/1e3);
 ```
 
 ### Profiling 操作
