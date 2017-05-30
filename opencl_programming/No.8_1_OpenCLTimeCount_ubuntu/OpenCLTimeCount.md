@@ -106,3 +106,17 @@ clock_getres(CLOCK_MONOTONIC, {0, 1})   = 0
 ## 测量带宽
 
 
+
+
+
+
+
+
+
+
+
+
+
+## 参考
+
+- https://lwn.net/Articles/429925/

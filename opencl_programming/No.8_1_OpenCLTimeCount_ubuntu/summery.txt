@@ -6,62 +6,13 @@ OpenCL 性能分析
 - 测量时间
 - 测量带宽
 
-Posix 接口 - 计时功能
-- 之前都使用了该接口；
-- 精度如何，是如何实现的？
-- 如何使用
-- timespec 的精度，是否和 Profiling 一致？
-
-Profiling - 计时功能；
-- 什么是 Profiling
-## 从 5.12 来看，就是用来统计提交到命令队列中命令，记录其时间戳。然后用来分析该命令的执行时间，及系统性能；
-## 系统性能包括那些东西？
-
-- 如何使用
-- 精度如何，是如何实现的？
-
-两者分别在那些场合下使用，Posix 接口还有没有用？是否有分工
-
-
 ## Profiling 操作
-
-///////////
-
-测量执行时间
-
-## 参考
-
-- https://lwn.net/Articles/429925/
-
-
-clock_gettime 来自于 libc 库，Profiling 的精度也是来自通过调用 clock_getres 的调用。
-xbdong@xbdong-opencl:~/Project/tmp/hello1$ ldd ./hello
-	linux-vdso.so.1 =>  (0x00007ffd7e1fd000)
-	libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007f7924be9000)
-	/lib64/ld-linux-x86-64.so.2 (0x000056475be2f000)
-
-
-
-
-
-
 
 ==================================
 先搭个框架，在逐步增加
 ==================================
 
-在 ARM T-880 的平台上，定时器的精度为 1000 纳秒；在 AMD RX-460 的平台上，定时器的精度为 1 纳秒。
-
 5.12 对内存对象和内核的分析（Profiling）操作
-
-返回的无符号的 64 位值可以用来测量 OpenCL 命令消耗的时间，以纳秒为单位。
-
-...
-
-如果 clGetEventProfilingInfo 成功执行返回 CL_SUCCESS，同时分析信息被记录
-下来。否则，返回下面的错误值。
-...	...
-
 
 ======================
 Performance
@@ -119,25 +70,7 @@ profiling 功能，对所有的 clEnqueue 调用，会额外添加大约
 运行库将提交的多个命令合并到到一批处理。提交的一批命令，给
 出类似（similar）的开始时间和相同的结束时间。
 
-5.4.2 使用 OpenCL 定时器和其它的系统定时器
-定时器的精度，以纳秒为单位，可以通过下面的方式获得：
-clGetDEviceInfo(..., CL_DEVICE_PROFILING_TIMER_RESOLUTION...);
 
-
-==================================
-- Q1.txt
-==================================
-5. OpenCL 性能和优化
-本文讨论当为 AMD APP GPU 计算、CPU，以及 GPU 和 CPU 的组合，等设备编程时的性能和优化。和 Southern Islands 系列 GPU 相关的详细细节在本章的
-末尾描述。
-
-5.1 CodeXL GPU Profiler 介绍
-CodeXL GPU Profiler（后面称作 Profiler）是性能分析工具，在 OpenCL 应用程序执行时，用来从 OpenCL run-time 和 AMD Radeon GPUs 获取数据信息。
-这些信息在 AMD 的平台下，用来发现应用程序中的瓶颈，并找到方法以优化应用程序的性能。下面的部分描述 Profiler 支持的操作模式。
-
-5.1.1 收集 OpenCL 应用执行信息
-
-当被剖析的应用程序执行完后，CodeXL 显示会话。
 
 
 ==================================
@@ -181,3 +114,19 @@ Bw = 1 * (1024 * 1024 * 4 bytes) = 4194304 bytes
 对于时间测量可以提供下面的示例，找出重点部分，测算内核启动时间
 /opt/AMDAPPSDK-3.0/samples/opencl/cl/1.x/KernelLaunch/docs
 
+
+5.4.2 使用 OpenCL 定时器和其它的系统定时器
+
+5. OpenCL 性能和优化
+本文讨论当为 AMD APP GPU 计算、CPU，以及 GPU 和 CPU 的组合，等设备编程时的性能和优化。和 Southern Islands 系列 GPU 相关的详细细节在本章的
+末尾描述。
+
+5.1 CodeXL GPU Profiler 介绍
+CodeXL GPU Profiler（后面称作 Profiler）是性能分析工具，在 OpenCL 应用程序执行时，用来从 OpenCL run-time 和 AMD Radeon GPUs 获取数据信息。
+这些信息在 AMD 的平台下，用来发现应用程序中的瓶颈，并找到方法以优化应用程序的性能。下面的部分描述 Profiler 支持的操作模式。
+
+5.1.1 收集 OpenCL 应用执行信息
+
+当被剖析的应用程序执行完后，CodeXL 显示会话。
+
+在 ARM T-880 的平台上，定时器的精度为 1000 纳秒；在 AMD RX-460 的平台上，定时器的精度为 1 纳秒。
