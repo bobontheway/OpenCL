@@ -11,7 +11,6 @@
 #include <time.h>
 
 #define SIZE	(8*1024*1024)	/* 8MB int32 */
-#define COUNT	300
 
 int64_t system_time()
 {
@@ -51,48 +50,19 @@ void get_devices_info(cl_device_id *devices, int num)
 	int err;
 	size_t len = 100;
 	char buf[len];
-	cl_uint width;
-
-	int type[] = {
-		CL_DEVICE_PREFERRED_VECTOR_WIDTH_CHAR,
-		CL_DEVICE_PREFERRED_VECTOR_WIDTH_SHORT,
-		CL_DEVICE_PREFERRED_VECTOR_WIDTH_INT,
-		CL_DEVICE_PREFERRED_VECTOR_WIDTH_LONG,
-		CL_DEVICE_PREFERRED_VECTOR_WIDTH_FLOAT,
-		CL_DEVICE_PREFERRED_VECTOR_WIDTH_DOUBLE
-	};
-
-	const char *str_type[] = {
-		"char",
-		"short",
-		"int",
-		"long",
-		"float",
-		"double"
-	};
+	struct timespec ts;
 
 	printf("[Device Infomation]\n");
 	for (int i = 0; i < num; i++) {
 		err = clGetDeviceInfo(devices[i], CL_DEVICE_NAME, len, buf, NULL);
 		check_error(err, __LINE__);
 		printf("device name: %s\n", buf);
-
-		for (int j = 0; j < (int)(sizeof(type)/sizeof(type[0])); j++) {
-			err = clGetDeviceInfo(devices[i],
-				type[j], sizeof(cl_int), &width, NULL);
-			check_error(err, __LINE__);
-			printf("Preferred vector width %s: %d\n", str_type[j], width);
-		}
-
-		size_t resolution;
-		err = clGetDeviceInfo(devices[i],
-			CL_DEVICE_PROFILING_TIMER_RESOLUTION, sizeof(size_t),
-			&resolution, NULL);
-		check_error(err, __LINE__);
-		printf("Timer resolution: %d\n", (int)resolution);
-
-		printf("\n");
 	}
+
+	clock_getres(CLOCK_MONOTONIC, &ts);
+	long resolution = (long)ts.tv_sec * 1e9 + ts.tv_nsec;
+	printf("monotonic clock timer resolution: %d(ns)\n", (int)resolution);
+	printf("\n");
 }
 
 char *package_program(const char *filename)
@@ -207,11 +177,6 @@ int main()
 		exit(EXIT_FAILURE);
 	}
 
-#if 1 /* debug */
-	for (int i = 0; i < SIZE; i++)
-		orig_buffer[i] = 100 + i;
-#endif
-
 	// create memory object
 	input = clCreateBuffer(context, CL_MEM_READ_ONLY |
 		CL_MEM_COPY_HOST_PTR, sizeof(int)*SIZE, orig_buffer, &err);
@@ -223,7 +188,6 @@ int main()
 	}
 
 	// create kernel
-
 	kernel = clCreateKernel(program, "memory_copy_v1", &err);
 	if (kernel == NULL) {
 		printf("create kernel fail: %d\n", err);
@@ -236,8 +200,6 @@ int main()
 	check_error(err, __LINE__);
 
 	// execute kernel
-	// Q: how to set local size?
-	// A: the size same as the strlen
 	size_t g_size[] = {SIZE};
 	size_t local_size[] = {256};
 
@@ -248,7 +210,8 @@ int main()
 		0, NULL, NULL);
 	clFinish(queue);
 	int64_t time_end = system_time();
-	printf("kernel execute time: %f(us)\n", (time_end-time_start)/1e3);
+	printf("[Result]\n");
+	printf("function execute time: %f(us)\n", (time_end-time_start)/1e3);
 
 	clReleaseKernel(kernel);
 	clReleaseMemObject(input);

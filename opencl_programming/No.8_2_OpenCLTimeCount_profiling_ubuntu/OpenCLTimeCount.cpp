@@ -7,10 +7,7 @@
 #include <CL/cl.h>
 #endif
 
-#include "util.h"
-
 #define SIZE	(8*1024*1024)	/* 8MB int32 */
-#define COUNT	300
 
 void check_error(int error, int line)
 {
@@ -42,25 +39,6 @@ void get_devices_info(cl_device_id *devices, int num)
 	int err;
 	size_t len = 100;
 	char buf[len];
-	cl_uint width;
-
-	int type[] = {
-		CL_DEVICE_PREFERRED_VECTOR_WIDTH_CHAR,
-		CL_DEVICE_PREFERRED_VECTOR_WIDTH_SHORT,
-		CL_DEVICE_PREFERRED_VECTOR_WIDTH_INT,
-		CL_DEVICE_PREFERRED_VECTOR_WIDTH_LONG,
-		CL_DEVICE_PREFERRED_VECTOR_WIDTH_FLOAT,
-		CL_DEVICE_PREFERRED_VECTOR_WIDTH_DOUBLE
-	};
-
-	const char *str_type[] = {
-		"char",
-		"short",
-		"int",
-		"long",
-		"float",
-		"double"
-	};
 
 	printf("[Device Infomation]\n");
 	for (int i = 0; i < num; i++) {
@@ -68,19 +46,12 @@ void get_devices_info(cl_device_id *devices, int num)
 		check_error(err, __LINE__);
 		printf("device name: %s\n", buf);
 
-		for (int j = 0; j < (int)(sizeof(type)/sizeof(type[0])); j++) {
-			err = clGetDeviceInfo(devices[i],
-				type[j], sizeof(cl_int), &width, NULL);
-			check_error(err, __LINE__);
-			printf("Preferred vector width %s: %d\n", str_type[j], width);
-		}
-
 		size_t resolution;
 		err = clGetDeviceInfo(devices[i],
 			CL_DEVICE_PROFILING_TIMER_RESOLUTION, sizeof(size_t),
 			&resolution, NULL);
 		check_error(err, __LINE__);
-		printf("Timer resolution: %d\n", (int)resolution);
+		printf("profiling timer resolution: %d(ns)\n", (int)resolution);
 
 		printf("\n");
 	}
@@ -136,7 +107,6 @@ int main()
 	cl_mem input, output;
 	cl_event event;
 	cl_ulong prof_start, prof_end;
-	//const char *upper_case = "Hello OpenCL, I like U";
 
 	// get platform
 	err = clGetPlatformIDs(1, &platform, NULL);
@@ -160,9 +130,8 @@ int main()
 	}
 
 	// create command queue
-	queue = clCreateCommandQueue(context, device, 0, &err); // xbdong
-	//queue = clCreateCommandQueue(context, device,
-	//	CL_QUEUE_PROFILING_ENABLE, &err);
+	queue = clCreateCommandQueue(context, device,
+		CL_QUEUE_PROFILING_ENABLE, &err);
 	if (queue == NULL) {
 		printf("create command queue fail\n");
 		exit(EXIT_FAILURE);
@@ -203,11 +172,6 @@ int main()
 		exit(EXIT_FAILURE);
 	}
 
-#if 1 /* debug */
-	for (int i = 0; i < SIZE; i++)
-		orig_buffer[i] = 100 + i;
-#endif
-
 	// create memory object
 	input = clCreateBuffer(context, CL_MEM_READ_ONLY |
 		CL_MEM_COPY_HOST_PTR, sizeof(int)*SIZE, orig_buffer, &err);
@@ -219,7 +183,6 @@ int main()
 	}
 
 	// create kernel
-
 	kernel = clCreateKernel(program, "memory_copy_v1", &err);
 	if (kernel == NULL) {
 		printf("create kernel fail: %d\n", err);
@@ -232,43 +195,22 @@ int main()
 	check_error(err, __LINE__);
 
 	// execute kernel
-	// Q: how to set local size?
-	// A: the size same as the strlen
 	size_t g_size[] = {SIZE};
 	size_t local_size[] = {256};
 
-	clFinish(queue);
-	time_start();
 	err = clEnqueueNDRangeKernel(queue, kernel, 1,
 		NULL, g_size, local_size,
 		0, NULL, &event);
 	clFinish(queue);
-	time_end("time is");
 
-#if 1 /* debug */
-	int *outBuf = (int *)malloc(sizeof(int) * SIZE);
-	err = clEnqueueReadBuffer(queue, output, CL_TRUE, 0,
-		sizeof(int)*SIZE, outBuf, 0, NULL, NULL);
-	check_error(err, __LINE__);
-	printf("[Result]\n");
-
-	for (int i = 0; i < SIZE; i++)
-		;
-	//	printf("%d  ", outBuf[i]);
-#endif
-
-
-	// 64-bit 值，当使用 event 标识的命令执行时，描述当前设备的时间
-	// 以纳秒为单位的计数
+	// 当使用 event 标识的命令执行时，获取以纳秒为单位的时间戳信息
 	clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_START,
 		sizeof(cl_ulong), &prof_start, NULL);
-	// 使用 event 标识的命令，在设备上已经执行完成
+	// 获取命令已经执行完成后的时间戳数据
 	clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_END,
 		sizeof(cl_ulong), &prof_end, NULL);
 
-	printf("prof start:%lu  prof_end:%lu\n", prof_start, prof_end);
-	printf("prof time is:%lu\n", (cl_ulong)(prof_end-prof_start)/1000);
-
+	printf("Profiling kernel time: %f(us)\n", (prof_end-prof_start)/1e3);
 
 	clReleaseKernel(kernel);
 	clReleaseMemObject(input);
