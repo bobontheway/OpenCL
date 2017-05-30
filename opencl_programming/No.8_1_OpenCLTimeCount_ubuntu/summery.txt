@@ -24,22 +24,51 @@ Profiling - 计时功能；
 
 ## Profiling 操作
 
+OpenCL 的 Profiling 操作可以应用于这些函数：Enqueue{Read|Write|Map}Image、clEnqueueUnmapMemObject、clEnqueueCopyBuffer、
+clEnqueueCopyBufferRect、clEnqueueCopyImage、clEnqueueCopyImageToBuffer、clEnqueueCopyBufferToImage、clEnqueueNDRangeKernel、clEnqueueTask 和 clEnqueueNativeKernel，
+当这些函数函数提交到命令队列时，使用特定的事件对象来对其标识。事件对象可以用来获取 Profiling 操作的信息，它记录了命令在不同执行阶段的时间戳。如果需要使能 Profiling 操作，
+在使用 `clCreateCommandQueue` 函数创建命令队列时，将它的 `properties` 参数设置为 CL_QUEUE_PROFILING_ENABLE 即可。当 Profiling 操作使能后，可以通过 `clGetEventProfilingInfo`
+ 函数来获取和事件对象关联的命令的信息，其函数原型如下：
 
-什么是 Profiling 操作，
-所谓 Profiling 操作就是更准确的测量函数/内核的执行时间，以此对系统的性能进行分析。
-找到内存对象或内核代码中的相关缺陷，为优化提供帮助。
+```c
+cl_int
+clGetEventProfilingInfo (cl_event event,
+	cl_profiling_info param_name,
+	size_t param_value_size,
+	void *param_value,
+	size_t *param_value_size_ret)
+```
 
-对内存对象和内核的分析
+下面是参数描述：
 
-GPU 在执行命令时，包含了下面四个阶段：
-- 主机端将命令提交到命令队列；
-- 命令被发送到 GPU 设备端；
-- 设备开始执行命令；
-- 命令执行完成。
+- event：事件对象。表示需要获取哪个命令的 Profiling 数据；
+- param_name：数据类型。Profiling 操作支持的数据类型和对应的返回值在下面的列表中描述；
+- param_value：指向内存的指针。用来存放 param_name 类型对应的 Profiling 数据。如果为 NULL，结果将被忽略；
+- param_value_size：表示 param_value 参数指向内存的大小，以字节为单位。该大小不能小于返回类型的大小；
+- param_value_size_ret：返回实际存放到 param_value 参数指向位置的数据大小，以字节为单位。如果为 NULL，结果将被忽略。
 
-前面介绍的测量方法只能对`函数`的执行时间进行测量，不能更精确的测量`内核`执行时间。
-如果使用上面的方式来测量内核执行时间，就会带来较大的误差。通过使用 OpenCL 提供的 Profiling
-机制可以更精确的测量`内核`执行时间，通过使用这种方式可以进一步的测算带宽。
+数据类型可以是下面的值，对应的描述如下：
+
+
+///////////
+
+测量执行时间
+
+当创建命令队列时，通过设置 CL_QUEUE_PROFILING_ENABLE 标识，
+OpenCL 运行库可以提供内置机制来测算（timing）内核执行时间。
+一旦 profiling 使能后，在每次内核和内存操作提交给命令队列
+时，OpenCL 运行库自动记录时间戳信息。
+
+OpenCL 提供了四种时间戳信息：
+- CL_PROFILING_COMMAND_QUEUED：表明在主机端，命令提交到命
+令队列的时间；
+- CL_PROFILING_COMMAND_SUBMIT：表示命令提交给设备设备的时
+间；
+- CL_PROFILING_COMMAND_START：表示命令在请求的设备上开始
+执行的时间；
+- CL_PROFILIGN_COMMAND_END：表示命令在请求的设备上结束执行
+的时间。
+
 
 ## 参考
 
@@ -73,42 +102,6 @@ CL_DEVICE_PROFILING_TIMER_RESOLUTION  -
 
 5.12 对内存对象和内核的分析（Profiling）操作
 
-这部分描述对 OpenCL 函数的分析操作，这些函数作为命令提交到命令队列中。
-涉及到的函数包括：
-Enqueue{Read|Write|Map}Image, clEnqueueUnmapMemObject, clEnqueueCopyBuffer,
-clEnqueueCopyBufferRect, clEnqueueCopyImage, clEnqueueCopyImageToBuffer,
-clEnqueueCopyBufferToImage, clEnqueueNDRangeKernel , clEnqueueTask 和
-clEnqueueNativeKernel。这些提交到命令队列的命令使用唯一（特定）的事件对象来
-标识。
-
-事件对象可以用来捕获（获取）分析（Profiling）信息，它们测量了命令的执行时间。
-对 OpenCL 命令分析的使能，可以在通过 clCreateCommandQueue 创建命令队列时，为
-其 properties 参数设置 CL_QUEUE_PROFILING_ENABLE 标志。
-
-如果分析使能，下面的函数
-cl_int
-clGetEventProfilingInfo (cl_event event,
-	cl_profiling_info param_name,
-	size_t param_value_size,
-	void *param_value,
-	size_t *param_value_size_ret)
-
-返回和 event 关联的命令的分析信息。
-
-- event：指定事件对象；
-- param_name：指定需要查询的分析数据。支持的 param_name 的类型列表
-和通过 clGetEventProfilingInfo 在 param_value 参数中返回的信息在下面
-的表中描述。
-- param_value：指向内存的指针，查询返回的对应结果将被存放在那里。如
-果 param_value 为 NULL，它讲被忽略；
-- param_value_size：用来指定 param_value 指向的内存的大小，以字节为单
-位。该 size 必须 >= 返回类型的大小；
-- param_value_size_ret：返回实际拷贝到 param_value 位置的数据大小，以
-字节为单位。如果 param_value_size_ret 为 NULL，它将被忽略；
-
-CL_PROFILING_COMMAND_QUEUED
-...	...
-
 返回的无符号的 64 位值可以用来测量 OpenCL 命令消耗的时间，以纳秒为单位。
 
 ...
@@ -116,22 +109,6 @@ CL_PROFILING_COMMAND_QUEUED
 如果 clGetEventProfilingInfo 成功执行返回 CL_SUCCESS，同时分析信息被记录
 下来。否则，返回下面的错误值。
 ...	...
-
-==================================
-- Q1.txt
-==================================
-5. OpenCL 性能和优化
-本文讨论当为 AMD APP GPU 计算、CPU，以及 GPU 和 CPU 的组合，等设备编程时的性能和优化。和 Southern Islands 系列 GPU 相关的详细细节在本章的
-末尾描述。
-
-5.1 CodeXL GPU Profiler 介绍
-CodeXL GPU Profiler（后面称作 Profiler）是性能分析工具，在 OpenCL 应用程序执行时，用来从 OpenCL run-time 和 AMD Radeon GPUs 获取数据信息。
-这些信息在 AMD 的平台下，用来发现应用程序中的瓶颈，并找到方法以优化应用程序的性能。下面的部分描述 Profiler 支持的操作模式。
-
-5.1.1 收集 OpenCL 应用执行信息
-
-当被剖析的应用程序执行完后，CodeXL 显示会话。
-
 
 
 ======================
@@ -173,22 +150,7 @@ Accuracy test		passed
 - Q1_execution_time.txt
 ==================================
 
-测量执行时间
 
-当创建命令队列时，通过设置 CL_QUEUE_PROFILING_ENABLE 标识，
-OpenCL 运行库可以提供内置机制来测算（timing）内核执行时间。
-一旦 profiling 使能后，在每次内核和内存操作提交给命令队列
-时，OpenCL 运行库自动记录时间戳信息。
-
-OpenCL 提供了四种时间戳信息：
-- CL_PROFILING_COMMAND_QUEUED：表明在主机端，命令提交到命
-令队列的时间；
-- CL_PROFILING_COMMAND_SUBMIT：表示命令提交给设备设备的时
-间；
-- CL_PROFILING_COMMAND_START：表示命令在请求的设备上开始
-执行的时间；
-- CL_PROFILIGN_COMMAND_END：表示命令在请求的设备上结束执行
-的时间。
 
 下面的示例代码显示了如何计算内核的执行时间（结束-开始）：
 ...	...
@@ -219,6 +181,22 @@ AMD 的 OpenCL SDK 对平台上的所有的设备使用相同的时钟域
 和 AMD OpenCL 运行库用来生成时间戳的时钟相同。该函数在用于关联
 其他的程序事件和 OpenCL profiling 时间戳时非常有用。
 。。。
+
+==================================
+- Q1.txt
+==================================
+5. OpenCL 性能和优化
+本文讨论当为 AMD APP GPU 计算、CPU，以及 GPU 和 CPU 的组合，等设备编程时的性能和优化。和 Southern Islands 系列 GPU 相关的详细细节在本章的
+末尾描述。
+
+5.1 CodeXL GPU Profiler 介绍
+CodeXL GPU Profiler（后面称作 Profiler）是性能分析工具，在 OpenCL 应用程序执行时，用来从 OpenCL run-time 和 AMD Radeon GPUs 获取数据信息。
+这些信息在 AMD 的平台下，用来发现应用程序中的瓶颈，并找到方法以优化应用程序的性能。下面的部分描述 Profiler 支持的操作模式。
+
+5.1.1 收集 OpenCL 应用执行信息
+
+当被剖析的应用程序执行完后，CodeXL 显示会话。
+
 
 ==================================
 - Q2_memory_bandwidth.txt
