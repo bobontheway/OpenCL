@@ -75,6 +75,13 @@ void get_devices_info(cl_device_id *devices, int num)
 			printf("Preferred vector width %s: %d\n", str_type[j], width);
 		}
 
+		size_t resolution;
+		err = clGetDeviceInfo(devices[i],
+			CL_DEVICE_PROFILING_TIMER_RESOLUTION, sizeof(size_t),
+			&resolution, NULL);
+		check_error(err, __LINE__);
+		printf("Timer resolution: %d\n", (int)resolution);
+
 		printf("\n");
 	}
 }
