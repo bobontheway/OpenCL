@@ -2,7 +2,7 @@
 Summery.txt |
 =============
 
-OpenCL 性能
+OpenCL 性能分析
 - 测量时间
 - 测量带宽
 
