@@ -87,5 +87,21 @@ CL_PROFILING_COMMAND_SUBMIT   |表示命令发送给设备的时间戳
 CL_PROFILING_COMMAND_START    |表示命令在请求的设备上开始执行的时间戳
 CL_PROFILIGN_COMMAND_END      |表示命令在设备上执行完成的时间戳
 
+当设备的时钟频率或电源状态发生变化时，要求设备也能正确的对命令的执行过程进行时间统计。这就需要 Profiling 操作所使用时钟的精度及时间不受设备频率和电源状态的影响。在调用 clGetDeviceInfo() 函数时，传入 CL_DEVICE_PROFILING_TIMER_RESOLUTION 标识作为参数，可以获取 Profiling 操作所使用的定时器精度，以纳秒为单位。参考代码如下：
+```c
+int err;
+size_t resolution;
+err = clGetDeviceInfo(devices[i],
+	CL_DEVICE_PROFILING_TIMER_RESOLUTION, sizeof(size_t),
+	&resolution, NULL);
+printf("Timer resolution: %d\n", (int)resolution);
+```
+
+在 AMD OpenCL 平台下，所有的设备使用相同的时钟类型。因此，通过 Profiling 操作获取的时间戳信息可以直接用于 CPU 和 GPU 设备之间的性能比较。使用 strace 命令跟踪应用程序的函数调用路径时，发现在使用 `CL_DEVICE_PROFILING_TIMER_RESOLUTION` 作为参数调用 clGetDeviceInfo() 函数时，其内部又调用了如下函数：
+```c
+clock_getres(CLOCK_MONOTONIC, {0, 1})   = 0
+```
+可以看出 OpenCL 运行库进一步调用 clock_getres() 函数来得到 Profiling 操作所使用的定时器精度，这里为 1 纳秒（在不同的平台上运行可能存在差异）。CLOCK_MONOTONIC（单调递增）时钟也是前面用来统计函数执行时间所使用的时钟，也就是说 Profiling 操作所生成的时间戳信息可以和前面测量函数执行时间所得到的时间戳进行比较。
+
 
 
