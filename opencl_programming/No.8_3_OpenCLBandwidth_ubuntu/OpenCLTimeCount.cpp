@@ -8,9 +8,7 @@
 #endif
 
 #define SIZE	(8*1024*1024)	/* 8MB int32 */
-//#define SIZE	(1024)	/* 8MB int32 */
 #define MAX_COUNT	1000
-//#define MAX_COUNT	600
 
 void check_error(int error, int line)
 {
@@ -72,7 +70,7 @@ void get_devices_info(cl_device_id *devices, int num)
 			err = clGetDeviceInfo(devices[i],
 				type[j], sizeof(cl_int), &width, NULL);
 			check_error(err, __LINE__);
-			printf("Preferred vector width %s: %d\n", str_type[j], width);
+			printf("preferred vector width %s: %d\n", str_type[j], width);
 		}
 
 		size_t resolution;
@@ -80,7 +78,7 @@ void get_devices_info(cl_device_id *devices, int num)
 			CL_DEVICE_PROFILING_TIMER_RESOLUTION, sizeof(size_t),
 			&resolution, NULL);
 		check_error(err, __LINE__);
-		printf("Timer resolution: %d\n", (int)resolution);
+		printf("profiling timer resolution: %d(ns)\n", (int)resolution);
 
 		printf("\n");
 	}
@@ -136,7 +134,6 @@ int main()
 	cl_mem input, output;
 	cl_event event;
 	cl_ulong prof_start, prof_end;
-	//const char *upper_case = "Hello OpenCL, I like U";
 
 	// get platform
 	err = clGetPlatformIDs(1, &platform, NULL);
@@ -202,11 +199,6 @@ int main()
 		exit(EXIT_FAILURE);
 	}
 
-#if 1 /* debug */
-	for (int i = 0; i < SIZE; i++)
-		orig_buffer[i] = 100 + i;
-#endif
-
 	// create memory object
 	input = clCreateBuffer(context, CL_MEM_READ_ONLY |
 		CL_MEM_COPY_HOST_PTR, sizeof(int)*SIZE, orig_buffer, &err);
@@ -218,7 +210,6 @@ int main()
 	}
 
 	// create kernel
-	//const char *kernel_index[3] = {
 	const char *kernel_index[5] = {
 		"memory_copy_v1",
 		"memory_copy_v2",
@@ -228,7 +219,6 @@ int main()
 	};
 
 	size_t local_size[] = {256};
-	//size_t global_size[3][1] = {
 	size_t global_size[5][1] = {
 		{SIZE},
 		{SIZE/2},
@@ -239,9 +229,6 @@ int main()
 
 	// xbdong
 	for (int index = 0; index < 5; index++) {
-		//kernel = clCreateKernel(program, "memory_copy_v1", &err);
-		//kernel = clCreateKernel(program, "memory_copy_v2", &err);
-		//kernel = clCreateKernel(program, "memory_copy_v4", &err);
 		kernel = clCreateKernel(program, kernel_index[index], &err);
 		if (kernel == NULL) {
 			printf("create kernel fail: %d\n", err);
@@ -254,67 +241,37 @@ int main()
 		check_error(err, __LINE__);
 
 		// execute kernel
-		// Q: how to set local size?
-		// A: the size same as the strlen
-		//size_t g_size[] = {SIZE};
-		//size_t g_size[] = {SIZE/2};
-		//size_t g_size[] = {SIZE/4};
+		cl_ulong nanosecond = 0;
+		int64_t byte_size;
+		double second, gigabyte, bandwidth;
 
-		// xbdong
-		cl_ulong sum = 0;
-		//for (int i = 0; i < MAX_COUNT; i++) {
-		for (int i = 0; i < 2; i++) {
+		for (int i = 0; i < MAX_COUNT; i++) {
 			err = clEnqueueNDRangeKernel(queue, kernel, 1,
-				//NULL, g_size, local_size,
 				NULL, global_size[index], local_size,
 				0, NULL, &event);
 			check_error(err, __LINE__);
 			clFinish(queue);
 
-			// 64-bit 值，当使用 event 标识的命令执行时，描述当前设备的时间
-			// 以纳秒为单位的计数
+			// 当使用 event 标识的命令执行时，获取以纳秒为单位的时间戳信息
 			clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_START,
 				sizeof(cl_ulong), &prof_start, NULL);
-			// 使用 event 标识的命令，在设备上已经执行完成
+			// 获取命令已经执行完成后的时间戳数据
 			clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_END,
 				sizeof(cl_ulong), &prof_end, NULL);
+			err = clReleaseEvent(event);
+			check_error(err, __LINE__);
 
-			//printf("prof start:%lu  prof_end:%lu\n", prof_start, prof_end);
-			//printf("prof time is:%lu(us)\n", (cl_ulong)(prof_end-prof_start)/1000);
-
-			float time = (prof_end - prof_start) / 1e9;
-			printf("time=%fs  time_count=%lu\n", time,
-				(prof_end-prof_start));
-
-			int64_t size = SIZE * sizeof(int) * 2;
-			float gsize = size / 1024.0f / 1024.0f / 1024.0f;
-
-			printf("size=%ldByte  gsize=%fG\n", size, gsize);
-
-			printf("bandwidth=%fG/s\n", gsize/time);
-#if 0
-			float band_width = SIZE * sizeof(int) * 2 / time;
-			printf("band_width=%f\n", band_width);
-#endif
-
-
-			//sum = sum + (prof_end - prof_start) / 1000;
+			nanosecond = nanosecond + (prof_end - prof_start);
 		}
-		printf("prof time is: sum=%lu  time=%lu(us)\n", sum, (sum/MAX_COUNT));
 
-
-#if 0 /* debug */
-		int *outBuf = (int *)malloc(sizeof(int) * SIZE);
-		err = clEnqueueReadBuffer(queue, output, CL_TRUE, 0,
-			sizeof(int)*SIZE, outBuf, 0, NULL, NULL);
-		check_error(err, __LINE__);
-		printf("[Result]\n");
-
-		for (int i = 0; i < SIZE; i++)
-			printf("%d  ", outBuf[i]);
-		printf("\n");
-#endif
 		clReleaseKernel(kernel);
+
+		byte_size = SIZE * sizeof(int) * 2;
+		gigabyte = byte_size / 1024.0f / 1024.0f / 1024.0f;
+		second = nanosecond / 1e12;
+		bandwidth = gigabyte / second;
+
+		printf("bandwidth=%.2f (GB/s)\n", bandwidth);
 	}
 
 	clReleaseMemObject(input);
