@@ -282,22 +282,11 @@ int main()
 			//printf("prof start:%lu  prof_end:%lu\n", prof_start, prof_end);
 			//printf("prof time is:%lu(us)\n", (cl_ulong)(prof_end-prof_start)/1000);
 
-			//float time = (prof_end - prof_start) / 1e9; // ns
-			float time = (prof_end - prof_start) / 1e9; // ns
+			float time = (prof_end - prof_start) / 1e9;
 			printf("time=%fs  time_count=%lu\n", time,
 				(prof_end-prof_start));
 
-#if 0
-			double size = SIZE / 1024.0f / 1024.0f / 1024.0f *
-				sizeof(int) * 2; 
-			double sec = (prof_end - prof_start) / 1000000000.0f;
-			double band_width = size / sec;
-
-			printf("size=%lu  time=%lu band_width=%lf\n", size,
-				time, band_width);
-#endif
-			int64_t size = SIZE * sizeof(int) * 2; // bytes
-			//float gsize = SIZE / 1024.0f / 1024.0f / 1024.0f;
+			int64_t size = SIZE * sizeof(int) * 2;
 			float gsize = size / 1024.0f / 1024.0f / 1024.0f;
 
 			printf("size=%ldByte  gsize=%fG\n", size, gsize);
@@ -311,7 +300,7 @@ int main()
 
 			//sum = sum + (prof_end - prof_start) / 1000;
 		}
-		printf("prof time is: sum=%lu  time=%lu(um)\n", sum, (sum/MAX_COUNT));
+		printf("prof time is: sum=%lu  time=%lu(us)\n", sum, (sum/MAX_COUNT));
 
 
 #if 0 /* debug */
