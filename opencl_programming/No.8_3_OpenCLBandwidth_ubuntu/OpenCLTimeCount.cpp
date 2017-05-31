@@ -43,21 +43,29 @@ void get_devices_info(cl_device_id *devices, int num)
 	cl_uint width;
 
 	int type[] = {
+		/*
 		CL_DEVICE_PREFERRED_VECTOR_WIDTH_CHAR,
 		CL_DEVICE_PREFERRED_VECTOR_WIDTH_SHORT,
+		*/
 		CL_DEVICE_PREFERRED_VECTOR_WIDTH_INT,
+		/*
 		CL_DEVICE_PREFERRED_VECTOR_WIDTH_LONG,
 		CL_DEVICE_PREFERRED_VECTOR_WIDTH_FLOAT,
 		CL_DEVICE_PREFERRED_VECTOR_WIDTH_DOUBLE
+		*/
 	};
 
 	const char *str_type[] = {
+		/*
 		"char",
 		"short",
+		*/
 		"int",
+		/*
 		"long",
 		"float",
 		"double"
+		*/
 	};
 
 	printf("[Device Infomation]\n");
@@ -227,7 +235,7 @@ int main()
 		{SIZE/16}
 	};
 
-	// xbdong
+	printf("[Bandwidth]\n");
 	for (int index = 0; index < 5; index++) {
 		kernel = clCreateKernel(program, kernel_index[index], &err);
 		if (kernel == NULL) {
@@ -271,7 +279,7 @@ int main()
 		second = nanosecond / 1e12;
 		bandwidth = gigabyte / second;
 
-		printf("bandwidth=%.2f (GB/s)\n", bandwidth);
+		printf("%s: %.2f GB/s\n", kernel_index[index], bandwidth);
 	}
 
 	clReleaseMemObject(input);
