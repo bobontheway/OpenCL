@@ -62,6 +62,7 @@ void get_devices_info(cl_device_id *devices, int num)
 	clock_getres(CLOCK_MONOTONIC, &ts);
 	long resolution = (long)ts.tv_sec * 1e9 + ts.tv_nsec;
 	printf("monotonic clock timer resolution: %d(ns)\n", (int)resolution);
+
 	printf("\n");
 }
 
@@ -210,8 +211,9 @@ int main()
 		0, NULL, NULL);
 	clFinish(queue);
 	int64_t time_end = system_time();
+
 	printf("[Result]\n");
-	printf("function execute time: %f(us)\n", (time_end-time_start)/1e3);
+	printf("function execute time: %.2f us\n", (time_end-time_start)/1e3);
 
 	clReleaseKernel(kernel);
 	clReleaseMemObject(input);

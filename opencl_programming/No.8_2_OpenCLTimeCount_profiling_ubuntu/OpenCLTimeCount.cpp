@@ -210,8 +210,10 @@ int main()
 	clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_END,
 		sizeof(cl_ulong), &prof_end, NULL);
 
-	printf("Profiling kernel time: %f(us)\n", (prof_end-prof_start)/1e3);
+	printf("[Result]\n");
+	printf("profiling kernel time: %.2f us\n", (prof_end-prof_start)/1e3);
 
+	clReleaseEvent(event);
 	clReleaseKernel(kernel);
 	clReleaseMemObject(input);
 	clReleaseMemObject(output);
