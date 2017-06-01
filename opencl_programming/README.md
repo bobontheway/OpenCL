@@ -65,6 +65,7 @@ git push -f origin master
 
 ### No.8_1_OpenCLTimeCount
 使用 Linux 系统提供的时钟/时间接口来获取函数执行的时间戳。
+（OpenCLTimeCount.md 包含了对 No.8_2_OpenCLProfiling 和 No.8_3_OpenCLBandwidth 的描述）
 
 ### No.8_2_OpenCLProfiling
 执行 OpenCL 提供的 Profiling 操作来获取内核运行时间戳。
