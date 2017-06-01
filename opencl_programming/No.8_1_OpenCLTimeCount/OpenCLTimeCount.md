@@ -129,8 +129,36 @@ BW = (Br + Bw) / T = (33554432 + 33554432) / 1000000 = 67.1 GB/s
 
 > 在 AMD 的 OpenCL 平台下，如果使能了 Profiling 操作，所有 clEnqueueXXX 命令的执行，会增加额外 10us 到 40us 时间的消耗。内核在提交到命令队列之后，启动之前需要花费一些时间，这是由于将命令队列中的命令发送给 OpenCL 设备需要花费时间，并且 OpenCL 运行库在启动内核过程中也需要花时间。对于 CPU 设备，这段时间也就几十微秒，但是对于独立的 GPU 设备而言，可能高达几百个微秒。
 
+在不同的平台上，在执行内存拷贝时，同一标量类型，不同矢量宽度会得到不同性能。下面代码通过调用 clGetDeviceInfo() 函数来获得内置标量类型 `int` 的最优矢量宽度。从运行结果来看，该设备支持的 int 标量类型的最优矢量宽度为 1，得到的带宽数据也验证了矢量宽度为 1 时带宽最高。
+```c
+cl_uint width;
 
+clGetDeviceInfo(devices[i],
+    CL_DEVICE_PREFERRED_VECTOR_WIDTH_INT, sizeof(cl_int), &width, NULL);
 
+printf("preferred vector width (int): %d\n", width);
+```
+`CL_DEVICE_PREFERRED_VECTOR_WIDTH_INT` 表示在对应的设备上，该矢量数据类型支持的最优元素个数,使用该数据类型处理数据时会获得最佳性能。矢量数据类型由多个标量元素组成，例如，int2 包含 2 个标量元素。下图是使用不同矢量数据类型测得的内存拷贝带宽。
+
+<img src="image/bandwidth.png" width="60%" height="60%">
+
+程序源代码如下，下面是运行结果：
+```bash
+[Platform Infomation]
+platform name: AMD Accelerated Parallel Processing
+
+[Device Infomation]
+device name: Baffin
+preferred vector width (int): 1
+profiling timer resolution: 1(ns)
+
+[Bandwidth]
+memory_copy_v1: 87.95 GB/s
+memory_copy_v2: 85.82 GB/s
+memory_copy_v4: 85.59 GB/s
+memory_copy_v8: 74.74 GB/s
+memory_copy_v16: 78.66 GB/s
+```
 
 
 
