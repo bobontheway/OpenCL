@@ -1,5 +1,5 @@
 all:
-	g++ -o OpenCLTimeCount OpenCLTimeCount.cpp -I /opt/AMDAPPSDK-3.0/include/ -L /opt/AMDAPPSDK-3.0/lib/x86_64/sdk/ -lOpenCL
+	g++ -o OpenCLProfiling OpenCLProfiling.cpp -I /opt/AMDAPPSDK-3.0/include/ -L /opt/AMDAPPSDK-3.0/lib/x86_64/sdk/ -lOpenCL
 
 clean:
-	rm -rf *.o OpenCLTimeCount
+	rm -rf *.o OpenCLProfiling
