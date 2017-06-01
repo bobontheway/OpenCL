@@ -63,11 +63,14 @@ git push -f origin master
 ### No.7_7_OpenCLSyncQueue
 提交到命令队列中命令的同步，以及命令队列之间的同步。
 
+### No.8_1_OpenCLTimeCount
+使用 Linux 系统提供的时钟/时间接口来获取函数执行的时间戳。
+
+### No.8_2_OpenCLProfiling
+执行 OpenCL 提供的 Profiling 操作来获取内核运行时间戳。
+
+### No.8_3_OpenCLBandwidth
+执行 Profiling 操作来获取时间戳数据，以计算内存拷贝带宽。
 
 
 
-
-
-
-
-### wiz GCN3
