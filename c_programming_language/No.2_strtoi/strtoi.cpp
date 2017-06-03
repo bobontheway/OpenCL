@@ -34,17 +34,26 @@ int inline toLower(char ch)
 	return (ch | 0x20);
 }
 
-// 十六进制
-int htoi(const char *ch)
+// 十六进制、八进制、十进制
+int strtoi(const char *ch)
 {
-	int result = 0;
 	int value;
+	int result = 0;
+
+	int base; // 基数
 
 	if (ch[0] == '0') {
-		if ((ch[1] == 'x') || (ch[1] == 'X'))
+		if ((ch[1] == 'x') || (ch[1] == 'X')) {
+			base = 16; // 十六进制
 			ch += 2;
+		} else {
+			base = 8; // 八进制
+		}
+	} else {
+		base = 10; // 十禁止
 	}
 
+	printf("base = %d\n", base);
 	while (*ch != '\0') {
 		if (isDigit(*ch)) {
 			if (isXDigit(*ch))
@@ -52,7 +61,12 @@ int htoi(const char *ch)
 			else
 				value = *ch - '0';
 
-			result = result * 16 + value;
+			if (value >= base) {
+				printf("invalide value\n");
+				return EXIT_FAILURE;
+			}
+
+			result = result * base + value;
 		} else {
 			printf("invalide value\n");
 			return EXIT_FAILURE;
@@ -64,9 +78,11 @@ int htoi(const char *ch)
 
 int main(int argc, char *argv[])
 {
-	char *vstr = "0x1987A46";
+	//const char *vstr = "017246";
+	//const char *vstr = "0X1987A46";
+	const char *vstr = "198746";
 
-	int val = htoi(vstr);
+	int val = strtoi(vstr);
 	printf("val = %d hex val=0x%x\n", val, val);
 	return 0;
 }
