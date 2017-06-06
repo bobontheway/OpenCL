@@ -1,4 +1,4 @@
-深入理解 Android UI：使用 SurfaceFlinger 来合成 UI
+1.深入理解 Android UI：使用 SurfaceFlinger 来合成 UI
 
 SurfaceFlinger 是 Android 系统服务，负责将应用程序和系统的所有界面，
 合成到单个缓冲区中，该缓冲区最后用于显示控制器显示。
@@ -23,6 +23,24 @@ SurfaceFlinger 负责合成（compositing）所有的这些界面。一个通常
 为了在降低功耗的同时增加性能，SurfaceFlinger 通常使用显示硬件来合
 成，这可以避免使用 OpenGL 来合成。这就是称作 HardWare Composer（
 HWC）的东西。
+
+
+2.深入理解 Android UI：SurfaceFlinger 的设计，设计模式的视角
+
+该幻灯片用于大约一年前为我们部门内部进行的培训，我发现很多人觉得它
+比较有用，特别是那些和 Android 图形框架（Android graphic framework）
+打交道的人。
+
+Android 本地图形系统（native graphic system），SurfaceFlinger 位于其
+中心位置，相当的复杂，这需要花时间来充分理解所有部分是如何一起工作
+的。尽管如此复杂，我们时常惊叹与整个架构设计如此优雅。为了得到如此优
+雅的结果，设计模式扮演了关键角色。
+
+在这次的演示中，我引入了多个设计模式：Observer、Proxy、Command Pattern、
+Thread Pool、Producer-Consumer 和 Active Object。前三个在 GOF 中引入，
+后面三个是并发模式。还有，我举例说明了 SurfaceFlinger 是如何利用并发展
+了这些模型，来构建一个庞大的架构以满足图形系统的要求。我也解释了一个在
+用户层的更新是如何触发 SF 的合成的顺序，一个用例将各个部分链接在一起。
 
 
 
