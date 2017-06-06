@@ -1,3 +1,5 @@
+http://pierrchen.blogspot.sg/
+
 1.深入理解 Android UI：使用 SurfaceFlinger 来合成 UI
 
 SurfaceFlinger 是 Android 系统服务，负责将应用程序和系统的所有界面，
@@ -41,6 +43,4 @@ Thread Pool、Producer-Consumer 和 Active Object。前三个在 GOF 中引入�
 后面三个是并发模式。还有，我举例说明了 SurfaceFlinger 是如何利用并发展
 了这些模型，来构建一个庞大的架构以满足图形系统的要求。我也解释了一个在
 用户层的更新是如何触发 SF 的合成的顺序，一个用例将各个部分链接在一起。
-
-
 

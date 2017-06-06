@@ -1,0 +1,7 @@
+[Ref]
+https://www.codeproject.com/Articles/990983/Androids-Graphics-Buffer-Management-System-Part-II
+
+Android 的图形缓冲区管理系统（第二部分：BufferQueue）
+
+
+
