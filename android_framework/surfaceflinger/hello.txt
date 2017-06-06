@@ -1,0 +1,28 @@
+深入理解 Android UI：使用 SurfaceFlinger 来合成 UI
+
+SurfaceFlinger 是 Android 系统服务，负责将应用程序和系统的所有界面，
+合成到单个缓冲区中，该缓冲区最后用于显示控制器显示。
+
+详解：
+SurfaceFlinger 是系统级的服务，但它并不能被应用开发人员直接使用，这
+就和传感器（Sensor）或其它的服务不太一样。每当需要更新 UI 时，SF 将
+参与进来。这就解释了为什么 SF 和电池消耗比较密切。
+
+除了应用程序的界面，还有系统界面，包括状态栏、导航栏，当发生旋转时，
+系统将创建界面用于旋转动画。大多数的应用程序只有一个活动的界面，用
+于前端活动界面（activity），其它的多余一个，当在 view 层次结构中使
+用了 SurfaceView，或使用了 Presentation 模式时。
+
+SurfaceFlinger 负责合成（compositing）所有的这些界面。一个通常的误
+解是 SF 用来绘图（drawing）。这不正确，绘图是 OpenGL 的工作。有趣的
+是 SurfaceFlinger 也会使用 OpenGL 来合成。
+
+合成的结果将存放到一个系统缓冲区或本地窗口中，这用于显示控制器用来
+从那里取数据源。这就是在显示屏上看见的东西。
+
+为了在降低功耗的同时增加性能，SurfaceFlinger 通常使用显示硬件来合
+成，这可以避免使用 OpenGL 来合成。这就是称作 HardWare Composer（
+HWC）的东西。
+
+
+
