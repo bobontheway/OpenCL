@@ -108,43 +108,33 @@ BufferQueueCore 可以维护一个可变大小的 GraphicBuffer 对象的数组�
 
 GraphicBuffer 的分配执行使用了 IGraphicBufferAlloc 的实现，当在构造的时候提
 供给了 BufferQueueCore。默认的 IGraphicBufferAlloc 的实现由 SurfaceFlinger
-来提供（系统对象负责所有 surfaces 的合成），并且使用 gralloc 来分配缓冲区。
-（ps: 这里是说 SF 使用 gralloc 来分配缓冲区 ）
+来提供（系统对象负责所有 surfaces 的合成），并且使用 gralloc 来分配缓冲区
+（ps: 这里是说 SF 使用 gralloc 来分配缓冲区）。在前面的文章中，我们讨论了在不
+同的硬件 SoC 模块中，为什么一个真正中心（重要）的图形缓冲区分配器是非常好的建
+议。
 
+BufferQueueCore 类并不直接存放 GraphicBuffer —— 它使用了 BufferItem 类，该类
+包含了一个指向 GraphicBuffer 实例的指针，还包括其它不同的元数据（可参
+考 frameworks/native/include/gui/BufferItem.h）。
+...	...	... （图形）
+类图显示了和图形缓冲区分配器相关的主要类。
 
+异步通知接口 IConsumerListener 和 IProducerListener 用来提醒听众关于某些事件，
+例如缓冲区已经处于就绪状态，以共消费者消
+耗（IConsumerListener::onFrameAvailable）；或者一个空的缓冲区可以被使用（利用）
+（IproducerListener::onBufferReleased）。这些回调接口通常使用 Binder 并且可以
+跨越进程边界。可在 frameworks/native/include/gui/IConsumerListener.h 中进一步
+的检查细节。
 
+我找到的关于 Android 图形系统的最好源信息，当然除了代码本身，在这里：
+https://source.android.com/devices/graphics/architecture
 
+消费者
+...	...	...
+一些消费者类
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+BufferQueue 的创建
+...	...	...
+自顶向下的缓冲区创建流程。
 
 
