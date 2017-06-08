@@ -53,6 +53,80 @@ Surfaceflinger，使用来自多个源头的缓冲区，并将它们合成后输
 选的，但需要我们确切的知道对缓冲区内存生命周期的管理。生命周期管理，访问管理
 和同步是其它相关的方面，这在前面的帖子中有讨论。
 
+BufferQueue
+在讨论数据缓冲区之后，我们最后可以进入对 Android 系统的详细描述。我们将从
+BufferQueue 类开始，这是因为它是 Android 中图像缓冲区运动的中心。它抽象了
+图形缓冲区的队列，使用 gralloc 来分配缓冲，并使用一些方法来连接缓冲区的生
+产者和消费者，他们驻留在不同进程的地址空间。
+
+将要讨论的 BufferQueue 类和很多相关类的代码可以
+在 `/frameworks/native/libs/gui` 目录中找到，对应的头文件在
+`frameworks/natvie/include/gui` 目录中。
+
+BufferQueue 类拥有一个静态工厂（static factory）方法，
+为 BufferQueue::createBufferQueue，它用来创建 BufferQueue 实例。
+(BufferQueue 管理 gralloc 内存槽的池，用于生产者和消费者。分配器用于分配所
+有需要的 gralloc 缓冲区)。
+
+简单的浏览了它的实现，BufferQueue 是很薄的类。是 BufferQueueCore 的实现，它
+包含了真正的实现逻辑。为了简化这些讨论，后面将对这些类不做区分。
+
+通过 BufferQueue 连接后相当直观。首先，生产者和消费者链接到 BufferQueueu。
+1. 生产者从 BufferQueue（dequeueBuffer）取一个空的（empty）缓冲区；
+2. 生产者（例如， camera）拷贝拷贝图像或图形数据到缓冲区中；
+3. 生产者将填充（filled）好的的缓冲区返回给 BufferQueue（queueBuffer）；
+4. 消费者接收了一个表明已经存在填充数据的缓冲区，通过回调函数（callback）；
+5. 消费者将这个缓冲区从 BufferQueue 中移除（acquireBuffer）；
+6. 当消费者完成消费后，会将缓冲区返回给 BufferQueueu（releaseBuffer）。
+
+下面的图显示了在 camera（图像缓冲区的生产者）和显示器（图像缓冲区的消费者）之
+间的一个简单交互。
+...	...	...（图形）
+Camera 系统和 GPU 之间简单的数据路径。
+
+生产者和消费者可能驻留在不同的进程中，这使用 Binder 来通信。
+
+BufferQueueProducer 是实际干活的，它在 IGraphicBufferProducer 的后面。
+BufferQueueProducer 和 BufferQueueCore 维护了一个亲密关系，并直接访问它的
+成员变量，包括互斥量、条件和其它的重要成员（例如指向 IGraphicBufferAlloc 的
+指针）。就我个人而言我不太喜欢，这样太混乱和脆弱。
+
+当生产者请求提供一个空的缓冲区时使用 dequeueBuffer，它尽量从 BufferQueueCore
+取缓冲区，BufferQueueCore 维护了一个缓冲区的数组和这些缓冲区的状态（DEQUEUED，
+QUEUED，ACQUIRED，FREE）。如果在缓冲区数组中找到了一个空闲的槽（slot），但是
+它并没有包含缓冲区，或者如果生产者明确的请求重新分配缓冲区，接着
+BufferQueueProducer 使用 BufferQueueCore 的来分配一个新的缓冲区。
+
+初始状态，所有对 dequeueBuffer 的调用会导致分配一个新的缓冲区。但由于这是闭环
+系统，一旦消费者使用完了其内容后，缓冲区的消费者将返回缓冲区（通过调用
+releaseBuffer），我们因该会看到在很快的时候后系统会达到平衡。注意，虽然
+BufferQueueCore 可以维护一个可变大小的 GraphicBuffer 对象的数组，让所有缓冲区
+保持相同大小是明智的。否则，每次对 dequeueBuffer 的调用可能需要重新分配一个
+新的 GraphicBuffer 实例。
+...	...	... （图形）
+和 BufferQueue 相关的主要的类。
+
+GraphicBuffer 的分配执行使用了 IGraphicBufferAlloc 的实现，当在构造的时候提
+供给了 BufferQueueCore。默认的 IGraphicBufferAlloc 的实现由 SurfaceFlinger
+来提供（系统对象负责所有 surfaces 的合成），并且使用 gralloc 来分配缓冲区。
+（ps: 这里是说 SF 使用 gralloc 来分配缓冲区 ）
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
