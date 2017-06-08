@@ -1,3 +1,5 @@
+http://netaz.blogspot.co.il/2015/03/androids-graphics-buffer-management.html
+
 Android's Graphics Buffer Management System (Part I: gralloc)
 
 在这个系列的文章中，我将深入 Android 的图形缓冲管理系统。我将涉及到
