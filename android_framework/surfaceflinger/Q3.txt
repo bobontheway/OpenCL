@@ -115,6 +115,39 @@ device/generic/goldfish/opengl/system/gralloc/gralloc.cpp
 有两种 YUV 格式：packed 格式（也称作 semi-planar）和 planar 格式。NV12 是
 packed 格式的示例，YV12 是 planar 格式的示例。在 packed 格式中，Y、U 和 V
 通道存放在单独的数组中。像素组织为 macropixels 组中，他们的布局依赖于格式。
+在 planar 格式中，Y、U 和 V 通道存放在三个独立的平面中。在 YV12 图中，上面
+的 Y（亮度）的大小和 width * height 相等，每个（U,V）的大小和 width/2 *
+height/2 相等。这就意味着宽和高必须为偶数。YV12 同时也规定了行的 strip 必须
+是 16 个像素的整数倍。这是因为 NV12 和 YV12 都是 4:2:0 的采样，对于每个
+2x2 的像素，有 4*Y 采样，同时 1*U 和 1*V 采样。
+
+Tiling
+如果 SoC 硬件使用的算法主要是访问相邻的像素块，那么可能更有效的安排图像内存
+的布局，使相邻像素被放置在相同的行中，而不是它们的通常位置。这就称作tiling。
+
+一些图像/图像硬件使用更详尽的 tiling，例如对两种 tile 大小的支持，一组小的
+tile 可能可能安排来一些扫描在大的 tile 中。
+
+Tiling：左边的图像，它们的像素按照自然顺序存放。绿色的帧定义了 4x4 的 tile
+大小，红色的箭头显示了扫描顺序。右边的是相同的图像，但是它的像素是按照扫描
+顺序存放的。
+
+Compression
+如果生产者和消费者是硬件组件，并且集成到了同一个 SoC 中，那么可能写入病读取
+一个常用的，专有的压缩数据格式，并在数据传输的过程中解压缩数据（例如，使用
+片上内存，通常是 SRAM，在处理像素数据之前）
+
+内存连续性（Memory Contiguity）
+一些旧的硬件模块（camera，display 等）病没有 MMU 或并不支持 scatter-gather
+的 DMA。在这种情况下，对 DMA 设备在编程的时候使用物理地址，它指向一个连续的
+内存。这并不会影响内存的布局，但它肯定是一种特定于平台的约束，gralloc 在分配
+内存的时候需要注意。
+
+gralloc：Buffer Ownership management
+
+
+
+
 
 
 
