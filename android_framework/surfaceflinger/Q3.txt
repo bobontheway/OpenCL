@@ -1,5 +1,13 @@
 http://netaz.blogspot.co.il/2015/03/androids-graphics-buffer-management.html
 
+
+https://www.codeproject.com/Articles/991640/Androids-Graphics-Buffer-Management-System-Part-I
+https://www.codeproject.com/Articles/990983/Androids-Graphics-Buffer-Management-System-Part-II
+
+问题：
+（1）Gralloc 中对 Cache 一致性是如何处理的？
+
+
 Android's Graphics Buffer Management System (Part I: gralloc)
 
 在这个系列的文章中，我将深入 Android 的图形缓冲管理系统。我将涉及到
@@ -143,7 +151,51 @@ Compression
 内存。这并不会影响内存的布局，但它肯定是一种特定于平台的约束，gralloc 在分配
 内存的时候需要注意。
 
-gralloc：Buffer Ownership management
+gralloc：Buffer Ownership manageme
+内存是共享资源。它可能在图形硬件模块和 CPU 之间共享；或者在两个图形模块之间
+共享。如果是 CPU 渲染到图形缓冲区，我们需要确保显示控制器等待 CPU 完成写操
+作，在它开始读缓冲区内存之前。这通过使用系统级别的同步机制，我将在后面的 blog
+中讨论。但是单这个同步还不能保证显示控制器能够访问内存的一致性视图。在上面的
+例子中，CPU 写的数据最后需要更新到缓冲区中，可能还没有从高速缓冲区中清除到系
+统内存中。如果发生这种情况，显示器可能显示不正确的图像缓冲区内容。因此，我们
+需要一些类型的底层原子同步机制来明确的管理，传递内存缓冲区的所有权，它验证内
+存的所有者看到内存的一致性视图。
+
+对内存缓冲区的访问（包括读和写，不管是软件还是硬件）明确的通过 gralloc来管
+理（这可以做一些同步或已步操作）。这通过 lock 和 unlock 一个内存缓冲区补丁。
+可以有多个线程能同时获取 read-lock，但是只有一个线程能获取 write 锁。
+
+...	...	...
+代码
+
+lockAsync 方法和 lock 方法比较类似，除了缓冲区的同步 fence 对象传递给 lock
+调用，而不是要求调用者等待操作完成。
+
+gralloc 的实现获取 fenceFd 的所有权，当它不再需要时并负责关闭它。
+...	...	...
+代码
+
+Cache Coherence（缓存一致性）
+如果软件需要访问图形缓冲区，那么 CPU 可以通过读或写来正确的访问数据。保持
+缓存一致性是 gralloc 的责任之一。不需要清除缓存，或者在一些 SoC 中使能总线
+监听，来保持内存一致性视图，在图形硬件和 CPU 之间，这会浪费电源并增加延迟。
+因此，在这里 gralloc 需要使用特定于平台的机制。
+
+Locking Pages 在 RAM 中
+另一个在 CPU 和图形硬件之间共享内存的方面是确保内存页不会清除到交换文件，
+当它们被硬件使用时。我不记得在 Android 的设备上看见过配置了 swap 文件，但
+它确实是可行的，并且 lock 应该真正的在 RAM 中锁定内存页面。
+另一个相关的问题是，当一个虚拟地址重新安排到一个物理地址，发生了页映射，这
+动态的重新安排了不同的物理页（页迁移）。内核可能这样做的原因之一是为了通过
+重新安排物理内存的分配防止碎片化。从 CPU 的角度来说，只要新的物理页包含正
+确的内容，这就非常好。但是从图形硬件模块的角度来说，这就是拖动脚下的地毯。
+硬件之间共享的页面应该设计为不可移动。
+
+
+
+
+
+
 
 
 
