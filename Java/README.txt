@@ -12,3 +12,6 @@ http://blog.csdn.net/wen294299195/article/details/39964971
 Data Structures and Algorithm Analysis in Java (Third Edition)
 Resource
 http://users.cis.fiu.edu/~weiss/
+
+Notepad++ Run Java 
+http://jingyan.baidu.com/article/a65957f4fedcc424e67f9bd1.html
