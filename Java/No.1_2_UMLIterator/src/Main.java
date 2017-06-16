@@ -5,7 +5,8 @@ public class Main {
 		bookShelf.appendBook(new Book("Bible"));
 		bookShelf.appendBook(new Book("Cinderella"));
 		bookShelf.appendBook(new Book("Daddy-Long-Legs"));
-		bookShelf.appendBook(new Book("Dad"));
+		bookShelf.appendBook(new Book("Gulliver's Travels"));
+		bookShelf.appendBook(new Book("Hamlet"));
 
 		// 这里使用了接口作为返回类型
 		Iterator it = bookShelf.iterator();
