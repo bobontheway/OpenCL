@@ -1,0 +1,5 @@
+#written by FileProperties
+#Sat Jun 17 11:16:38 CST 2017
+day=17
+year=2017
+month=6
