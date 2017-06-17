@@ -1,5 +1,10 @@
 习题 2-2
 
+问题：
+属性列表中的 key 和 value 存放形式？
+
+====
+
 关于 Properties 类，继承自 Hashtable<Object, Object>
 
 类 Properties 表示一组持久属性，该属性可以保存到流中，或者从流加载。
