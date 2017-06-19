@@ -1,6 +1,6 @@
 // 使用一个包含了撒个元素的数组来保存 Triple 的实例
 public class Triple {
-	private Triple[] triple = new Triple[] {
+	private static Triple[] triple = new Triple[] {
 		new Triple(0),
 		new Triple(1),
 		new Triple(2)
