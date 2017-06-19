@@ -12,5 +12,8 @@ public class Main {
 		card1.use();
 		card2.use();
 		card3.use();
+
+		IDCard card = new IDCard("小波");
+		System.out.println("new card: " + card.getOwner());
 	}
 }
