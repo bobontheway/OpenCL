@@ -15,3 +15,6 @@ http://users.cis.fiu.edu/~weiss/
 
 Notepad++ Run Java 
 http://jingyan.baidu.com/article/a65957f4fedcc424e67f9bd1.html
+
+No.4_UMLFactory
+使用了 package 的概念。问题，默认的构造函数的共享属性是如何？
