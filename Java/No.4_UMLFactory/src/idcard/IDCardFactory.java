@@ -1,3 +1,5 @@
+package idcard;
+import framework.*;
 import java.util.*;
 
 public class IDCardFactory extends Factory {

@@ -1,3 +1,5 @@
+package framework;
+
 public abstract class Factory {
 	public final Product create(String owner) {
 		Product p = createProduct(owner);
