@@ -6,9 +6,9 @@ public class Main {
 		// 返回抽象类
 		Factory factory = new IDCardFactory();
 		// 抽象类调用子类的实现
-		Product card1 = factory.create("小明", "20062371");
-		Product card2 = factory.create("小红", "20061772");
-		Product card3 = factory.create("小刚", "20068765");
+		Product card1 = factory.create("小明");
+		Product card2 = factory.create("小红");
+		Product card3 = factory.create("小刚");
 		System.out.println();
 
 		// 产品抽象方法的实现

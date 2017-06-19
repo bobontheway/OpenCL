@@ -3,24 +3,24 @@ import framework.*;
 
 public class IDCard extends Product {
 	private String owner;
-	private String id;
+	private int serial;
 
-	IDCard(String owner, String id) {
+	IDCard(String owner, int serial) {
 		System.out.println("制作" + owner + "的ID卡");
 		this.owner = owner;
-		this.id = id;
+		this.serial = serial;
 	}
 
 	public void use() {
-		System.out.println("使用" + owner + "(" + id + ")" + "的ID卡");
+		System.out.println("使用" + owner + "(" + serial + ")" + "的ID卡");
 	}
 
 	public String getOwner() {
 		return owner;
 	}
 
-	public String getId() {
-		return id;
+	public int getSerial() {
+		return serial;
 	}
 
 }
