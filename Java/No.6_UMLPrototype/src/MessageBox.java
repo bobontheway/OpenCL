@@ -26,6 +26,7 @@ public class MessageBox implements Product {
 	public Product createClone() {
 		Product p = null;
 
+		// 创建并返回对象的副本。“拷贝“ 的具体含义取决与对象的类
 		try {
 			p = (Product)clone();
 		} catch (CloneNotSupportedException e) {
