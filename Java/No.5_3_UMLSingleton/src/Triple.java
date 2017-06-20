@@ -16,6 +16,8 @@ public class Triple {
 		return triple[id];
 	}
 
+	// 返回表示对象 Object 的字符串，在 Object 类中定义。Object 类是所有
+	// Java 类的父类。
 	public String toString() {
 		return "[Triple id=" + id + "]";
 	}
