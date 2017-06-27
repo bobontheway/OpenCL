@@ -11,7 +11,7 @@ public class NightState implements State {
 
 	// 设置时间
 	public void doClock(Context context, int hour) {
-		if (hour >= 9 || hour < 17){ // 白天
+		if (hour >= 9 && hour < 17){ // 白天
 			context.changeState(DayState.getInstance());
 		}
 	}
