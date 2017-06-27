@@ -23,4 +23,4 @@ No.4_UMLFactory
 使用了 package 的概念。问题，默认的构造函数的共享属性是如何？
 
 No.18_UMLMemento
-对泛型的使用仍然存在问题？
+对泛型的使用仍然存在问题？包的概念待使用（wide interface, narrow interface）？
