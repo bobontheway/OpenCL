@@ -24,3 +24,6 @@ No.4_UMLFactory
 
 No.18_UMLMemento
 对泛型的使用仍然存在问题？包的概念待使用（wide interface, narrow interface）？
+
+No.21_UMLProxy
+看得最清晰
