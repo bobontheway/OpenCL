@@ -1,18 +1,13 @@
 public class Main {
 	public static void main(String[] args) {
-		SafeFrame frame  = new SafeFrame("State Sample");
-
-		while (true) {
-			// 时钟，用来驱动事件
-			for (int hour = 0; hour < 24; hour++) {
-				frame.setClock(hour); // 设置时间
-				try {
-					//Thread.sleep(1000);
-					Thread.sleep(1000);
-				} catch (InterruptedException e) {
-				}
-			}
+		if (args.length == 0) {
+			System.out.println("Usage: java Main digits");
+			System.out.println("Example: java Main 1212123");
+			System.exit(0);
 		}
+
+		BigString bs = new BigString(args[0]);
+		bs.print();
 	}
 }
 
