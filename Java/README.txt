@@ -1,3 +1,9 @@
+目标：
+（1）熟悉 GoF 设计模式，并能熟练应用；
+（2）能尝试做一些扩展，或者建立自己的模式；
+（3）从变成语言切入数学，最终到硬件架构和实现；
+
+
 图说设计模式
 https://design-patterns.readthedocs.io/zh_CN/latest/
 
