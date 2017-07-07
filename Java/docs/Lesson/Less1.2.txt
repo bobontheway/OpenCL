@@ -1,0 +1,77 @@
+1.5 Default 方法
+Interface 部分描述了一个例子，它设涉及由计算机控制的汽车的制造商，
+它们发布行业标准接口，描述了可以调用哪些方法来操作他们的汽车。要
+是这些电脑控制的汽车的制造商为汽车增加新的功能怎么办呢，如飞行功
+能？这些制造商需要指定新的方法，以使其它公司（如电子制导仪器制造
+商）能够调整自己的软件以适应飞行汽车。那这些汽车制造商在哪里声明
+这些新的飞行相关的方法呢？如果他们将新的方法添加到原始接口中，那
+么实现这些接口的程序员就必须重写它们的实现。如果他们将它们添加为
+static 方法，那么程序员就会将它们看作是工具（实用）方法，而不是关
+键的核心方法。
+
+default 方法使你能够向库的接口中添加新的功能，并确保为这些接口的
+旧的版本编写的代码具有二进制兼容性。
+
+考虑下面的 TimeClient 接口，在 Answers to Questions and Exercises:
+Interfaces 中描述:
+
+import java.time.*;
+
+public interface TimeClient {
+	void setTime(int hour, int minute, int second);
+	void setDate(int day, int month, int year);
+	void setDAteAndTime(int day, int month, int year,
+		int hour, int minute, int second);
+	LocalDateTime getLocalDateTime();
+}
+
+下面的 SimpleTimeClient 类实现了 TimeClient 接口：
+
+package defaultmethods;
+import java.time.*;
+import java.lang.*;
+import java.util.*;
+
+public class SimpleTimeClient implements TimeClient {
+	private LocalDateTime dataAndTime;
+
+	public SimpleTimeClient() {
+		dateAndTime = LocalDateTime.now();
+	}
+
+	public void setTime(int hour, int minute, int second) {
+		LocalDate currentDate = LocalDate.from(dateAndTime);
+		LocalTime timeToSet = LocalTime.of(hour, minute, second);
+		dateAndTime = LocalDateTime.of(currentDate, timeToSet);
+	}
+
+	public void setDate(int day, int mouth, int year) {
+		LocalDate dateToSet = LocalDate.of(day, mounth, year);
+		LocalTime currentTime = LocalTime.from(dateAndTime);
+		dateAndTime = LocalDateTime.of(dateToSet, currentTime);
+	}
+
+	public void setDateAndTime(int day, int mouth, int year,
+		int hour, int minute, int second) {
+		LocalDate dateToSet = LocalDate.of(day, mounth, year);
+		LocalTime timeToSet = LocalTime.of(hour, minute, second);
+		dateAndTime = LocalDateTime.of(dateToSet, timeToSet);
+	}
+
+	public LocalDateTime getLocalDateTime() {
+		return dateAndTime;
+	}
+
+	public String toString() {
+		return dateAndTime.toString();
+	}
+
+	public static void main(String... args) {
+		TimeClient myTimeClient = new SimpleTimeClient();
+		System.out.println(myTimeClient.toString());
+	}
+}
+
+
+
+
