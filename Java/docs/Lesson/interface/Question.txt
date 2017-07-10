@@ -1,0 +1,9 @@
+1. 必须实现：charAt, length, subSequence, toString
+2. 实现的方法缺少 default 或 static 关键字
+3. 修改如下：
+public interface SomethingIsWrong {
+	default void aMethod(int aValue) {
+		System.out.println("Hi Mom");
+	}
+}
+4. 有效，可以在经后扩展 default 方法。
