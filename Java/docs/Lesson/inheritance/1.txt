@@ -1,0 +1,130 @@
+继承
+
+在前面的文章中，可以看到 inheritance 被多次提及到。在 Java 语言中，类可以
+从其它的类派生，因此可以从这些类中继承字段和方法。
+
+定义：从其它的类派生的类称为子类（也是派生类，扩展类或子类别）。可以派生出
+子类的类称为超类（也是基类或父类）
+
+除了对象没有超类，每个类都有且仅有一个唯一的直接超类（单继承）。在没有指定
+任何其它显式超类的情况下，每个类隐式都是 Object 的子类。
+
+类可以派生自派生于其它类的类，并最终派生自最上层的类 Object。例如，类 C 派
+生自类 B，类 B 派生子类 A，类 A 派生自 Object。
+
+继承的思想是简单而强大的：当需要创建新的类时，并且已有的类已经包含了一些需
+要的代码，这就可以从已有的类派生出新类。这样，就可以重用现有类的字段和方法，
+而不必自己编写（调试）。
+
+子类从超类中继承所有的成员（字段，方法和嵌套类）。构造函数不是成员，因此子
+类不会继承，但是超类的构造函数可以从子类中调用。
+
+1.1Java 平台类层次结构
+在 java.lang 包中定义的 Object 类，定义并实现所有类共有的行为——包括自己编写
+的代码。在 Java 平台中，许多类直接从 Object 派生，其它类从这些类派生，等等，
+构成类的层次结构。
+
+图……
+Java 平台中的所有类都是 Object 的后代。
+
+在层次结构的顶部，Object 提供了所有类中通用的行为。层次结构底部附近的类提供
+了更专业的行为。
+
+1.2继承的示例
+下面是 Bicycle 类中可能实现的示例代码：
+
+public calss Bicycle {
+	// the Bicycle class has three fields
+	public int cadence; // 韵律，节奏
+	public int gear; // 齿轮
+	public int speed; // 速度
+	...	...
+}
+
+声明为 MountainBike 的类，是 Bicycle 的子类，如下所示：
+public class MountainBike extends Bicycle {
+	// the MountainBike subclass adds one field
+	public int seatHeight; // 座椅高度
+}
+
+MountainBike 继承了 Bicycle 的所有字段和方法，并添加了 seatHeight 字段和一个
+设置该字段的方法。除了构造函数，这就像完全从头编写了一个新的 MountainBike 类，
+其中有四个字段和五个方法。然而，不必做所有的工作。如果 Bicycle 类中的方法是复
+杂的并需要大量时间来调试，这将是特别有价值的。
+
+1.3 可以在子类中做些什么
+不管子类在哪个包中，子类从父类继承了所有的 public 和 protected 成员。如何子类
+和父类在同一个包中，它也继承父类的包私有成员（package-private）。可以使用继承
+的成员，或者替换它们，隐藏它们，抑或是用新成员补充它们。
+- 继承的字段可以直接使用，就像其它的字段一样；
+- 可以在子类中声明一个与超类中同名的字段，达到隐藏超类字段的目的（不推荐这么做）；
+- 可以在子类中声明一个在超类不存在的新的字段；
+- 继承的方法可以直接使用；
+- 可以在子类中写一个新的 instance 方法，和超类中的具有相同的签名，以 overriding 
+超类的方法；
+- 可以在子类中写一个新的 static 方法，和超类中的具有相同的签名，以 hiding 超类的
+方法；
+- 可以在子类中声明一个在超类中不存在的新的方法；
+- 可以在子类中写一个构造函数来调用超类的构造函数，使用隐式方式或通过 super 关键
+字。
+
+本文以下部分将在这些主题上展开。
+
+1.4超类中的私有成员
+子类并不会继承父类中的私有（private）成员。然而，如果超类包含 public 或
+protected 方法来访问它的私有成员，这些私有成员也可以间接的被子类使用。
+
+// 翻译问题？
+嵌套的类可以访问包含它的类的所有成员——包括字段和方法。因此，继承了的 public 或
+protected 的嵌套类的子类可以间接访问超类的所有私有成员。
+
+1.5 对象转换（Casting Objects）
+我们已经看到，一个对象是类的数据类型，该类是它实例化的类。例如，如下所示：
+
+public MountainBike myBike = new MountainBike();
+
+那么 myBike 是 MountainBike 类型。
+
+MountainBike 起源于（来自于） Bicycle 和 Object。因此，MountainBike 是
+Bicycle，并且也是 Object，它可以用于 Bicycle 或 Object 对象需要的时候。
+
+反过来则不一定是真的：Bicycle 可能是 MountainBike，但不是一定的。类似的
+一个 Object 可能是 Bicycle 或 MountainBike，但它并不是一定的。
+
+强制转换显示了在继承和和实现所允许的对象中，使用一种类型的对象代替另一种
+类型。例如，如果我们写：
+
+Object obj = new MountainBike();
+
+那么 obj 同时为 Object 和 MountainBike（直到 obj 被安排为另一个不是
+MountainBike 的对象），这称作隐式强制转换。
+
+另一方面，我们写：
+
+MountainBike myBike = obj;
+
+这会得到一个编译错误，因为编译器不知道 obj 是 MountainBike。然而，通过显式
+强制转换，我们可以告诉编译器，我们会安排 MountainBike 给 obj：
+
+MountainBike myBike = (MountainBike)obj;
+
+此强制转换将插入一个运行时检查，即 obj 被安排（分配）为 MountainBike，以便
+编译器可以安全地假定 obj 是 MountainBike。如果在运行时 obj 不是 MountainBike，
+将抛出一个异常。
+
+注意：
+可以使用 instanceof 操作符，做一个是否为特定对象类型的逻辑测试。由于不正确的
+强制转换，这可以避免运行时错误。例如：
+
+if (obj instanceof MountainBike) {
+	MountainBike myBike = (MountainBike)obj;
+}
+
+这里，instanceof 操作符验证 obj 引用了 Mountainbike，这样我们就可以
+做强制转换，知道不会引发运行时异常抛出。
+
+
+
+
+
+
