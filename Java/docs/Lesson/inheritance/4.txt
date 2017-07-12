@@ -1,0 +1,110 @@
+
+file:///home/likewise-open/SPREADTRUM/xiaobo.dong/Project/src/github/books/java/tutorial/java/IandI/polymorphism.html
+
+多态（Polymorphism）
+对多态的定义为是指生物界中，一个生物体或物种可以拥有不同的形态（形式）或阶
+段（变态阶段）。这一原则也可以应用于面向对象编程和语言，例如 Java 编程语言。
+类的子类可以定义它们自己的唯一行为，同时也能共享父类中的某些相同功能。
+
+多态性可以通过对 Bicycle 类的轻微修改来证明。例如，可以在类中添
+加 printDescription 方法，显示当前存储在实例中的所有数据。
+
+public void printDescription() {
+	System.out.println("\nBike is " + "in gear" + this.gear +
+		"with a cadence of " + this.cadence +
+		" and travelling at a speed of " + this.speed + ".");
+}
+
+为了演示 Java 语言中的多态特性，使用 MountainBike 和 RoadBike 类来扩展
+Bicycle 类。对于 MountainBike，添加一个字段用于悬浮（暂停），它是一个字符串
+值，指示自行车前面是否有减震气（前减震），或者该自行车同时包括前后减震器（双
+减震器）。
+
+下面是更新后的类：
+
+public class MountainBike extends Bicycle {
+	private String suspension;
+
+	public MountainBike(int startCadence, int startSpeed,
+		int startGear, String suspensionType) {
+		super(startCadence, startSpeed, starGear);
+		this.setSuspension(suspendsionType);
+	}
+
+	public String getSuspension() {
+		return this.suspension;
+	}
+
+	public void setSuspension(String suspensionType) {
+		this.suspension = suspensionType;
+	}
+
+	public void printDescription() {
+		super.printDescription();
+		System.out.println("The " + "MountainBike has a" +
+			getSuspension() + " suspension.");
+	}
+}
+
+注意被重写的 printDescription 方法。除了之前提供的信息外，有关
+suspension 的其他数据也包括在输出中。
+
+接下来，创建 RoadBike 类。由于道路或赛车自行车有瘦轮胎，添加一个属性用来
+表示轮胎宽度。以下是 RoadBike 类：
+
+public class RoadBike extends Bicycle {
+	// In millimeters(mm，毫米)
+	private int tireWidth;
+
+	public RoadBike(int startCadence, int startSpeed,
+		int startGear, int newTireWidth) {
+		super(startCadence, startSpeed, startGear);
+		this.setTireWidth(newTireWidth);
+	}
+
+	public int getTireWidth() {
+		return this.newTireWidth;
+	}
+
+	public void setTireWidth(int newTireWidth) {
+		this.tireWidth = newTireWidth;
+	}
+
+	public void printDescription() {
+		super.printDescription();
+		System.out.println("The RoadBike" + "has " +
+			getTireWidth() + "  MM tires.");
+	}
+}
+
+注意：printDescription 方法被重写了。此时，将显示有关轮胎宽度的信息。
+
+总之，有三个类：Bicycle，MountainBike 和 RoadBike。两个子类重写了
+printDescription 方法，并打印（输出）唯一的信息。（这里的唯一信息指类特
+有的信息）
+
+下面是一个测试程序，创建了三个 Bicycle 变量。每个变量被分配三个 bicycle
+类中的其中一个。接着每个变量打印输出信息。
+
+public class TestBikes {
+	public static void main(String[] args) {
+		Bicycle bike01, bike02, bike03;
+
+		bike01 = new Bicycle(20, 10, 1);
+		bike02 = new MountainBike(20, 10, 5, "Dual");
+		bike03 = new RoadBike(40, 20, 8, 23);
+
+		bike01.printDescription();
+		bike02.printDescription();
+		bike03.printDescription();
+	}
+}
+
+以下是测试程序的输出：
+。。。
+
+Java 虚拟机（JVM）为每个变量中引用的对象调用适当的方法。它不调用由（通过）变量
+类型定义的方法。此行为称为虚方法调用，并演示 Java 语言中重要的多态功能的一个方
+面。
+
+
