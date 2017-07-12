@@ -100,8 +100,19 @@ public class TestBikes {
 	}
 }
 
-以下是测试程序的输出：
-。。。
+以下是测试程序的输出（参见　Less5）：
+```java
+xbdong@xbdong-opencl:~/Project/github/OpenCL/Java/docs/Lesson/inheritance/Less5$
+sh build.sh 
+
+Bike is in gear 1 with a cadence of 20 and travelling at a speed of 10. 
+
+Bike is in gear 5 with a cadence of 20 and travelling at a speed of 10. 
+The MountainBike has a Dual suspension.
+
+Bike is in gear 8 with a cadence of 40 and travelling at a speed of 20. 
+The RoadBikehas 23  MM tires.
+```
 
 Java 虚拟机（JVM）为每个变量中引用的对象调用适当的方法。它不调用由（通过）变量
 类型定义的方法。此行为称为虚方法调用，并演示 Java 语言中重要的多态功能的一个方
