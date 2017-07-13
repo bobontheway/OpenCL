@@ -1,9 +1,71 @@
 1.隐藏字段（Hiding Fields）
 在一个类中，与超类中的字段同名的字段将隐藏超类的字段，即使它们的类型不同。
 在子类中，超类中的字段不能简单的通过名称引用。相反，必须通过 super 访问该
-字段，在下一节讲对其介绍。总的来说，不建议隐藏字段，因为它使代码难以阅读。
+字段，在下一节将对其介绍。总的来说，不建议隐藏字段，因为它使代码难以阅读。
 
 2.使用 super 关键字
+2.1 访问超类的成员
+如果方法重写了超类中的方法，则可以通过使用 super 关键字调用被重写的方法。
+还可以使用 super 来引用隐藏的字段（尽管不鼓励隐藏字段），考虑下面的超类：
 
+public class Superclass {
+	public void printMethod() {
+		System.out.println("Printed in Superclass.");
+	}
+}
 
+下面是一个称为 Subclass 的子类，它重写了 printMethod() 方法：
+
+public class Subclass extends Superclass {
+	// overrides printMethod in Superclass
+	public void printMethod() {
+		super.printMethod();
+		System.out.println("Printed in Subclass");
+	}
+
+	public static void main(String[] args) {
+		Subclass s = new Subclass();
+		s.printMethod();
+	}
+}
+
+在子类中，简单的名称 printMethod 是指在子类中声明的那个，它重写了超类中
+同名的方法。因此，要引用从超类继承的 printMethod() 方法，子类必须使用一
+个限定符，使用 super 来表示。编译并执行子类打印如下内容（参考 Less6）：
+
+```java
+Printed in Superclass.
+Printed in Subclass
+```
+
+2.2 子类构造函数
+下面的示例阐述了如何使用 super 关键字来调用超类的构造函数。回忆 Bicycle 示
+例，MountainBike 是 Bicycle 的子类。下面是 MountainBike（子类）构造函数调
+用超类的构造函数，然后添加自己的初始化代码：
+
+public MountainBike()int startHeight, int startCadence, int startSpeed,
+	   int startGear) {
+		   super(startCadence, startSpeed, startGear);
+		   seatHeight = startHeight;
+}
+
+对超类构造函数的调用必须在子类构造函数中的第一行。调用超类构造函数的语法为：
+
+	super();
+
+或
+	super(参数列表);
+
+使用 super()，将调用超类中没有参数的构造函数。使用 super(参数列表)，具有匹配
+参数列表的超类构造将被调用。
+
+注意：如果构造函数没有明确（显式）的调用超类的构造函数，Java 编译器将自动插入
+一个对超类中没有参数构造函数的调用。如果超类中没有包含不带参数的构造函数，则
+会的到编译错误。Object 确实有这样的构造函数，因此如果 Object 是唯一的超类，则
+没有问题。
+
+如果子类构造函数调用了超类的构造函数，不管是显示调用还是隐式调用，可以认为会
+有一个整个构造函数链的调用，所有的路径最终将调用 Object 的构造函数。事实上，
+情况就是这样的。它被称作构造函数链，当有长的类时，需要了解（意识、关注）它。
+（由于类的继承是单继承的，顺着链条往下走就行）
 
