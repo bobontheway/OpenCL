@@ -1,1 +1,27 @@
-Writing Final Classes and Methods
+编写　Final 类和方法（Writing Final Classes and Methods）
+可以声明类的某些或者所有方法为 final 方法。在方法声明时使用 final 关键字
+表示该方法不能被子类重写。Object 类就这样做了，它的一些方法就是 final 方
+法。
+
+如果一个方法在实现时不能被改变，并且保持对象的一致性非常关键，那么该方法
+就应该为 final。例如，可能希望在 ChessAlgorithm 类中讲　getFirstPlayer 
+声明为 final 方法：
+
+class ChessAlgorithm { // 棋算法
+	enum ChessPlayer {WHITE, BLACK}
+	...
+	final ChessPlayer getFirstPlayer) {
+		return ChessPlayer.WHITE;
+	}
+	...
+}
+
+从构造函数中调用的方法通常声明为 final。如果构造函数调用非 final 方法，子
+类可能会以令人惊讶后不希望的结果重新定义该方法。
+
+注意，也可以声明整个类为 final。声明为 final 的类不能被子类（什么意思？不
+能被继承？没有子类，不能被继承）。例如，在创建像 String 这样不可变的类时，
+这一点尤其重要。
+
+参考：
+https://zhidao.baidu.com/question/2265651950505852748.html
