@@ -1,1 +1,152 @@
 Object 作为超类（Object as a Superclass）
+
+在 java.lang 包中的 Object 类，位于类层次结构树的顶端。每个类都是 Object 类直
+接或简介的后代。每个使用的或开发的类都继承了 Object 的实例方法。不必使用这些方
+法中的任何一种，但是如果需要可以在自己的类中重写这些方法。从 Object 继承的方法
+将在本节中讨论：
+- protected Object clone() trhows CloneNotSupportedException
+创建并返回此对象的副本；
+- public boolean equals(Object obj)
+表示其它对象是否和这个相等；
+- protected void finalize() throws Throwable
+当垃圾回收时，垃圾回收器将在一个对象上调用
+- public final Class getClass()
+返回对象的运行时（runtime）类
+- public int hashCode()
+返回对象的哈希代码值（哈希值）
+- public String toString()
+返回对象的字符串表示形式
+
+对象的 notify，notifyAll 和 wait 方法都扮演相应的角色，以同步程序中独立运行线程
+的活动，稍后的课程将对此进行讨论，此处不再介绍。有五种方法：
+
+- public final void notify()
+- public final void notifyAll()
+- public final void wait()
+- public final void wait(long timeout)
+- public final void wait(long timeout, int nanos)
+
+注意：这些方法的中有一些微妙的方面，特别是 clone 方法
+
+1.1 clone() 方法
+如果某个类，或它的超类，实现了 Cloneable 接口，则可以使用 clone() 方法从现有对象
+创建副本。若要创建副本，请编写：
+
+aCloneableObject.clone();
+
+对象对此方法的实现，将检查调用 clone() 的对象是否是否实现了 Cloneable 接口。
+如果没有实现，该方法将抛出 CloneNotSupportedException 异常。异常处理将自爱后面
+的课程中介绍。当前，需要知道 clone() 必须声明为：
+
+protected Object clone() throws CloneNotSupportedException
+
+or
+
+public Object clone() throws CloneNotSupportedException
+
+如果要编写一个重写 Object 中的 clone() 方法。
+
+如果调用 clone() 的对象实现了 Cloneable 接口，Object 对 clone() 方法的实现将  
+创建一个相同类的对象，和原始对象相同，并初始化新对象的成员变量，它和原始对象
+对应成员变量的值相同。
+
+使类可克隆（生成副本）最简单的方法是在类声明中添加 Cloneable 的实现。然后，对
+象就可以调用 clone() 方法。
+
+对于某些类，Object 的 clone() 方法的默认行为工作正常。但是，一个对象包含对外
+部对象的引用，称作 ObjExternal，就需要重写（override）clone() 方法来的到正确
+的行为。否则，一个对象在 ObjExternal 中所做的修改将在其克隆（副本）中可见。这
+意为着原始对象及其克隆对象不是独立的——要解耦它们，必须重写 clone() 方法，以便
+它克隆对象和 ObjExternal。然后，原始对象引用 ObjExternal，同时克隆对象引用一个
+克隆的 ObjExternal，因此对象及其克隆是真正独立的。
+// 列举个示例？
+
+1.2 equals() 方法
+equals() 方法比较两个对象是否相等，如果相等，则返回 true。Object 类中
+的 equals() 方法使用标识运算符（==）来确定两个对象是否相等。对于原始数据类型，
+这可以给出正确结果。但是，对于对象，它不会。由 Object 提供 equals() 方法测试
+对象引用是否相等——也就是说，比较的对象是否为完全相同的对象。
+
+若要测试两个对象在等效性上是否相等（包含相同的信息），必须重写（override）
+equals() 方法。下面是重写 equals() 方法的 Book 类：
+
+public class Book {
+	...
+	public boolean equals(Object obj) {
+		if (obj instanceof Book)
+			return ISBN.equals((Book)obj.getISBN());
+		else
+			return false;
+	}
+}
+
+考虑下面的代码，测试 Book 类的两个实例的相等性：
+
+// Swing Turotrial, 2nd edition
+Book firstBook = new Book("0201914670");
+Book secondBook = new Book("0201914670");
+
+if (firstBook.equals(secondBook)) {
+	System.out.println("objects are equeal");
+} else {
+	System.out.println("objects are not equeal");
+}
+
+即使 firstBook 和 secondBook 引用两个不同的对象，但程序显示对象是相等的。
+它们被认为相等是由于比较的对象包含相同的 ISBN 号。
+
+如果标识晕算符不适合时，则应重写 equals() 方法。
+
+注意：如果重写了 equals() 方法，则必须也重写 hashCode() 方法。
+
+1.3 finalize() 方法
+Object 类提供了一个回调方法，即 finalize()，在对象变为垃圾时可以对其调用。
+Object 中对 finalize() 的实现不执行任何操作，可以重写 finalize() 来执行清
+理，例如释放资源。
+
+finalize() 方法可以由系统自动调用，但当它被调用时，或者即使被调用，也不确
+定（时间？）。因此，不应该依赖此方法执行清理操作。例如，如果执行完 I/O 操
+作后，代码中没有关闭文件描述符，并且寄希望于 finalize() 来关闭，则可能会耗
+尽文件描述符。
+
+1.4 getClass() 方法
+不能重写 getClass 方法。
+getClass() 方法返回一个类对象，它具有可用于获取有关类的信息方法，例如它的
+名称（getSimpleName()），它的超类（getSuperclass()）和它实现的接
+口（getInterfaces()）。例如，下面的方法获取并显示对象的类名：
+
+void printClassName(Object obj) {
+	System.out.println("The object's" + " class is " +
+		obj.getClass().getSimplename());
+}
+
+java.lang 包中的 Class 类，有大量的方法（超过 50 个）。例如，可以测试该类
+是注释（isAnnotation()），一个接口（isInterface()）或一个枚举（isEnum()）。
+可以看到对象的字段是什么（getFields()）或它的方法是什么（getMethods()），等
+等。
+
+1.5 hashCode() 方法
+hashCode() 返回的是对象的哈希代码，它是十六进制表示的对象的内存地址。
+
+根据定义，如果两个对象相等，则它们的哈希代码也必须相等。如果重写 equals() 方
+法，则更改两个对象的等效方式（相等的条件），并且对象的 hashCode() 实现不再有
+效。因此，如果重写了 equals() 方法，也必须重写 hashCode() 方法。
+
+1.6 toString() 方法
+始终需要考虑在自己的类中重写 toString() 方法，也就是说，在自己的类中往往需要
+重写 toString() 方法。
+
+Object 的 toString() 方法返回对象的字符串表示形式，这对于调试非常有用。对象的
+字符串表示形式完全依赖与对象，这就是需要在类中重写 toString() 的原因。这里是说
+类的对象变了（子类嘛）？
+
+可以将 toString() 和 System.out.println() 一起用于显示对象的文本表示形式，如书
+籍的实例：
+
+System.out.println(firstBook.toString());
+
+对于正确的重写 toString() 方法，打印一些有用的内容，如下所示：
+
+ISBN: 0201914670; The Swing Tutorial; A Guide to Constructing GUIs, 2nd Edition
+
+
