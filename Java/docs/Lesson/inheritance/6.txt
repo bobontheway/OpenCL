@@ -1,0 +1,1 @@
+Object 作为超类（Object as a Superclass）
