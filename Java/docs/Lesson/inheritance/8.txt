@@ -1,1 +1,144 @@
 抽象方法和类（Abstract Methods and Classes）
+抽象类是声明为 abstract 的类——它可能包括或不包括抽象方法。抽象类不能实例化，但
+可以被继承（子类化）。
+
+抽象方法在声明的时候没有具体实现（不带大括号，后跟分号），如下所示：
+
+abstract void moveTo(double deltaX, double deltaY);
+
+如果类包含抽象方法，则类必须声明为抽象类，如下所示：
+
+public abstract class GraphicObject {
+	// declare fields
+	// declare nonabstract methods
+	abstract void draw();
+}
+
+当抽象类被继承时，子类通常为父类中的所有抽象方法提供具体实现。然而，如果没有，
+那么子类也必须被声明为抽象的。
+
+注意：接口中的方法（参见接口部分），如果没有被声明为 default 或 static 方法的
+隐式是抽象的，因此 abstract 修饰符不与接口方法一起使用。（可以使用，但是不必
+要的）
+
+1.1 抽象类相对于接口
+抽象类和接口类似，不能对它们实例化，并且它们可能包含在声明时有或没有实现的混合
+方法。但是，使用抽象类，可以声明非 static 和 final 的字段，并且定义 public，
+protected 和 private 的具体方法。对于接口，所有的字段都是 public，static 和
+final 的，并且所有的声明或定义的方法（和 default 方法类似）都是 public 的。此
+外，只能扩展（extends）一个类，无论它是否为抽象的，但是可以实现任意数量的接口。
+
+抽象类和接口，应该使用哪个？
+
+- 如果下面语句中的任何一个适用于当前情况，需要使用抽象类：
+（1）需要在多个紧密相关的类之间共享代码；
+（2）希望扩展自抽象类的类拥有许多常用的方法和字段，或者需要除 public 之外的访
+问修饰符（例如 protected 和 private）；
+（3）需要声明非 static 和 final 的字段。这允许定义方法，它们可以访问和修改所属
+对象的状态。
+
+- 如果下面语句中的任何一个适用与当前情况，需要使用接口：
+（1）需要不相关的类来实现接口。例如，Comparable 和 Cloneable 被许多不相关的类
+所实现；
+（2）需要指定特定数据类型的行为，但不关心谁实现其行为（多态）；
+（3）需要利用类型的多重继承特性。
+
+JDK 中一个抽象类的示例是 AbstractMap，它是 Collections 框架（Framework）的一部
+分。它的子类（包括 HashMap，TreeMap 和 ConcurrentHashMap）共享许多在
+AbstractMap 中定义的方法（包括 get，put，isEmpty，containsKey 和
+containsValue） 
+
+JDK 中实现多个接口的类的一个示例是 HashMap，它实现了 Serializable，Cloneable和
+Map<K, V> 接口。通过读取此接口的列表，可以推断 HashMap 的实例（不管开发人员还是
+公司实现了这个类）是可以被克隆，是可以序列化的（这意味着它可以转换为字节流；参
+考 Serializable 对象部分），并且拥有 map 的功能。此外，Map<K, V> 接口已经通过许
+多 default 方法的到了增强，例如 merge 和 forEach，而已实习该接口的旧的类不必重
+定义。
+
+注意，许多软件库同时使用了抽象类和接口；HashMap 类实习了多个接口，并且还扩展了
+抽象类 AbstractMap。
+
+1.2 抽象列示例（An Abstract Class Example）
+
+在面向对象的绘图应用中，可以绘制圆、矩形、线条、贝塞尔曲线和许多其它图形对象。这
+写对象都具有某些共同的状态（例如：位置、方向、线条颜色、填充颜色）和行为（例
+如：moveTo，rotate，resize，draw）。某些状态和行为对于所有图形对象来说都是相同
+的（例如：位置，填充颜色 和 moveTo），其它则需要不同的实现（例如：resize 或 draw）
+所有的图像对象（GraphicObjects）必须能够绘制（draw）和调整自己大小（resize）；它
+们的不同之处在于它们是如何做的。这对抽象类来说是完美的场景（情况）。可以利用这些
+相似性，并声明所有图形对象继承自相同的抽象父对象（例如：GraphicObject），如下图所
+示：
+
+...	...
+
+继承自 GraphicObject 的 Rectangle，Line，Bezier 和 Circle 类。
+
+首先，声明一个抽象类 GraphicObject，以提供所有子类完全共享的成员变量和方法，如当
+前位置和 moveTo 方法。GraphicObject 还声明了需要由所有子类实现但必须以不同方式实
+现的方法（例如，draw 和 resize）抽象方法。GraphicObject 可以是这样的：
+
+abstract class GraphicObject {
+	int x, y;
+	...
+	void moveTo(int newX, int newY) {
+		...
+	}
+	abstract void draw();
+	abstract void resize();
+}
+
+GraphicObject 的每个子类（非抽象类，如 Circle 和 Rectangle）必须为 draw 和 resize
+放提供具体的实现。
+
+class Circle extends GraphicObject {
+	void draw() {
+		...
+	}
+	void resize() {
+		...
+	}
+}
+
+class Rectangle extends GraphicObject {
+	void draw() {
+		...
+	}
+	void resize() {
+		...
+	}
+}
+
+1.3 是么时候一个抽象类实现一个接口（When an Abstract Class Implements an
+Interface）
+
+在 Interfaces 一节部分，有提到实现接口的类必须实现接口的所有方法。但是，如
+果定义了一个没有实现接口中所有方法的类，那么这个类应该被声明为抽象类。例如：
+
+abstract class X implements Y {
+	// implements all but one method of Y
+}
+
+class XX extens X {
+	// implements the remaining method in Y
+}
+
+在上面的例子中，类 X 必须为抽象类，因为它并没有完全实现 Y，但是类 XX 实际上
+实现了 Y。
+
+1.4 类成员（Class Members）
+
+抽象类可能包含 static 字段和 static 方法。可以将这些静态成员与类引用一起使
+用（例如，AbstractClass.staticMethod()），就像与任何其他类一样 。（这里的类
+引用与对象引用对应？）
+
+
+
+
+
+
+
+
+
+
+
+
