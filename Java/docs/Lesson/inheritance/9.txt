@@ -1,2 +1,26 @@
 继承小结（Summary of Inheritance）
 
+除了 Object 类，每个类都有一个直接的超类。类直接或间接继承了其所有超类的字段
+和方法。子类可以重写它继承的方法，也可以隐藏它继承的字段和方法（注意，隐藏字
+段通常是不好的变成习惯（实践））。
+
+在 "Overriding and Hiding Methods" 章节的表中，显示了声明一个和超类中的方法具
+有相同签名结果。
+
+Object 类在类层次结构的顶部。所有类都从次类派生出来，并继承了它的方法。
+从 Object 类继承的有用方法包括 toString()，equals()，clone() 和 getClass()。
+
+在类声明时使用 final 关键字可以防止类被继承。类似的，通过将方法声明为
+final 方法可以防止它在子类中被重写。
+
+抽象类只能被继承，不能被实例化。抽象类可以包含抽象方法——已声明但为实现的方法。
+然后，子类为抽象方法提供实现。
+
+问题和练习：继承（Questions and Exercises: inheritance）
+问题：
+a.重写了子类的方法：methodTwo()；
+b.隐藏了子类的方法：methodFour()；
+c.编译错误：methodOne() 和 methodThree()。
+
+
+
