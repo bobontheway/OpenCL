@@ -1,0 +1,18 @@
+Java 中声明和定义的区别：
+
+https://stackoverflow.com/questions/11715485/what-is-the-difference-between-declaration-and-definition-in-java
+
+down vote
+From the Sun glossary's definitions:
+
+declaration: A statement that establishes an identifier and associates attributes with it, without necessarily reserving its storage (for data) or providing the implementation (for methods). 
+
+definition: A declaration that reserves storage (for data) or provides implementation (for methods).
+
+The way I read the Sun glossary would be like this:
+
+List i;              // declaration - variable on the stack  
+i = new ArrayList(); // definition - gives variable a reference
+
+
+定义新的接口就意味着定义了新的数据类型。可以在任何可以使用其它数据类型名称的位置使用接口名称。如果定义的引用变量的类型是接口，则分配（赋值）给它的任何对象都必须是实现该接口的类的实例。

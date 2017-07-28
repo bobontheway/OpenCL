@@ -1,6 +1,6 @@
 1.1接口的定义
-接口的声明由修饰符、interface 关键字、接口名称、逗号分割的父接口（如果有），
-还有接口体组成。例如：
+接口的声明由访问修饰符、interface 关键字、接口名称、逗号分割的父接口（如果有的话），
+以及接口体组成。例如：
 
 public interface GroupInterface extends Interface1, Interface2, interface3 {
 	// constant declarations
@@ -13,11 +13,12 @@ public interface GroupInterface extends Interface1, Interface2, interface3 {
 	int doSomethingElse(String s);
 }
 
-public 访问修饰符表示接口可以被任何包中的任何类使用。
-如果接口的访问修饰符没有指定为 public，那么接口只能
-被和该接口在同一包中定义的类访问。
+public 访问修饰符表示接口可以被任何类使用，不管该类在哪里包中。
+如果接口的访问修饰符没有指定为 public，那么接口只能被同一包中定义的类访问。
 
 接口可以从其它的接口扩展，就像类或子类从其它的类扩展
+
+接口可以扩展自其它的接口，就像类或子类从其它的类扩展
 一样。然而，类只能从其它的某个类扩展，但接口可以从任
 意数量的几口扩展。接口声明包括一个逗号分隔的列表，列
 出了它所扩展的所有接口。
@@ -166,6 +167,13 @@ public boolean isEqual(Object object1, Object object2) {
 超类）类型和 Relatable 类型。这为它们提供了多重继承的一些优点，它们
 可以从超类和接口中获得行为（方法调用）。
 
+
+这些方法对任何 "relatable" 对象都起作用，不管它们的类继承关系如何。
+当类实现 `Relatable` 接口时，传递给上面函数的对象可以是类本身或超类的类型，也可以是 Relatable 类型。
+这就是多重继承的好处，它们可以同时包含超类和接口的功能。
+
+它们就可以同时包含超类和接口的功能。
+
 1.4接口的演进
 考虑一个已经开发称作 DoIt 的接口：
 public interface DoIt {
@@ -181,23 +189,32 @@ public interface DoIt {
 	boolean didItWork(int i, double x, String s);
 }
 
-如果做了这样的修改，则实现旧的 DoIt 接口的所有类都将中断，
-因为他们不再实现旧的接口。依赖这个接口的程序员会大声抗议。
+
+如果按照上面的修改，那么之前实现了 DoIt 接口的类都将不能正常工作。
+由于没有实现 didItWork 方法，将出现错误，这种做法过于粗暴，对开发人员来说很不友好。
 
 （为什么会抱怨？需要重新编译？）
 
-尽量预测接口的所有用途，并从一开始就指定它。如果像往接口添
-加其他方法，则有多个选项。可以创建一个扩展自 DoIt 的
-DoItPlus 接口。
+在定义接口时，尽量预测接口的所有用途，并从一开始就指定。如果以后想往接口中添加其它方法，有多个选
+项供选择。可以创建一个扩展自 DoIt 的 DoItPlus 接口。
+
+
 
 public interface DoItPlus extends DoIt {
 	boolean didItWork(int i, double x, String s);
 }
 
+
+
+
 现在代码的用户可以选择继续使用旧的接口或者更新到新的接口。
 
-或者将新的方法定义为 default 方法。下面的示例定义了一个名
+
+这样，实现 DoIt 接口的类可以选择继续使用旧的接口或者更新到新的接口。
+
+或者在 DoIt 接口中将新的方法定义为 `default` 方法。下面的示例定义了一个名
 为 didItWork 的默认方法。
+
 
 public interface DoIt {
 	void doSomething(int i, double x);
@@ -210,10 +227,26 @@ public interface DoIt {
 注意，必须为 default 方法提供实现。也可以在现有的接口中定义
 新的 static 方法。
 
+在接口中增加了新的 default 或 static 方法后，那些实现了 DoIt 接口的类，无需修改或重新编译仍然可以正常工作。
+
 当用户实现了使用新的 default 或 static 方法来增强的接口的
 类时，不必修改或重新编译就可以适应（容纳）新增加的方法。
 
+
+
+
+
+
+
+
+
+
+
+
+
+
 待办：
 （1）示例程序，说明上面在扩展接口成员时，为什么用户会抱怨？
+- 答，在类中必须实现接口中的所有方法，否则它不然会报错。
 
 
