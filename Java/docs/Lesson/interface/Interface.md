@@ -28,20 +28,20 @@ public 访问修饰符表示接口可以被任意的类访问，和类所在的�
 
 
 ## 1.2接口的实现
-若要声明实现接口的类，需要在声明类时包括一个 implements 从句。类可以实现多个接口，因此 implements 关键字后跟类实现的接口列表，使用逗号分隔。如果有 extends 从句，implements 从句跟在 extends 从句的后面。
+若要声明实现了接口的类，在声明类时需要包含一个 implements 从句。类可以实现多个接口，因此 implements 关键字后面是类实现的接口列表，接口之间使用逗号隔开。如果有 extends 从句，implements 从句跟在 extends 从句的后面。
 
-Relatable 接口示例
-考虑下面的接口，它声明了如何比较对象大小的方法。
+### 1.2.1Relatable 接口示例
+下面的接口声明了如何比较对象大小的方法。
 ```java
 public interface Relatable {
 	public int isLargerThan(Relatable other);
 }
 ```
-如果希望能够比较相同对象的大小，不管它们是什么对象，实例化他们的类应该实现 Relatable 接口。
+若要比较相同对象的大小（无论它们是什么对象），这些对象对应的类应该实现 `Relatable` 接口。
 
-如果有某种方法来比较从类实例化的对象的相对“大小”，任何类都可以实现 Relatable。对于字符串，它可能是字符数；对于书籍，它可能是页数；对于学生来说，它可能是重量，等等。对于平面几何对象，面积将是一个很好的选择（见下面的 RectanglePlus 类），而体积将用于三位几何对象。所有的这些类都可以实现 isLargerThan() 方法。
+如果要比较对象的`大小`，实现了 Relatable 接口的类可以比较这些的数据。对于字符串，它可以是字符数；对于书籍，它可能是页数；对于平面几何对象，可以选择面积（如下面的 RectanglePlus 类），而体积可用于三维几何对象。这些类都需要实现 isLargerThan() 方法。
 
-实现 Relatable 接口
+### 1.2.2实现 Relatable 接口
 下面是 Rectangle 类，实现了 Relatable 接口。
 ```java
 public class RectanglePlus implements Relatable {
@@ -60,7 +60,7 @@ public class RectanglePlus implements Relatable {
 
 	// a method required to implement the Relatable interface
 	public int isLargerThan(Relatable other) {
-		RectanglePlus otherRect = (RectanglePlus)other;
+		RectanglePlus otherRect = (RectanglePlus)other;  // ①
 		if (this.getArea() < otherRect.getArea())
 			return -1;
 		else if (this.getArea() > otherRect.getArea())
@@ -84,8 +84,7 @@ public class RectanglePlus implements Relatable {
 ```
 由于 RectanglePlus 类实现了 Relatable 接口，任意两个 RectanglePlus 对象的大小都可以比较。
 
-> 注意
-定义在 Relatable 接口中的 isLargerThan 方法，包含一个 Relatable 类型的对象。上面示例中以粗体显示的代码行将 other 转换为 RectanglePlus 实例。类型转换告诉编译器真正的对象是什么。直接在 other 实例上调用 getArea （other.getArea()）将编译失败，这是因为编译器并不理解 other 实际上是 RectanglePlus 的实例。
+注意，在 Relatable 接口中声明的  方法，包含了一个 Relatable 类型的对象作为参数。上面示例中位置 ① 的代码行将 other 转换为 RectanglePlus 实例，类型转换告诉编译器真正的对象是什么。直接在 other 实例上调用 getArea 方法（例如，other.getArea()）将编译失败，这是因为编译器并不知道 other 实际上是 RectanglePlus 类的实例。
 
 ## 1.3将接口当作类型来使用
 定义新的接口就意味着定义了新的数据类型。可以在任何使用其它数据类型的位置使用接口名称。如果定义的变量的类型是接口，则赋值给它的任何对象都必须是实现该接口的类的实例。
