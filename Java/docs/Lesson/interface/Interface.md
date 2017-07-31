@@ -13,14 +13,14 @@ public interface GroupInterface extends Interface1, Interface2, interface3 {
 	int doSomethingElse(String s);
 }
 ```
-public 访问修饰符表示接口可以被任意的类访问，和类所在的包无关。如果接口的访问修饰符没有指定 public，那么接口只能被同一包中定义的类访问。
+public 访问修饰符表示接口可以被任意的类访问，和类所在的包无关。如果接口的访问修饰符没有指定为 public，那么接口只能被同一包中定义的类访问。
 
-接口可以扩展自其它接口，就像一个类从其它的类扩展一样。然而，类只能从其它的单个类扩展，但接口可以从任意数量的接口扩展。接口声明包括一个逗号分隔的列表，列出了它所扩展的所有接口。
+接口可以扩展自其它接口，就像一个类从其它的类扩展一样。然而，类只能从单个类扩展，但接口可以从任意数量的接口扩展。接口声明包括一个逗号分隔的列表，列出了它所扩展的所有接口。
 
 ### 1.1.1接口体
-接口体是大括号中包含的部分。它可以包含抽象方法、默认方法和静态方法。接口中的抽象方法以分号结尾（不含大括号，因为抽象方法不包含实现）；默认方法定义时使用了 `default` 修饰符，同时静态方法使用了 `static` 关键字。接口中所有的抽象、默认和静态方法隐式使用了 public 访问修饰符，因此可以省略 public 修饰符。
+接口体是大括号中包含的部分。它可以包含抽象方法、默认方法和静态方法。接口中的抽象方法以分号结尾（不含大括号，因为抽象方法不包含具体实现）；默认方法定义时使用了 `default` 修饰符，同时静态方法使用了 `static` 关键字。接口中所有的抽象、默认和静态方法隐式使用了 public 访问修饰符，因此在声明时可以省略 public 修饰符。
 
-还有，接口中可以包含常量声明。接口中定义的所有常量隐式使用了 public、static 和 final 修饰，这就可以省略这些修饰符符。
+还有，接口中可以包含常量声明。接口中定义的所有常量隐式使用了 public、static 和 final 修饰，这就可以省略这些修饰符。
 
 > xiaobo：1.默认状态下，接口的访问修饰和接口中成员的访问修饰不一样。接口隐式为 protected，接口中的成员隐式为 public。
 
@@ -63,7 +63,7 @@ public class RectanglePlus implements Relatable {
 		RectanglePlus otherRect = (RectanglePlus)other;  // ①
 		if (this.getArea() < otherRect.getArea())
 			return -1;
-		else if (this.getArea() > otherRect.getArea())
+		else if (this.getArea() > otherRect.getArea()) // ② this 表示 isLargerThan 所属对象
 			return 1;
 		else
 			return 0;
@@ -84,7 +84,7 @@ public class RectanglePlus implements Relatable {
 ```
 由于 RectanglePlus 类实现了 Relatable 接口，任意两个 RectanglePlus 对象的大小都可以比较。
 
-注意，在 Relatable 接口中声明的  方法，包含了一个 Relatable 类型的对象作为参数。上面示例中位置 ① 的代码行将 other 转换为 RectanglePlus 实例，类型转换告诉编译器真正的对象是什么。直接在 other 实例上调用 getArea 方法（例如，other.getArea()）将编译失败，这是因为编译器并不知道 other 实际上是 RectanglePlus 类的实例。
+注意，在 Relatable 接口中声明的方法，包含了一个 Relatable 类型的对象作为参数。上面示例中位置 ① 的代码行将 other 转换为 RectanglePlus 实例，类型转换告诉编译器真正的对象是什么。直接在 other 实例上调用 getArea 方法（例如，other.getArea()）将编译失败，这是因为编译器并不知道 other 实际上是 RectanglePlus 类的实例。
 
 ## 1.3将接口当作类型来使用
 定义新的接口就意味着定义了新的数据类型。可以在任何使用其它数据类型的位置使用接口名称。如果定义的变量的类型是接口，则赋值给它的任何对象都必须是实现该接口的类的实例。
