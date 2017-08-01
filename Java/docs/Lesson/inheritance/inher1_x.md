@@ -109,9 +109,7 @@ MountainBike 扩展自 Bicycle 和 Object 类。因此，MountainBike 是 Bicycl
 ```java
 Object obj = new MountainBike();
 ```
-那么 obj 可以同时为 Object 和 MountainBike 对象（直到 obj 被赋值为另一个不是 MountainBike 的对象），这称作隐式的强制转换。
-
-另一方面，如果按照下面的方式：
+那么 obj 可以同时为 Object 和 MountainBike 对象，直到 obj 被赋值为另一个不是 MountainBike 的对象，这称作隐式的强制转换。相反，如果按照下面的方式：
 ```java
 MountainBike myBike = obj;
 ```
@@ -119,19 +117,15 @@ MountainBike myBike = obj;
 ```java
 MountainBike myBike = (MountainBike)obj;
 ```
-// xbdong
-此强制转换将插入一个运行时检查，即 obj 被安排（分配）为 MountainBike，以便编译器可以安全地假定 obj 是 MountainBike。如果在运行时 obj 不是 MountainBike，将抛出一个异常。
+当 obj 被赋值给 MountainBike 类型对象时， 强制转换将插入一个运行检查，这样编译器可以安全地认为 obj 是 MountainBike 类型的对象。如果在运行时 obj 不是 MountainBike 类型对象，将抛出一个异常。
 
-> 注意：可以使用 instanceof 操作符，做一个是否为特定对象类型的逻辑测试。由于不正确的强制转换，这可以避免运行时错误。例如：
-
-
+注意：可以使用 instanceof 操作符来测试特定对象类型，这可以避免由于不正确的强制转换导致的运行时错误。如下：
 ```java
 if (obj instanceof MountainBike) {
 	MountainBike myBike = (MountainBike)obj;
 }
 ```
-
-> 这里，instanceof 操作符验证 obj 引用了 Mountainbike，这样我们就可以做强制转换，知道不会引发运行时异常抛出。
+这里，instanceof 操作符验证 obj 是否为 Mountainbike 类型对象，如果成立就做强制转换，这样就不会导致运行异常的发生。
 
 ## 1.2状态、实现和类型的多继承
 类和接口之间的一个显著区别是类可以有字段，而接口不能。此外，可以实例化一个类来创建一个对象，而这是不能用在接口上的。一个对象将它的状态存储在字段中，这写字段在类中定义。Java 编程语言不允许扩展多个类的一个原因是为了避免状态的多重继承问题，这是从多个类继承字段的能力。例如，假设能够定义一个扩展自多个类的新类。通过实例化该类创建对象时，该对象将从该类所有超类中继承字段。要是不同超类的方法或构造函数实例化同一个字段该怎么办？哪个方法或构造函数优先？（问题：这里的同一个字段指哪里的字段？父类还是子类？重名的字段如何处理？）由于接口不包含字段，因此不必担心由多个状态继承导致的问题。
