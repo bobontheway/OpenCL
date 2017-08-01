@@ -97,31 +97,29 @@ MountainBike 继承了 Bicycle 的所有字段和方法，并添加了 seatHeigh
 嵌套类中内部内可看作是外部内的一个成员，因此内部内可以访问外部类的所有私有成员，包括其中的字段和方法。于是，继承自 public 或 protected 内部类的子类可以间接访问超类中所有的私有成员。
 
 ### 1.1.5 对象转换（Casting Objects）
-我们已经看到，一个对象是类的数据类型，该类是它实例化的类。例如，如下所示：
+通过前面的学习，我们已经知道一个对象是类的数据类型，此类被实例化。例如，在下面的代码中：
 ```java
 public MountainBike myBike = new MountainBike();
 ```
-那么 myBike 是 MountainBike 类型。
+myBike 是 MountainBike 类型。
 
-MountainBike 起源于（来自于） Bicycle 和 Object。因此，MountainBike 是Bicycle，并且也是 Object，它可以用于 Bicycle 或 Object 对象需要的时候。
+MountainBike 扩展自 Bicycle 和 Object 类。因此，MountainBike 是 Bicycle、并且也是 Object 类型。当需要的时候，它可以应用于 Bicycle 或 Object 对象。反过来则不一定成立，Bicycle 可能是 MountainBike 类型，但不是一定的。同理，Object 可能是 Bicycle 或 MountainBike 类型，但这并不是一定的。
 
-反过来则不一定是真的：Bicycle 可能是 MountainBike，但不是一定的。类似的一个 Object 可能是 Bicycle 或 MountainBike，但它并不是一定的。
-
-强制转换显示了在继承和和实现所允许的对象中，使用一种类型的对象代替另一种类型。例如，如果我们写：
+强制转换体现了在`继承`和`实现`所允许的对象中，使用一种类型代替另一种类型的对象。例如，我们可以这么写：
 ```java
 Object obj = new MountainBike();
 ```
-那么 obj 同时为 Object 和 MountainBike（直到 obj 被安排为另一个不是 MountainBike 的对象），这称作隐式强制转换。
+那么 obj 可以同时为 Object 和 MountainBike 对象（直到 obj 被赋值为另一个不是 MountainBike 的对象），这称作隐式的强制转换。
 
-另一方面，我们写：
+另一方面，如果按照下面的方式：
 ```java
 MountainBike myBike = obj;
 ```
-这会得到一个编译错误，因为编译器不知道 obj 是 MountainBike。然而，通过显式
-强制转换，我们可以告诉编译器，我们会安排 MountainBike 给 obj：
+将会得到一个编译错误，因为编译器不知道 obj 是 MountainBike 类型的对象。然而，通过显式的强制转换，我们可以告诉编译器，将 MountainBike 类型的对象赋值给 myBike：
 ```java
 MountainBike myBike = (MountainBike)obj;
 ```
+// xbdong
 此强制转换将插入一个运行时检查，即 obj 被安排（分配）为 MountainBike，以便编译器可以安全地假定 obj 是 MountainBike。如果在运行时 obj 不是 MountainBike，将抛出一个异常。
 
 > 注意：可以使用 instanceof 操作符，做一个是否为特定对象类型的逻辑测试。由于不正确的强制转换，这可以避免运行时错误。例如：
