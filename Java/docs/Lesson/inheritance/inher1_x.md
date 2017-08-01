@@ -190,7 +190,7 @@ The instance method in Cat
 ### 1.3.3 接口方法
 接口中的 default 方法和 abstract 方法和实例方法一样被继承。但是，当类的接口（超类型）提供具有相同签名的多个 default 方法时，Java 编译器遵循继承规则来解决命名冲突。这些规则由以下包括下面两个原则：
 
-- 实例方法优先于接口中的 default 方法。考虑以下的类和接口：
+- 实例方法优先于接口中的 default 方法。在下面的类和接口中：
 
 ```java
 public class Horse {
@@ -213,16 +213,16 @@ public interface Mythical {
 
 public class Pegasus extends Horse implements Flyer, Mythical {
 	public static void main(String[] args) {
-		Pegasus myApp = new Pegasus(); // 飞，天马
+		Pegasus myApp = new Pegasus(); // 能飞，天马
 		System.out.println(myApp.identifyMyself());
 	}
 }
 ```
-方法 Pegasus.identifyMyself 返回 “I am a horse“ 的字符串。
+方法 `Pegasus.identifyMyself` 返回字符串 `I am a horse` 。
 
-- 已经被其它候选项重写的方法将被忽略。当超类型共享一个共同的祖先（ancestor）时，就会出现这种情况。
+- 已经被其它接口重写的方法将被忽略。当超类型（接口）继承自同一个接口时，就会出现这种情况。
 
-考虑下面的接口和类：
+请看下面的接口和类：
 ```java
 public interface Animal {
 	default public String identifyMyself() {
@@ -245,11 +245,11 @@ public class Dragon implents EggLayer, FireBreather { // 火焰
 	}
 }
 ```
-方法 Dragon.identifyMyself 返回 “I am able to lay eggs” 的字符串。（Animal 中的方法被 EggLayer 中的方法重写，将被忽略）
+方法 `Dragon.identifyMyself` 返回字符串 `I am able to lay eggs`。Animal 中的方法被 EggLayer 中的定义的方法重写，将被忽略。
 
-如果两个或多个独立定义的 default 方法产生冲突，或者 default 方法与 abstract方法发生冲突，那么 Java 编译器将生成编译器错误。必须显示重写超类中的方法。
+如果两个或多个在独立的接口中定义的 default 方法产生冲突，或者 default 方法与 abstract方法发生冲突，那么 Java 编译器将生成编译器错误，此时必须显式的重写超类型中的方法。
 
-考虑现在可以飞行的计算机控制的汽车的例子。有两个接口（OperateCar 和 FlyCar），它们为同一方法（startEngine）提供了默认实现：
+以可以飞行的计算机控制的汽车为例。有两个接口，分别是 OperateCar 和 FlyCar，它们为同一方法 `startEngine` 提供了默认实现：
 ```java
 public interface OperateCar {
 	// ...
@@ -265,7 +265,7 @@ public interface FlyCar {
 	}
 }
 ```
-同时实现 OperateCar 和 FlyCar 接口的类必须重写 startEngine 方法。可以使用 super 关键字来调用任何 default 实现。
+这时，同时实现了 OperateCar 和 FlyCar 接口的类就必须重写 startEngine 方法。针对不同的超类型，可以使用 super 关键字来调用它们具体的 default 实现。
 ```java
 public class FlyingCar implements OperateCar, FlyCar {
 	// ...
@@ -275,9 +275,9 @@ public class FlyingCar implements OperateCar, FlyCar {
 	}
 }
 ```
-super 前面的名称（在该例子中，FlyCar 或 OperateCar）必须直接引用超接口（superinterface），它定义或继承 default 方法用来被调用。这种形式的方法调用不限于区分在实现的多个包含相同签名的 default 方法接口之间。（翻译？）
+super 前面的名称（在上面的例子中，FlyCar 或 OperateCar）必须直接引用超类型对应的接口，它定义或继承的 default 方法将被调用。这种形式的方法调用可以使用在实现了多个包含相同签名的 default 方法接口的类中。
 
-从类继承的实例方法可以重写抽象接口方法。考虑下面的接口和类：
+从类继承的实例方法可以重写接口中的抽象方法。如下面的接口和类：
 ```java
 public interface Mammal {
 	String identifyMyself();
@@ -296,9 +296,11 @@ public class Mustang extends Horse implements Mammal { // 野马， 哺乳动物
 	}
 }
 ```
-方法 Mustang.identifyMyself 返回 “I am a horse.” 字符串。类 Mustang 从 Horse 类继承了 identifyMyself 方法，它重写了 Mammal 接口中具有相同名称的 abstract 方法。
+方法 `Mustang.identifyMyself` 返回字符串 `I am a horse.`。类 Mustang 从 Horse 类继承了 identifyMyself 方法，它重写了 Mammal 接口中具有相同名称的 abstract 方法。
 
-注意：接口中的 static 方法将永远不会被继承。
+> 注意：接口中的 static 方法将永远不会被继承。
+
+// xbdong why?
 
 1.3.4 修饰（Modifiers）
 
