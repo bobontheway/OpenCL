@@ -136,61 +136,56 @@ Java 编程语言支持类型的多重继承（接口也是一种类型），也
 
 与实现的多重继承一样，类可以继承它实现的所有接口中定义方法的具体实现（default 或 static）。在这种情况下，编译器或用户必须决定使用哪个接口中实现的方法。
 
-## 1.3重写和隐藏方法（Overriding and Hiding Methods）
+## 1.3重写和隐藏方法
 
-### 1.3.1 实例方法（Instance Methods）
-子类中实例方法和父类中的实例方法有相同的签名（方法名称，加上参数的类型和数目）和返回类型时，将重写（overrides）超类的方法。
+### 1.3.1 实例方法
+子类中的实例方法和父类中的实例方法如果具有有相同的签名（方法名称、参数类型和数目）和返回类型，将重写（overrides）超类的方法。重写方法还可以返回被重写方法的返回类型的子类型。当重写方法时，可以使用 `@Override` 注释来提示编译器要重写超类中的方法。如果编译器检查到该方法在超类中不存在，它将生成编译错误。
 
-子类重写方法的能力允许类从超类继承，它们的行为“足够接近”，然后根据需要修改行为。重写方法具有相同的名称、参数的数目和类型，以及返回类型作为其重写的方法。重写后的方法还可以返回被重写方法返回类型的子类型。该子类型成为协变（covariant）返回类型。
+### 1.3.2 静态方法
+如果子类定义的静态方法与超类中的静态方法具有相同的签名，那么子类中的方法将隐藏超类中的方法。
 
-当重写方法，可能需要使用 @Override 注释来提示编译器要重写超类中的方法。如果由于某种原因，编译器检查到该方法在超类中不存在，它将生成一个错误。有关 @Override 的详细信息，请参阅注释。
+弄清楚隐藏静态方法和重写实例方法的区别具有重要意义：
 
-### 1.3.2 静态方法（Static Methods）
-如果子类定义的静态方法与超类中的静态方法具有相同的签名，那么子类中的方法将隐藏（hides）超类中的方法。
-
-隐藏静态方法和重写实例方法的区别具有重要意义：
-
-- 被调用的重写实例方法为子类中的；
+- 被调用的重写实例方法处于子类中；
 - 被调用的隐藏静态方法取决于该调用是来自于子类还是超类。
 
-考虑包含两个类的示例。第一个是 Animal，它包含一个实例方法和一个静态方法：
+下面是两个类的示例程序，第一个是 Animal，它包含一个实例方法和一个静态方法：
 ```java
 public class Animal {
-	public static void testClassMethod() {
-		System.out.println("The static method in Animal");
-	}
+    public static void testClassMethod() {
+        System.out.println("The static method in Animal");
+    }
 
-	public void testInstanceMethod() {
-		System.out.println("The instance method in Animal");
-	}
+    public void testInstanceMethod() {
+        System.out.println("The instance method in Animal");
+    }
 }
 ```
-第二个类，Animal 的子类，叫 Cat：
+第二个类是 Animal 的子类 Cat：
 ```java
 public class Cat extends Animal {
-	public static void testClassMethod() {
-		System.out.println("The static method in Cat");
-	}
+    public static void testClassMethod() {
+        System.out.println("The static method in Cat");
+    }
 
-	public void testInstanceMethod() {
-		System.out.println("The instance method in Cat");
-	}
+    public void testInstanceMethod() {
+        System.out.println("The instance method in Cat");
+    }
 
-	public static void main(String[] args) {
-		Cat myCat = new Cat();
-		Animal myAnimal = myCat;
-		Animal.testClassMethod(); // Animal -> Invoked from superclass
-		myAnimal.testInstanceMethod(); // Cat -> From subclass
-	}
+    public static void main(String[] args) {
+        Cat myCat = new Cat();
+        Animal myAnimal = myCat;
+        Animal.testClassMethod(); // Animal -> Invoked from superclass
+        myAnimal.testInstanceMethod(); // Cat -> From subclass
+    }
 }
 ```
-Cat 类重写了 Animal 中的实例方法，并在 Animal 中隐藏了静态方法。此类中的 main 方法创建了一个 Cat 实例，并基于类调用了 testClassMethod() 方法，基于实例调用了 testInstanceMethod 方法。该程序的输入如下：
-
-```java
+Cat 类重写了 Animal 中的实例方法，并隐藏了在 Animal 中的静态方法。此类中的 main 方法创建了一个 Cat 实例，并基于类调用了 testClassMethod() 方法，基于实例调用了 testInstanceMethod 方法。该程序的输出如下所示（代码参见 Less1）：
+```bash
 The static method in Animal
 The instance method in Cat
 ```
-正如所描述的那样，被调用的隐藏静态方法来自于超类中，而被调用的重写实例方法来自于子类中。
+正如前面描述的那样，被调用的隐藏静态方法来自于超类，而被调用的重写实例方法来自于子类。
 
 ### 1.3.3 接口方法（Interface Methods）
 接口中的 default 方法和 abstract 方法像实例方法一样被继承。但是，当类或接口的类型（超类型）提供具有相同签名的多个 default 方法时，Java 编译器遵循继承规则来解决命名冲突。这些规则由以下两个原则驱动：
