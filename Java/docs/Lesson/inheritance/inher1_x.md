@@ -6,55 +6,95 @@
 继承的思想不仅简单而且强大。当需要创建新的类时，若已有的类已经包含了一些需要的代码，可以从已有的类派生出新类。这就可以重用现有类的字段和方法，而不必全部重新编写，同时也省去了调试步骤。
 
 子类从超类中继承所有的成员，包括字段、方法以及嵌套类。构造函数不是成员，因此子类不会继承，但是超类的构造函数可以在子类中调用。
-// xbdong
+
 ### 1.1.1Java 平台类层次结构
-在 java.lang 包中定义的 Object 类，定义并实现所有类共有的行为——包括自己编写的代码。在 Java 平台中，许多类直接从 Object 派生，其它类从这些类派生，等等，构成类的层次结构。
+在 java.lang 包中定义的 Object 类，它定义并实现了所有类共有的行为，这些类包括自己编写的类。在 Java 平台中，许多类直接派生自 Object ，其它类从这些类派生，以此类推。这就构成类的层次结构。
 
-**Java 平台中的所有类都是 Object 的后代**
+<center><img src="images/classes-object.gif" width="70%" height="70%"></center>
 
-<img src="images/classes-object.gif" width="70%" height="70%">
+<center>**Java 平台中的所有类都是 Object 的后代**</center>
 
-在层次结构的顶部，Object 提供了所有类中通用的行为。层次结构底部附近的类提供了更专业的行为。
+在类层次结构的顶部，Object 提供了所有类的通用行为。接近类层次结构底部的类提供更专业的行为。
 
 ### 1.1.2继承的示例
-下面是 Bicycle 类中可能实现的示例代码：
+下面是 Bicycle 类对应的示例代码：
+```java
+public class Bicycle {
 
-public calss Bicycle {
 	// the Bicycle class has three fields
-	public int cadence; // 韵律，节奏
+	public int cadence;
 	public int gear; // 齿轮
 	public int speed; // 速度
-	...	...
-}
 
-声明为 MountainBike 的类，是 Bicycle 的子类，如下所示：
+	// the Bicycle class has one constructor
+	public Bicycle(int startCadence, int startSpeed, int startGear) {
+		gear = startGear;
+		cadence = startCadence;
+		speed = startSpeed;
+	}
+
+	// the Bicycle class has four methods
+	public void setCadence(int newValue) {
+		cadence = newValue;
+	}
+
+	public void setGear(int newValue) {
+		gear = newValue;
+	}
+
+	public void applyBrake(int decrement) {
+		speed -= decrement;
+	}
+
+	public void speedUp(int increment) {
+		speed += increment;
+	}
+}
+```
+声明为 MountainBike 的类，它是 Bicycle 的子类，如下所示：
+```java
 public class MountainBike extends Bicycle {
-	// the MountainBike subclass adds one field
-	public int seatHeight; // 座椅高度
-}
 
-MountainBike 继承了 Bicycle 的所有字段和方法，并添加了 seatHeight 字段和一个设置该字段的方法。除了构造函数，这就像完全从头编写了一个新的 MountainBike 类，其中有四个字段和五个方法。然而，不必做所有的工作。如果 Bicycle 类中的方法是复杂的并需要大量时间来调试，这将是特别有价值的。
+	// the MountainBike subclass adds one field
+	public int seatHeight; // 坐垫高度
+
+	// the MountainBike subclass has one constructor
+	public MountainBike(int startHeight,
+		int startCadence,
+		int startSpeed,
+		int startGear) {
+		super(startCadence, startSpeed, startGear);
+		seatHeight = startHeight;
+	}
+
+	// the MountainBike subclass adds one method
+	public void setHeight(int newValue) {
+		seatHeight = newValue;
+	}
+}
+```
+MountainBike 继承了 Bicycle 的所有字段和方法，并添加了 seatHeight 字段和一个设置该字段的方法。除了构造函数，这就像完全重新编写了一个新的 MountainBike 类，它包含四个字段和五个方法，但是，实际上并不需要做所有的这些工作。如果 Bicycle 类中的方法非常复杂并且需要大量的时间来调试，继承现有操作将特别有效。
 
 ### 1.1.3 可以在子类中做些什么
-不管子类在哪个包中，子类从父类继承了所有的 public 和 protected 成员。如何子类和父类在同一个包中，它也继承父类的包私有成员（package-private）。可以使用继承的成员，或者替换它们，隐藏它们，抑或是用新成员补充它们。
+不管子类在哪个包中，子类从父类继承了所有的 public 和 protected 成员。如果子类和父类在同一个包中，它也继承父类中包的私有成员。在子类中，可以直接使用继承的成员，或者替换它们，隐藏它们，抑或是用新成员来做一些扩展。
 
-- 继承的字段可以直接使用，就像其它的字段一样；
-- 可以在子类中声明一个与超类中同名的字段，达到隐藏超类字段的目的（不推荐这么做）；
-- 可以在子类中声明一个在超类不存在的新的字段；
+- 继承的字段可以直接使用，就像使用类中的其它字段一样；
+- 在子类中声明一个与超类中同名的字段，达到隐藏超类字段的目的（不推荐这么做）；
+- 在子类中声明一个在超类不存在的新的字段；
 - 继承的方法可以直接使用；
-- 可以在子类中写一个新的 instance 方法，和超类中的具有相同的签名，以 overriding 超类的方法；
-- 可以在子类中写一个新的 static 方法，和超类中的具有相同的签名，以 hiding 超类的方法；
-- 可以在子类中声明一个在超类中不存在的新的方法；
-- 可以在子类中写一个构造函数来调用超类的构造函数，使用隐式方式或通过 super 关键字。
+- 在子类中编写新的 instance 方法，该方法和超类中的某个方法具有相同签名，以重写（overriding）超类的方法；
+- 在子类中编写新的 static 方法，该方法和超类中的某个方法具有相同签名，用以隐藏（hiding）超类的方法；
+- 在子类中声明一个超类中不存在的新方法；
+- 在子类中编写构造函数来调用超类的构造函数，这可以使用隐式方式或通过 super 关键字。
 
-本文以下部分将在这些主题上展开。
+// xbdong - 隐藏和重写有什么区别？方法签名包含那些东西？
+
+下面的部分将在这些主题上展开。
 
 ### 1.1.4超类中的私有成员
-子类并不会继承父类中的私有（private）成员。然而，如果超类包含 public 或 protected 方法来访问它的私有成员，这些私有成员也可以间接的被子类使用。
+子类并不会继承父类中的私有成员。但是，如果超类包含的 public 或 protected 方法会访问它的私有成员，那么这些私有成员也可以间接的被子类使用。
 
-// 翻译问题？
-嵌套的类可以访问包含它的类的所有成员——包括字段和方法。因此，继承了的 public 或
-protected 的嵌套类的子类可以间接访问超类的所有私有成员。
+嵌套类中内部内可看作是外部内的一个成员，因此内部内可以访问外部类的所有私有成员，包括其中的字段和方法。于是，继承自 public 或 protected 内部类的子类可以间接访问超类中所有的私有成员。
 
 ### 1.1.5 对象转换（Casting Objects）
 我们已经看到，一个对象是类的数据类型，该类是它实例化的类。例如，如下所示：
