@@ -300,25 +300,19 @@ public class Mustang extends Horse implements Mammal { // 野马， 哺乳动物
 
 > 注意：接口中的 static 方法将永远不会被继承。
 
-// xbdong why?
+1.3.4 访问修饰符
 
-1.3.4 修饰（Modifiers）
+重写的方法对应的访问修饰符只能比被重写的方法允许更多的访问，而不是更少的访问。例如，超类中的 protected 实例方法可以在子类中调整为 public，而不能变为 private。还有，如果尝试将超类中的实例方法更改为子类中的静态方法，将会出现编译错误，反之亦然。
 
-重写方法的访问说明符可以比被重写的方法允许更多，但不是更少的访问。例如，超类中的 protected 实例方法可以在子类中调整为 public，而不是 private。
+### 1.3.5 小结
+下表总结了当子类中定义的方法和超类的方法具有相同签名时所发生的情况：
 
-如果尝试将超类中的实例方法更改为子类中的静态方法，将会出现编译错误，反之亦然。
+  -             |    超类的实例方法 　| 超类的静态方法
+-----------------|------------------|-------------------
+**子类的实例方法** |    重写		      | 生成编译错误
+**子类的静态方法** |  生成编译错误       | 隐藏
 
-### 1.3.5 小结（Summary）
-下表总结了当定义一个和超类中的方法具有相同的签名时所发生的情况：
-
-定义一个和超类中的方法具有相同签名的方法
-
-  x            |    方法          | 超类静态方法
----------------|-----------------|-------------------
-子类的实例方法   |    重写		   | 生成编译错误
-子类的静态方法   |  生成编译错误     | 隐藏
-
-> 注意：在子类中，可以重载（Overload）从超类继承的方法。这样的重载方法既不隐藏也不重写超类实例方法——它们是新的方法，对子类是唯一的。
+> 注意：在子类中，可以重载（Overload）从超类继承的方法。这些的重载方法既不隐藏也不重写超类的实例方法,它们是新的方法，对子类来说是唯一的。所谓重载就是子类的实例方法和父类中的实例方法具有相同的名称，但是签名（参数数目或类型）不同。要注意和重写（Override）的区别，重写是方法签名和返回类型都相同。
 
 问题：
 什么是重载？
@@ -326,9 +320,9 @@ public class Mustang extends Horse implements Mammal { // 野马， 哺乳动物
 答：方法名称相同，签名不同（参数数目和类型）
 
 ## 1.4多态（Polymorphism）
-对多态的定义为是指生物界中，一个生物体或物种可以拥有不同的形态（形式）或阶段（变态阶段）。这一原则也可以应用于面向对象编程和语言，例如 Java 编程语言。类的子类可以定义它们自己的唯一行为，同时也能共享父类中的某些相同功能。
+多态的定义为是指在生物界中，一个生物体或物种拥有不同的形态（形式）或阶段（变态阶段）。这一原则也可以应用于面向对象编程和语言，例如 Java 编程语言。子类可以定义自己的行为，同时也能共享父类中的某些相同功能。
 
-多态性可以通过对 Bicycle 类的轻微修改来证明。例如，可以在类中添加 printDescription 方法，显示当前存储在实例中的所有数据。
+可以通过对 Bicycle 类做一些修改来说明多态特性。例如，可以在类中添加 printDescription 方法，显示当前存储在实例中的所有数据。
 ```java
 public void printDescription() {
 	System.out.println("\nBike is " + "in gear" + this.gear +
@@ -336,12 +330,12 @@ public void printDescription() {
 		" and travelling at a speed of " + this.speed + ".");
 }
 ```
-为了演示 Java 语言中的多态特性，使用 MountainBike 和 RoadBike 类来扩展 Bicycle 类。对于 MountainBike，添加一个字段用于悬浮（暂停），它是一个字符串值，指示自行车前面是否有减震气（前减震），或者该自行车同时包括前后减震器（双减震器）。
+为了演示 Java 语言中的多态特性，使用了扩展自 Bicycle 类的 MountainBike 和 RoadBike 类。对于 MountainBike，添加一个　suspension　字段，它是一个字符串类型值，指示自行车是否有前减震器，或者该自行车同时包括前后减震器（双减震器）。
 
 下面是更新后的类：
 ```java
 public class MountainBike extends Bicycle {
-	private String suspension;
+	private String suspension;　// 减震器
 
 	public MountainBike(int startCadence, int startSpeed,
 		int startGear, String suspensionType) {
@@ -364,12 +358,10 @@ public class MountainBike extends Bicycle {
 	}
 }
 ```
-注意被重写的 printDescription 方法。除了之前提供的信息外，有关 suspension 的其他数据也包括在输出中。
-
-接下来，创建 RoadBike 类。由于道路或赛车自行车有瘦轮胎，添加一个属性用来表示轮胎宽度。以下是 RoadBike 类：
+注意被重写的 printDescription 方法。除了之前提供的信息外，有关 ｀suspension｀ 的数据也包括在输出中。接下来，创建 RoadBike 类。由于赛车自行车拥有窄轮胎，添加一个 tireWidth 属性用来表示轮胎宽度。以下是 RoadBike 类：
 ```java
 public class RoadBike extends Bicycle {
-	// In millimeters(mm，毫米)
+	// In millimeters(毫米)
 	private int tireWidth;
 
 	public RoadBike(int startCadence, int startSpeed,
@@ -395,9 +387,7 @@ public class RoadBike extends Bicycle {
 ```
 注意：printDescription 方法被重写了。此时，将显示有关轮胎宽度的信息。
 
-总之，有三个类：Bicycle，MountainBike 和 RoadBike。两个子类重写了 printDescription 方法，并打印（输出）唯一的信息。（这里的唯一信息指类特有的信息）
-
-下面是一个测试程序，创建了三个 Bicycle 变量。每个变量被分配三个 bicycle 类中的其中一个。接着每个变量打印输出信息。
+总的来说有三个类，Bicycle，MountainBike 和 RoadBike。两个子类都重写了 printDescription 方法，并输出子类特有的信息。下面是一个测试程序，创建了三个 Bicycle 变量。每个变量被分配三个 bicycle 类中的其中一个。接着每个变量打印输出信息。
 ```java
 public class TestBikes {
 	public static void main(String[] args) {
@@ -418,18 +408,18 @@ public class TestBikes {
 xbdong@xbdong-opencl:~/Project/github/OpenCL/Java/docs/Lesson/inheritance/Less5$
 sh build.sh
 
-Bike is in gear 1 with a cadence of 20 and travelling at a speed of 10. 
+Bike is in gear 1 with a cadence of 20 and travelling at a speed of 10.
 
-Bike is in gear 5 with a cadence of 20 and travelling at a speed of 10. 
+Bike is in gear 5 with a cadence of 20 and travelling at a speed of 10.
 The MountainBike has a Dual suspension.
 
-Bike is in gear 8 with a cadence of 40 and travelling at a speed of 20. 
+Bike is in gear 8 with a cadence of 40 and travelling at a speed of 20.
 The RoadBikehas 23  MM tires.
 ```
-Java 虚拟机（JVM）为每个变量中引用的对象调用适当的方法。它不调用由（通过）变量类型定义的方法。此行为称为虚方法调用，并演示 Java 语言中重要的多态功能的一个方面。
+在上面的示例中，Java 虚拟机（JVM）为每个变量引用的对象调用了对应的方法，可以看出它并没有调用由变量类型定义的方法。这种行为称为虚方法调用，它是 Java 语言中多态功能的一个重要方面。
 
-
-## 1.6隐藏字段（Hiding Fields）
+// xbdong
+## 1.6隐藏字段
 在一个类中，与超类中的字段同名的字段将隐藏超类的字段，即使它们的类型不同。在子类中，超类中的字段不能简单的通过名称引用。相反，必须通过 super 访问该字段，在下一节将对其介绍。总的来说，不建议隐藏字段，因为它使代码难以阅读。
 
 ## 1.7 使用 super 关键字
