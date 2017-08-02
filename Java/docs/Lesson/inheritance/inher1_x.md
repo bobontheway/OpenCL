@@ -418,13 +418,12 @@ The RoadBikehas 23  MM tires.
 ```
 在上面的示例中，Java 虚拟机（JVM）为每个变量引用的对象调用了对应的方法，可以看出它并没有调用由变量类型定义的方法。这种行为称为虚方法调用，它是 Java 语言中多态功能的一个重要方面。
 
-// xbdong
 ## 1.6隐藏字段
-在一个类中，与超类中的字段同名的字段将隐藏超类的字段，即使它们的类型不同。在子类中，超类中的字段不能简单的通过名称引用。相反，必须通过 super 访问该字段，在下一节将对其介绍。总的来说，不建议隐藏字段，因为它使代码难以阅读。
+在子类中，与超类同名的字段将隐藏超类的字段，即使它们的类型不同。如果要在子类中引用超类的同名字段，不能简单的通过名称来引用，而是必须通过 super 关键字来访问该字段，下面将对其展开介绍。总的来说，不建议隐藏字段，因为它会导致代码难以阅读。
 
 ## 1.7 使用 super 关键字
 ### 1.7.1 访问超类的成员
-如果方法重写了超类中的方法，则可以通过使用 super 关键字调用被重写的方法。还可以使用 super 来引用隐藏的字段（尽管不鼓励隐藏字段），考虑下面的超类：
+如果子类中的方法重写了超类的方法，可以通过使用 super 关键字调用被重写的方法。还可以使用 super 来引用隐藏的字段（不建议隐藏字段），例如下面的超类：
 ```java
 public class Superclass {
 	public void printMethod() {
@@ -432,13 +431,13 @@ public class Superclass {
 	}
 }
 ```
-下面是一个称为 Subclass 的子类，它重写了 printMethod() 方法：
+下面是称为 Subclass 的子类，它重写了 printMethod() 方法：
 ```java
 public class Subclass extends Superclass {
 	// overrides printMethod in Superclass
 	public void printMethod() {
 		super.printMethod();
-		System.out.println("Printed in Subclass");
+		System.out.println("Printed in Subclass.");
 	}
 
 	public static void main(String[] args) {
@@ -447,15 +446,16 @@ public class Subclass extends Superclass {
 	}
 }
 ```
-在子类中，简单的名称 printMethod 是指在子类中声明的那个，它重写了超类中同名的方法。因此，要引用从超类继承的 printMethod() 方法，子类必须使用一个限定符，使用 super 来表示。编译并执行子类打印如下内容（参考 Less6）：
+在子类中，方法名称 `printMethod` 在子类中声明，它重写了超类中同名的方法。因此，若要引用从超类继承的 printMethod() 方法，子类必须使用一个限定符，通过 super 来表示。编译并执行该程序，在子类中输出了如下内容：
 
 ```bash
 Printed in Superclass.
-Printed in Subclass
+Printed in Subclass.
 ```
+（参考 Less6）
 
 ### 1.7.2 子类构造函数
-下面的示例阐述了如何使用 super 关键字来调用超类的构造函数。回忆 Bicycle 示例，MountainBike 是 Bicycle 的子类。下面是 MountainBike（子类）构造函数调用超类的构造函数，然后添加自己的初始化代码：
+下面的示例阐述了如何使用 super 关键字来调用超类的构造函数。回想在之前的 Bicycle 示例中，MountainBike 是 Bicycle 的子类。下面是在 MountainBike 构造函数中调用超类的构造函数，然后执行其它的初始化代码：
 ```java
 public MountainBike()int startHeight, int startCadence, int startSpeed,
 	   int startGear) {
@@ -463,18 +463,19 @@ public MountainBike()int startHeight, int startCadence, int startSpeed,
 		   seatHeight = startHeight;
 }
 ```
-对超类构造函数的调用必须在子类构造函数中的第一行。调用超类构造函数的语法为：
-
+对超类构造函数的调用必须在子类构造函数中的第一行执行。调用超类构造函数的语法为：
+```java
 	super();
-
+```
 或
+```java
 	super(参数列表);
+```
+使用 `super()`，将调用超类中不包含参数的构造函数；如果使用 `super(参数列表)`，超类中具有匹配参数列表的构造函数将被调用。
 
-使用 super()，将调用超类中没有参数的构造函数。使用 super(参数列表)，具有匹配参数列表的超类构造将被调用。
+> 注意：如果子类的构造函数没有显式的调用超类的构造函数，Java 编译器将自动插入一个对超类中没有参数列表的构造函数的调用。如果这时超类中不包含没有带参数的构造函数，则会的到编译错误。Object 类的实现中包含了没有带参数的构造函数，如果 Object 是唯一超类，则不会出现编译错误。
 
-> 注意：如果构造函数没有明确（显式）的调用超类的构造函数，Java 编译器将自动插入一个对超类中没有参数构造函数的调用。如果超类中没有包含不带参数的构造函数，则会的到编译错误。Object 确实有这样的构造函数，因此如果 Object 是唯一的超类，则没有问题。
-
-如果子类构造函数调用了超类的构造函数，不管是显示调用还是隐式调用，可以认为会有一个整个构造函数链的调用，所有的路径最终将调用 Object 的构造函数。事实上，情况就是这样的。它被称作构造函数链，当有长的类时，需要了解（意识、关注）它。（由于类的继承是单继承的，顺着链条往下走就行）
+如果子类构造函数调用了超类的构造函数，不管是显示调用还是隐式调用，那么会有一条整个构造函数链的调用，整条路径最终将调用 Object 类的构造函数。实际情况就是这样的，这被称作构造函数链。当包含较长的构造函数链时，需要了解它们的执行流程（由于类的继承是单继承，顺着链条往下走就行）。
 
 ## 1.8Object 作为超类（Object as a Superclass）
 
