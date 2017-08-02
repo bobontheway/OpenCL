@@ -634,13 +634,13 @@ JDK 中实现多个接口的示例是 HashMap 类，它实现了 Serializable、
 注意，许多软件库同时使用了抽象类和接口。例如，HashMap 类实现了多个接口，并且还扩展了 AbstractMap 抽象类。
 
 ### 1.10.2 抽象类示例
-在面向对象的绘图应用中，可以绘制圆、矩形、线条、贝塞尔曲线和许多其它图形对象。这写对象都具有某些共同的状态（例如：位置、方向、线条颜色、填充颜色）和行为（例如：moveTo，rotate，resize，draw）。某些状态和行为对于所有图形对象来说都是相同的（例如：位置，填充颜色 和 moveTo），其它则需要不同的实现（例如：resize 或 draw）所有的图像对象（GraphicObjects）必须能够绘制（draw）和调整自己大小（resize）；它们的不同之处在于它们是如何做的。这对抽象类来说是完美的场景（情况）。可以利用这些相似性，并声明所有图形对象继承自相同的抽象父对象（例如：GraphicObject），如下图所示：
+在面向对象的绘图应用中，可以绘制圆、矩形、线条、贝塞尔曲线和许多其它的图形对象。这些对象都具有某些共同的状态（例如：位置、方向、线条颜色、填充颜色）和行为（例如：moveTo，rotate，resize，draw）。某些状态和行为对所有图形对象来说都是相同的（例如：位置、填充颜色 和 moveTo），其它则需要不同的实现（例如：resize 或 draw）。所有的图像对象必须能够绘制（draw）和调整自己大小（resize），它们的不同之处在于不同的图形对象是如何实现的，抽象类非常适合这种场景。可以利用这些相似性，并将所有图形对象声明为继承自相同的抽象父对象（例如：GraphicObject），如下图所示：
 
 <center><img src="images/classes-graphicObject.gif" width="70%" height="70%"></center>
 
-<center>继承自 GraphicObject 的 Rectangle，Line，Bezier 和 Circle 类。</center>
+<center>继承自 GraphicObject 的 Rectangle、Line、Bezier 和 Circle 类。</center>
 
-首先，声明一个抽象类 GraphicObject，以提供所有子类完全共享的成员变量和方法，如当前位置和 moveTo 方法。GraphicObject 还声明了需要由所有子类实现但必须以不同方式实现的方法（例如，draw 和 resize）抽象方法。GraphicObject 可以是这样的：
+首先，声明一个抽象类 GraphicObject，以提供所有子类完全共享的成员变量和方法，如当前位置和 moveTo 方法。GraphicObject 还声明了需要由所有子类必须以不同方式实现的方法（例如，draw 和 resize 等抽象方法）。GraphicObject 可以是下面这样：
 ```java
 abstract class GraphicObject {
 	int x, y;
@@ -652,8 +652,8 @@ abstract class GraphicObject {
 	abstract void resize();
 }
 ```
-GraphicObject 的每个子类（非抽象类，如 Circle 和 Rectangle）必须为 draw 和 resize 放提供具体的实现。
-```
+GraphicObject 的每个子类（非抽象类，如 Circle 和 Rectangle）必须为 draw 和 resize 方法提供具体的实现。
+```java
 class Circle extends GraphicObject {
 	void draw() {
 		...
@@ -672,9 +672,8 @@ class Rectangle extends GraphicObject {
 	}
 }
 ```
-### 1.10.3 是么时候一个抽象类实现一个接口（When an Abstract Class Implements an Interface）
-
-在 Interfaces 一节部分，有提到实现接口的类必须实现接口的所有方法。但是，如果定义了一个没有实现接口中所有方法的类，那么这个类应该被声明为抽象类。例如：
+### 1.10.3 什么时候抽象类会实现一个接口
+在前面的接口部分提到实现接口的类必须实现接口的所有方法。但是，如果定义了一个没有实现接口中所有方法的类，那么这个类应该被声明为抽象类。例如：
 ```java
 abstract class X implements Y {
 	// implements all but one method of Y
@@ -684,24 +683,10 @@ class XX extens X {
 	// implements the remaining method in Y
 }
 ```
-在上面的例子中，类 X 必须为抽象类，因为它并没有完全实现 Y，但是类 XX 实际上实现了 Y。
+在上面的例子中，类 X 必须为抽象类，因为它并没有完全实现 Y，但是类 XX 实现了 Y。
 
-### 1.10.4 类成员（Class Members）
-抽象类可能包含 static 字段和 static 方法。可以将这些静态成员与类引用一起使用（例如，AbstractClass.staticMethod()），就像与任何其他类一样 。（这里的类引用与对象引用对应？）
+### 1.10.4 类成员
+抽象类可能包含 static 字段和 static 方法。可以将这些静态成员与类引用结合起来使用（例如，AbstractClass.staticMethod()），就像与任何其他类的使用方式一样 。
 
-## 1.11继承小结（Summary of Inheritance）
-除了 Object 类，每个类都有一个直接的超类。类直接或间接继承了其所有超类的字段和方法。子类可以重写它继承的方法，也可以隐藏它继承的字段和方法（注意，隐藏字段通常是不好的变成习惯（实践））。
-
-在 "Overriding and Hiding Methods" 章节的表中，显示了声明一个和超类中的方法具有相同签名结果。
-
-Object 类在类层次结构的顶部。所有类都从次类派生出来，并继承了它的方法。从 Object 类继承的有用方法包括 toString()，equals()，clone() 和 getClass()。
-
-在类声明时使用 final 关键字可以防止类被继承。类似的，通过将方法声明为final 方法可以防止它在子类中被重写。
-
-抽象类只能被继承，不能被实例化。抽象类可以包含抽象方法——已声明但为实现的方法。然后，子类为抽象方法提供实现。
-
-问题和练习：继承（Questions and Exercises: inheritance）
-问题：
-a.重写了子类的方法：methodTwo()；
-b.隐藏了子类的方法：methodFour()；
-c.编译错误：methodOne() 和 methodThree()。
+## 1.11继承小结
+除了 Object 类，每个类都有一个直接的超类。类直接或间接继承了其所有超类的字段和方法。子类可以重写它继承的方法，也可以隐藏它继承的字段和方法（注意，隐藏字段通常是不好的编程习惯）。在上面`重写和隐藏方法"`一节的列表中，显示了在子类中声明和超类具有相同方法签名结果。Object 类在类层次结构的顶部，所有类都从此类派生出来，并继承了它的方法。从 Object 类继承的有用的方法包括 toString()、equals()、clone() 和 getClass()。在类声明时使用 final 关键字可以防止该类被继承；类似的，通过将方法声明为final 方法可以防止该方法在子类中被重写。抽象类只能被继承，不能被实例化。抽象类可以包含抽象方法，已声明但尚未实现的方法。随后，由子类为抽象方法提供具体实现。
