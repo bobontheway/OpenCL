@@ -578,11 +578,11 @@ System.out.println(firstBook.toString());
 ```bash
 ISBN: 0201914670; The Swing Tutorial; A Guide to Constructing GUIs, 2nd Edition
 ```
-// xbdong
-## 1.9编写 Final 类和方法
-可以声明类的某些或者所有方法为 final 方法。在方法声明时使用 final 关键字表示该方法不能被子类重写。Object 类就这样做了，它的一些方法就是 final 方法。
 
-如果一个方法在实现时不能被改变，并且保持对象的一致性非常关键，那么该方法就应该为 final。例如，可能希望在 ChessAlgorithm 类中讲　getFirstPlayer 声明为 final 方法：
+## 1.9编写 Final 类和方法
+可以将类的部分或全部方法声明为 final 方法，在方法声明时如果使用了 final 关键字表示该方法不能被子类重写。Object 类就这样做了，它的一些方法就是 final 方法。
+
+如果一个方法在实现时希望以后不会被改变，并且该方法对于保持对象的一致性非常关键，那么就应该将它声明为 final。例如，将 ChessAlgorithm 类中的 getFirstPlayer 声明为 final 方法：
 ```java
 class ChessAlgorithm { // 棋算法
 	enum ChessPlayer {WHITE, BLACK}
@@ -593,19 +593,14 @@ class ChessAlgorithm { // 棋算法
 	...
 }
 ```
-从构造函数中调用的方法通常声明为 final。如果构造函数调用非 final 方法，子类可能会以令人惊讶后不希望的结果重新定义该方法。
+从构造函数中调用的方法通常声明为 final 方法。如果构造函数调用了非 final 方法，子类可能会重新定义该方法，并出现预料之外的结果。还有，也可以将整个类声明为 final 类，声明为 final 的类不能被继承。例如，在创建像 String 这样的类时就这样做了，这一点非常重要。
 
-注意，也可以声明整个类为 final。声明为 final 的类不能被子类（什么意思？不能被继承？没有子类，不能被继承）。例如，在创建像 String 这样不可变的类时，这一点尤其重要。
-
-=========
 ## 1.10抽象方法和类
-抽象类是声明为 abstract 的类——它可能包括或不包括抽象方法。抽象类不能实例化，但可以被继承（子类化）。
-
-抽象方法在声明的时候没有具体实现（不带大括号，后跟分号），如下所示：
+抽象类是声明为 abstract 的类，它可能包括抽象方法，也可以不包括抽象方法。抽象类不能实例化，但可以被子类继承。抽象方法在声明的时候不包含具体实现，它不带大括号，后面直接跟分号，如下所示：
 ```java
 abstract void moveTo(double deltaX, double deltaY);
 ```
-如果类包含抽象方法，则类必须声明为抽象类，如下所示：
+如果类中包含了抽象方法，则该类必须声明为抽象类，如下所示：
 ```java
 public abstract class GraphicObject {
 	// declare fields
@@ -613,40 +608,37 @@ public abstract class GraphicObject {
 	abstract void draw();
 }
 ```
-当抽象类被继承时，子类通常为父类中的所有抽象方法提供具体实现。然而，如果没有，那么子类也必须被声明为抽象的。
+当抽象类被继承时，子类通常会为父类中的所有抽象方法提供具体的实现。如果没有实现父类中所有的抽象方法，那么子类也必须被声明为抽象类。
 
-> 注意：接口中的方法（参见接口部分），如果没有被声明为 default 或 static 方法的隐式是抽象的，因此 abstract 修饰符不与接口方法一起使用。（可以使用，但是不必要的）
+> 注意：接口中的方法如果没有被声明为 default 或 static 方法，则隐式为抽象方法。因此， 通常 abstract 修饰符不与接口方法一起使用。也就说可以使用，但是没必要。
 
-### 1.10.1 抽象类相对于接口
-抽象类和接口类似，不能对它们实例化，并且它们可能包含在声明时有或没有实现的混合方法。但是，使用抽象类，可以声明非 static 和 final 的字段，并且定义 public，protected 和 private 的具体方法。对于接口，所有的字段都是 public，static 和 final 的，并且所有的声明或定义的方法（和 default 方法类似）都是 public 的。此外，只能扩展（extends）一个类，无论它是否为抽象的，但是可以实现任意数量的接口。
+### 1.10.1 抽象类和接口
+抽象类和接口类似，不能对它们实例化，并且它们在声明时都可能同时包含已实现和没有实现的方法。但是，使用抽象类，可以声明非 static 和 final 的字段，并且定义 public、protected 或 private 的具体方法。对于接口，所有的字段都同时具有 public、static 和 final 属性，并且所有的声明或定义的方法（如 default 方法）都是 public 属性。还有，只能扩展一个类，无论它是否为抽象类，但是可以同时实现多个接口。
 
-抽象类和接口，应该使用哪个？
+关于抽象类和接口，应该按照下面的方式来选择。
 
-- 如果下面语句中的任何一个适用于当前情况，需要使用抽象类：
-（1）需要在多个紧密相关的类之间共享代码；
-（2）希望扩展自抽象类的类拥有许多常用的方法和字段，或者需要除 public 之外的访
-问修饰符（例如 protected 和 private）；
-（3）需要声明非 static 和 final 的字段。这允许定义方法，它们可以访问和修改所属
-对象的状态。
+- 当遇到下面的情况，需要使用抽象类：
+（1）需要在多个密切相关的类之间共享代码；
+（2）希望扩展自抽象类的子类拥有许多共同的方法和字段，或者这些成员需要除 public 之外的其它访问修饰符（例如 protected 和 private）；
+（3）需要声明非 static 和 final 的字段。这就允许在类中定义一些方法，它们可以访问或修改所属对象的状态。
 
-- 如果下面语句中的任何一个适用与当前情况，需要使用接口：
-（1）需要不相关的类来实现接口。例如，Comparable 和 Cloneable 被许多不相关的类
-所实现；
-（2）需要指定特定数据类型的行为，但不关心谁实现其行为（多态）；
+- 当遇到下面的情况，需要使用接口：
+（1）不相关的类来实现接口。例如，接口 Comparable 和 Cloneable 被许多不相关的类所实现；
+（2）需要指定特定数据类型的行为，但不关心谁来实现具体的行为；
 （3）需要利用类型的多重继承特性。
 
-JDK 中一个抽象类的示例是 AbstractMap，它是 Collections 框架（Framework）的一部分。它的子类（包括 HashMap，TreeMap 和 ConcurrentHashMap）共享许多在 AbstractMap 中定义的方法（包括 get，put，isEmpty，containsKey 和 containsValue）
+JDK 中一个抽象类的示例是 AbstractMap，它是 Collections 框架的一部分。它的子类（包括 HashMap，TreeMap 和 ConcurrentHashMap）共享许多在 AbstractMap 中定义的方法（包括 get，put，isEmpty，containsKey 和 containsValue）。
 
-JDK 中实现多个接口的类的一个示例是 HashMap，它实现了 Serializable，Cloneable和 Map<K, V> 接口。通过读取此接口的列表，可以推断 HashMap 的实例（不管开发人员还是公司实现了这个类）是可以被克隆，是可以序列化的（这意味着它可以转换为字节流；参考 Serializable 对象部分），并且拥有 map 的功能。此外，Map<K, V> 接口已经通过许多 default 方法的到了增强，例如 merge 和 forEach，而已实习该接口的旧的类不必重定义。
+JDK 中实现多个接口的示例是 HashMap 类，它实现了 Serializable、Cloneable 和 Map 接口。通过读取这些接口的方法列表，可以推断 HashMap 的实例可以被克隆，可以被序列化（这意味着它可以转换为字节流；参考 Serializable 对象部分），并且拥有 map 的功能。此外，Map 接口已经通过定义多个 default 方法得到了功能的增强，例如 merge 和 forEach，之前已实现了 Map 接口的旧的类不必重新定义。
 
-注意，许多软件库同时使用了抽象类和接口；HashMap 类实习了多个接口，并且还扩展了抽象类 AbstractMap。
+注意，许多软件库同时使用了抽象类和接口。例如，HashMap 类实现了多个接口，并且还扩展了 AbstractMap 抽象类。
 
-1.10.2 抽象列示例（An Abstract Class Example）
+### 1.10.2 抽象类示例
 在面向对象的绘图应用中，可以绘制圆、矩形、线条、贝塞尔曲线和许多其它图形对象。这写对象都具有某些共同的状态（例如：位置、方向、线条颜色、填充颜色）和行为（例如：moveTo，rotate，resize，draw）。某些状态和行为对于所有图形对象来说都是相同的（例如：位置，填充颜色 和 moveTo），其它则需要不同的实现（例如：resize 或 draw）所有的图像对象（GraphicObjects）必须能够绘制（draw）和调整自己大小（resize）；它们的不同之处在于它们是如何做的。这对抽象类来说是完美的场景（情况）。可以利用这些相似性，并声明所有图形对象继承自相同的抽象父对象（例如：GraphicObject），如下图所示：
 
-<img src="images/classes-graphicObject.gif" width="70%" height="70%">
+<center><img src="images/classes-graphicObject.gif" width="70%" height="70%"></center>
 
-继承自 GraphicObject 的 Rectangle，Line，Bezier 和 Circle 类。
+<center>继承自 GraphicObject 的 Rectangle，Line，Bezier 和 Circle 类。</center>
 
 首先，声明一个抽象类 GraphicObject，以提供所有子类完全共享的成员变量和方法，如当前位置和 moveTo 方法。GraphicObject 还声明了需要由所有子类实现但必须以不同方式实现的方法（例如，draw 和 resize）抽象方法。GraphicObject 可以是这样的：
 ```java
