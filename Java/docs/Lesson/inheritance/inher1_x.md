@@ -477,24 +477,23 @@ public MountainBike()int startHeight, int startCadence, int startSpeed,
 
 如果子类构造函数调用了超类的构造函数，不管是显示调用还是隐式调用，那么会有一条整个构造函数链的调用，整条路径最终将调用 Object 类的构造函数。实际情况就是这样的，这被称作构造函数链。当包含较长的构造函数链时，需要了解它们的执行流程（由于类的继承是单继承，顺着链条往下走就行）。
 
-## 1.8Object 作为超类（Object as a Superclass）
-
-在 java.lang 包中的 Object 类，位于类层次结构树的顶端。每个类都是 Object 类直接或简介的后代。每个使用的或开发的类都继承了 Object 的实例方法。不必使用这些方法中的任何一种，但是如果需要可以在自己的类中重写这些方法。从 Object 继承的方法将在本节中讨论：
+## 1.8超类 Object
+在 java.lang 包中的 Object 类，位于类层次结构的顶端。所有类都是 Object 直接或间接的子类，每个类都继承了 Object 的实例方法。不一定要使用这些方法，但如果需要可以在子类中重写这些方法。这里将讨论从 Object 类继承的方法：
 
 - protected Object clone() trhows CloneNotSupportedException
-创建并返回此对象的副本；
+创建并返回该对象的副本；
 - public boolean equals(Object obj)
-表示其它对象是否和这个相等；
+判断其它对象是否和此对象相等；
 - protected void finalize() throws Throwable
-当垃圾回收时，垃圾回收器将在一个对象上调用
+当回收垃圾时，垃圾回收器将在该对象上调用
 - public final Class getClass()
-返回对象的运行时（runtime）类
+返回对象的运行时对应的类
 - public int hashCode()
-返回对象的哈希代码值（哈希值）
+返回对象的哈希值
 - public String toString()
 返回对象的字符串表示形式
 
-对象的 notify，notifyAll 和 wait 方法都扮演相应的角色，以同步程序中独立运行线程的活动，稍后的课程将对此进行讨论，此处不再介绍。有五种方法：
+Object 类的 notify、notifyAll 和 wait 方法用于程序中不同线程之间的同步，后面将对其详细介绍。总共有 5 个相关方法：
 
 - public final void notify()
 - public final void notifyAll()
@@ -502,25 +501,21 @@ public MountainBike()int startHeight, int startCadence, int startSpeed,
 - public final void wait(long timeout)
 - public final void wait(long timeout, int nanos)
 
-> 注意：这些方法的中有一些微妙的方面，特别是 clone 方法
-
 ### 1.8.1 clone() 方法
-如果某个类，或它的超类，实现了 Cloneable 接口，则可以使用 clone() 方法从现有对象创建副本。若要创建副本，请编写：
-
+如果子类或其超实现了 Cloneable 接口，则可以使用 clone() 方法根据现有的对象创建一个副本。若要创建副本，代码如下：
+```java
 aCloneableObject.clone();
-
-对象对此方法的实现，将检查调用 clone() 的对象是否是否实现了 Cloneable 接口。如果没有实现，该方法将抛出 CloneNotSupportedException 异常。异常处理将自爱后面的课程中介绍。当前，需要知道 clone() 必须声明为：
+```
+Object 类中实现的 clone() 方法将检查调用 clone() 方法的对象是否是否实现了 Cloneable 接口，如果没有实现该接口，将抛出 CloneNotSupportedException 异常，关于异常处理将在后面介绍。若要重写 Object 类中的 clone() 方法，clone() 必须按照如下方式声明：
 
 ```java
 protected Object clone() throws CloneNotSupportedException
 ```
-or
+或
 ```java
 public Object clone() throws CloneNotSupportedException
 ```
-如果要编写一个重写 Object 中的 clone() 方法。
-
-如果调用 clone() 的对象实现了 Cloneable 接口，Object 对 clone() 方法的实现将创建一个相同类的对象，和原始对象相同，并初始化新对象的成员变量，它和原始对象对应成员变量的值相同。
+如果调用 clone() 的对象已经实现了 Cloneable 接口，Object 类中的 clone() 方法将创建一个相同类的对象，和原始对象相同，并初始化新对象的成员变量，它和原始对象对应成员变量的值相同。
 
 使类可克隆（生成副本）最简单的方法是在类声明中添加 Cloneable 的实现。然后，对象就可以调用 clone() 方法。
 
@@ -528,9 +523,7 @@ public Object clone() throws CloneNotSupportedException
 // 列举个示例？
 
 ### 1.8.2 equals() 方法
-equals() 方法比较两个对象是否相等，如果相等，则返回 true。Object 类中的 equals() 方法使用标识运算符（==）来确定两个对象是否相等。对于原始数据类型，这可以给出正确结果。但是，对于对象，它不会。由 Object 提供 equals() 方法测试对象引用是否相等——也就是说，比较的对象是否为完全相同的对象。
-
-若要测试两个对象在等效性上是否相等（包含相同的信息），必须重写（override）equals() 方法。下面是重写 equals() 方法的 Book 类：
+equals() 方法比较两个对象是否相等，如果相等则返回 true。Object 类中的 equals() 方法使用标识运算符`==`来确定两个对象是否相等。对于原始数据类型，这可以得到正确的结果；但是，对于对象则不会。Object 类提供 equals() 方法测试对象引用是否相等，它比较的对象是否为完全相同的两个对象。若要测试两个对象是否相等（包含相同的信息），必须重写 equals() 方法。下面是重写了 equals() 方法的 Book 类：
 ```java
 public class Book {
 	...
@@ -542,7 +535,7 @@ public class Book {
 	}
 }
 ```
-考虑下面的代码，测试 Book 类的两个实例的相等性：
+在下面的代码中，测试 Book 类的两个实例是否相等：
 ```java
 // Swing Turotrial, 2nd edition
 Book firstBook = new Book("0201914670");
@@ -554,48 +547,39 @@ if (firstBook.equals(secondBook)) {
 	System.out.println("objects are not equeal");
 }
 ```
-即使 firstBook 和 secondBook 引用两个不同的对象，但程序显示对象是相等的。它们被认为相等是由于比较的对象包含相同的 ISBN 号。
+即使 firstBook 和 secondBook 引用了两个不同的对象，但结果显示对象是相等的。它们被认为相等是由于比较的对象包含了相同的 ISBN 编码。如果标识运算符不能满足比较需求，则应重写 equals() 方法。
 
-如果标识晕算符不适合时，则应重写 equals() 方法。
-
-> 注意：如果重写了 equals() 方法，则必须也重写 hashCode() 方法。
+> 注意：如果重写了 equals() 方法，则必须也重写 hashCode() 方法。hashCode() 返回对象哈希码，它是对象的十六进制表示的内存地址。
 
 ### 1.8.3 finalize() 方法
-Object 类提供了一个回调方法，即 finalize()，在对象变为垃圾时可以对其调用。Object 中对 finalize() 的实现不执行任何操作，可以重写 finalize() 来执行清理，例如释放资源。
+Object 类提供了一个 finalize() 回调方法，在对象变为垃圾时可以对其调用。Object 类中关于 finalize() 的实现不执行任何操作，可以通过重写 finalize() 来执行清理操作，例如释放资源。
 
-finalize() 方法可以由系统自动调用，但当它被调用时，或者即使被调用，也不确定（时间？）。因此，不应该依赖此方法执行清理操作。例如，如果执行完 I/O 操作后，代码中没有关闭文件描述符，并且寄希望于 finalize() 来关闭，则可能会耗尽文件描述符。
+finalize() 方法可以由系统自动调用，但被调用的时间是不确定的。因此，不应该依赖系统自动对此方法的调用来执行清理操作。例如，如果执行完 I/O 操作后代码中没有关闭文件描述符，并且寄希望于系统自动调用 finalize() 来关闭，最终可能会耗尽文件描述符。
 
 ### 1.8.4 getClass() 方法
-不能重写 getClass 方法。
-getClass() 方法返回一个类对象，它具有可用于获取有关类的信息方法，例如它的名称（getSimpleName()），它的超类（getSuperclass()）和它实现的接口（getInterfaces()）。例如，下面的方法获取并显示对象的类名：
+不能重写 Object 类的 getClass 方法，该方法在声明时使用了 final 修饰符。getClass() 方法返回一个类对象，该对象包含了可用于获取有关类的信息的方法，例如类名称`getSimpleName()`，类的超类`getSuperclass()`和类实现的接口`getInterfaces()`。例如，下面的方法获取并显示对象的类名：
 ```java
 void printClassName(Object obj) {
 	System.out.println("The object's" + " class is " +
 		obj.getClass().getSimplename());
 }
 ```
-java.lang 包中的 Class 类，有大量的方法（超过 50 个）。例如，可以测试该类是注释（isAnnotation()），一个接口（isInterface()）或一个枚举（isEnum()）。可以看到对象的字段是什么（getFields()）或它的方法是什么（getMethods()），等等。
+java.lang 包中的 Class 类，包含了大量的方法，超过 50 个。例如，可以测试该类是否为 annotation  类型`isAnnotation()`，是否为接口类型`isInterface()`或是否为枚举类型`isEnum()`。可以看到对象包含了哪些字段`getFields()`或有哪些方法`getMethods()`，等等。
 
 ### 1.8.5 hashCode() 方法
-hashCode() 返回的是对象的哈希代码，它是十六进制表示的对象的内存地址。
-
-根据定义，如果两个对象相等，则它们的哈希代码也必须相等。如果重写 equals() 方法，则更改两个对象的等效方式（相等的条件），并且对象的 hashCode() 实现不再有效。因此，如果重写了 equals() 方法，也必须重写 hashCode() 方法。
+hashCode() 返回对象的哈希码，它是通过十六进制来表示的对象的内存地址。根据定义，如果两个对象相等，则它们的哈希码也必须相等。如果重写了 equals() 方法，则更改了两个对象是否相等的前提条件，于是对象的 hashCode() 实现不再有效。因此，如果重写了 equals() 方法，也必须重写 hashCode() 方法。
 
 ### 1.8.6 toString() 方法
-始终需要考虑在自己的类中重写 toString() 方法，也就是说，在自己的类中往往需要重写 toString() 方法。
-
-Object 的 toString() 方法返回对象的字符串表示形式，这对于调试非常有用。对象的字符串表示形式完全依赖与对象，这就是需要在类中重写 toString() 的原因。这里是说类的对象变了（子类嘛）？
-
-可以将 toString() 和 System.out.println() 一起用于显示对象的文本表示形式，如书籍的实例：
+在子类中，通常需要重写 toString() 方法。Object 类的 toString() 方法返回对象的字符串表示，这对于调试非常有用。对象的字符串表示完全依赖于对象，这就是需要在子类中重写 toString() 的原因。可以将 toString() 和 System.out.println() 结合，用于显示对象的字符串表示，如书籍的实例：
 ```java
 System.out.println(firstBook.toString());
 ```
-对于正确的重写 toString() 方法，打印一些有用的内容，如下所示：
+也可以重写 toString() 方法，打印一些有用的信息，如下所示：
 ```bash
 ISBN: 0201914670; The Swing Tutorial; A Guide to Constructing GUIs, 2nd Edition
 ```
-
-## 1.9编写　Final 类和方法
+// xbdong
+## 1.9编写 Final 类和方法
 可以声明类的某些或者所有方法为 final 方法。在方法声明时使用 final 关键字表示该方法不能被子类重写。Object 类就这样做了，它的一些方法就是 final 方法。
 
 如果一个方法在实现时不能被改变，并且保持对象的一致性非常关键，那么该方法就应该为 final。例如，可能希望在 ChessAlgorithm 类中讲　getFirstPlayer 声明为 final 方法：
