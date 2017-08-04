@@ -1,0 +1,23 @@
+1.Starting - 创建工程
+2.Class View - 类视图
+3.Class - 类
+4.Class Diagram - 类图
+
+Generalisation - 概括（表示继承）
+Realize - 实现（表示接口实现）
+Aggregation - 聚集（集合）
+Composition - 组合、组成、构图
+Directional Aggregation - 定向聚合
+Directional Composition -定向组合
+Association - 关联
+Directional Association  - 定向关联
+
+show classes members visibility - 显示类成员的可见性
+
+如何存为图片？
+（1）可通过保存为 html 来获取 png 格式文件。在工具中 html 选择
+（2）类图中可以插入图片后一并保存，100%左边的人像图标
+
+对齐
+（1）相关宽度时，候选的按照先选的
+（2）同一 top 对齐，便于连线

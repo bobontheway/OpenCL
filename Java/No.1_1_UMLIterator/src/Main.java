@@ -6,7 +6,7 @@ public class Main {
 		bookShelf.appendBook(new Book("Cinderella"));
 		bookShelf.appendBook(new Book("Daddy-Long-Legs"));
 
-		// 这里使用了接口作为返回类型
+		// 这里使用了接口类型作为返回类型
 		Iterator it = bookShelf.iterator();
 		while (it.hasNext()) {
 			Book book = (Book)it.next();

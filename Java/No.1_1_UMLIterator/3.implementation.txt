@@ -1,2 +1,32 @@
 实现
 
+相关的类、接口和实例
+Aggregate
+# iterator
+
+Iterator
+# hasNext
+# next
+
+Book
+- name
+# getName
+
+BookShelf
+- books
+- last
+# getBookAt
+# appendBook
+# getLength
+# iterator
+
+BookShelfIterator
+- bookShelf
+- index
+# hasNext
+# next
+
+Main
+- it
+- bookShelf
+

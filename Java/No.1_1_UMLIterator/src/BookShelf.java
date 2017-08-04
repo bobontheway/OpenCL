@@ -3,7 +3,7 @@ public class BookShelf implements Aggregate {
 	private Book[] books;
 	private int last = 0;
 
-	// books 数组的大小在生成 BookShelf 实例时被指定
+	// books 数组的大小在生成 BookShelf 实例时被指定，和 BookShelf 为聚合关系
 	public BookShelf(int maxsize) {
 		this.books = new Book[maxsize];
 	}
@@ -21,7 +21,7 @@ public class BookShelf implements Aggregate {
 		return last;
 	}
 
-	// 生成并返回 BookShelfIterator 的实例作为 BookShelf 类对应的 Iterator
+	// 生成并返回 BookShelfIterator 的实例，作为 BookShelf 类的 Iterator
 	public Iterator iterator() {
 		return new BookShelfIterator(this);
 	}
