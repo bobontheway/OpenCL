@@ -10,7 +10,7 @@
 ### 1.1.1Java 平台类层次结构
 在 java.lang 包中定义的 Object 类，它定义并实现了所有类共有的行为，这些类包括自己编写的类。在 Java 平台中，许多类直接派生自 Object ，其它类从这些类派生，以此类推。这就构成类的层次结构。
 
-<center><img src="images/classes-object.gif" width="70%" height="70%"></center>
+<center><img src="image/classes-object.gif" width="70%" height="70%"></center>
 
 <center>**Java 平台中的所有类都是 Object 的后代**</center>
 
@@ -636,7 +636,7 @@ JDK 中实现多个接口的示例是 HashMap 类，它实现了 Serializable、
 ### 1.10.2 抽象类示例
 在面向对象的绘图应用中，可以绘制圆、矩形、线条、贝塞尔曲线和许多其它的图形对象。这些对象都具有某些共同的状态（例如：位置、方向、线条颜色、填充颜色）和行为（例如：moveTo，rotate，resize，draw）。某些状态和行为对所有图形对象来说都是相同的（例如：位置、填充颜色 和 moveTo），其它则需要不同的实现（例如：resize 或 draw）。所有的图像对象必须能够绘制（draw）和调整自己大小（resize），它们的不同之处在于不同的图形对象是如何实现的，抽象类非常适合这种场景。可以利用这些相似性，并将所有图形对象声明为继承自相同的抽象父对象（例如：GraphicObject），如下图所示：
 
-<center><img src="images/classes-graphicObject.gif" width="70%" height="70%"></center>
+<center><img src="image/classes-graphicObject.gif" width="70%" height="70%"></center>
 
 <center>继承自 GraphicObject 的 Rectangle、Line、Bezier 和 Circle 类。</center>
 
