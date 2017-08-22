@@ -173,7 +173,7 @@ xbdong@ubuntu:~/Project/src/github/No.2_UMLTemplate$ sh build.sh
 ## 模型和角色
 读完示例程序后，下面我们看看 Template Method 模式的模型图。
 
-<center><img src="image/TemplateMethod.bmp" width="60%" height="60%"></center>
+<center><img src="image/TemplateMethod.bmp" width="55%" height="55%"></center>
 
 接下来我们看看模型中规定的角色。
 
