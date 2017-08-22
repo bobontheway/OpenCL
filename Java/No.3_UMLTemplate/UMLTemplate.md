@@ -11,10 +11,6 @@
 ## 示例程序
 下面是一段使用 Template Method 模式的示例程序。它将字符和字符串分别循环显示 5 次。示例程序中包含下面列表的 4 个类。
 
-### 类图
-
-<center><img src="image/DisplayTemplate.bmp" width="65%" height="65%"></center>
-
 ### 类列表
 
 名称             | 描述
@@ -23,6 +19,10 @@ AbstractDisplay |只实现了 display 方法的抽象类
 CharDisplay     |实现了 open、print、close 方法的类
 StringDisplay   |实现了 open、print、close 方法的类
 Main            |测试程序的行为的类
+
+### 类图
+
+<center><img src="image/DisplayTemplate.bmp" width="65%" height="65%"></center>
 
 在 AbstractDisplay 类中定义了 display 方法，display 依次调用了 open、print 和 close 这 3 个方法。虽然这 3 个方法已经在 AbstractDisplay 中声明，但都是尚未实现的抽象方法。这里的 display 方法就是模板方法（Template Method）。
 
