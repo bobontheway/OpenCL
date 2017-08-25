@@ -1,0 +1,2 @@
+[关于static 方法和非static方法]
+http://www.iteye.com/problems/43808
