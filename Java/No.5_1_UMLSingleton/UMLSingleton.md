@@ -77,6 +77,10 @@ End.
 ```
 
 ### 时序图
+这里使用了 static 方法 getInstance 来获取类的实例，而不是通过 new 一个对象。
+
+<center><img src="image/SingleFlow.bmp" width="70%" height="70%"></center>
+
 ## 模型和角色
 单例模式的模型图比较简单。
 
