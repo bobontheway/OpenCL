@@ -1,5 +1,18 @@
-问题：
-1.默认情况下，未声明为 public 的构造方法其属性是怎样的？（例如在 IDCard 类中）
-答：编译错误如下。构造函数 IDCard() 在 IDCard 类中并不是 public 方法，不能从
-外部包来访问该方法。
+## 前言
 
+
+## 工厂模式
+## 示例程序
+### 类列表
+### 类图
+### 代码
+#### AbstractDisplay 类
+#### CharDisplay 类
+#### StringDisplay 类
+#### Main 类
+#### 运行结果
+### 时序图
+## 模型和角色
+### AbstractClass（抽象类）
+### ConcreteClass（具体类）
+## 意义
