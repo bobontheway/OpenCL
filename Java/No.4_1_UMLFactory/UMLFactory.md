@@ -147,9 +147,11 @@ Using XiaoGong's ID Card
 
 ## 模型和角色
 
+读完示例程序后，下面我们看看工厂模式的模型图。
+
 <center><img src="image/FactoryMethod.bmp" width="65%" height="65%"></center>
 
-在 Factory Method 模式的角色中，父类（框架） 中的 Creator 角色和 Product 角色与子类（制造）中的 ConcreteCreator 角色和 ConcreateProduct 角色是平行关系。
+在 Factory Method 模式的角色中，父类（框架） 中的 Creator 角色和 Product 角色与子类（制造）中的 ConcreteCreator 角色和 ConcreateProduct 角色是平行关系。接下来我们看看模型中规定的角色。
 
 ### Product（产品）
 Product 角色属于框架这一方。它是抽象类，声明产品的使用接口，具体的实现由子类 ConcreteProduct 决定。在示例程序中，由 Product 类扮演此角色。
