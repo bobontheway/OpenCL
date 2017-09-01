@@ -11,7 +11,7 @@
 
 首先，我们在 Main 类中生成 PrinterProxy 类的实例（代理人）的同时设置实例的名字为 `Alice`，接着在终端显示该名字。然后会将实例名字改为 Bob，接着显示该名字。在设置和获取名字时，都不会生成 Printer 类的实例（当事人），而是由 PrinterProxy 类代理负责处理。最后，我们调用 print 方法，启动打印机开始打印时，PrinterProxy 类才会生成 Printer 类的实例。
 
-为了让 PrinterProxy 类与 Printer 类的接口具有一致性，我们定义了 Printable 接口。示例程序的前提是`生成 Printer 类的实例`需要花费较长时间。为了在程序中体现这一点，我们在 Printer 类的构造函数中调用了 heavyJob 方法，让它处理一些繁重的任务。
+为了让 PrinterProxy 类与 Printer 类的接口具有一致性，我们定义了 Printable 接口。示例程序的前提是`生成 Printer 类的实例`需要花费较长时间。为了在程序中体现这一点，我们在 Printer 类的构造函数中调用了 heavyJob 方法，让它处理一些繁重的任务。下面是相关类和接口的列表。
 
 ### 类和接口列表
 
@@ -130,6 +130,17 @@ public class PrinterProxy implements Printable {
 #### Main 类
 Main 类通过 PrintProxy 类来间接使用 Printer 类。Main 类首先会生成 PrintProxy 类的实例，保存为 Printable 接口类型。然后调用
 getPrinterName 方法获取打印机的名字并显示。接着通过 setPrinterName 方法重新设置打印机的名字。最后，调用 print 方法在显示终端输出 `Hello, world!` 字符串。
+```java
+public class Main {
+	public static void main(String[] args) {
+		Printable p = new PrinterProxy("Alice");
+		System.out.println("Printer's name is " + p.getPrinterName() + ".");
+		p.setPrinterName("Bob");
+		System.out.println("Printer's name is " + p.getPrinterName() + ".");
+		p.print("Hello, world!");
+	}
+}
+```
 
 #### 运行结果
 示例程序的运行结果如下。
@@ -149,7 +160,11 @@ Hello, world!
 <center><img src="image/PrinterSequence.bmp" width="75%" height="75%"></center>
 
 ## 模型和角色
-在代理模式中有以下角色登场。
+读完示例程序后，下面我们看看代理模式的模型图。
+
+<center><img src="image/SubjectProxy.bmp" width="75%" height="75%"></center>
+
+下面是模型中规定的角色。
 
 ### Subject（当事人）
 Subject 角色定义了 Proxy 角色和 RealProxy 角色之间的一致性接口。由于存在 Subject 角色，Client 角色不必在意它所使用的究竟是 Proxy 角色还是 RealProxy 角色。在示例程序中，由 Printable 接口扮演此角色。
@@ -174,8 +189,6 @@ Proxy 角色会尽量处理来自 Client 角色的请求，只有当自己不能
 
 ### 访问代理（Access Proxy）
 当访问者有不同的访问权限时，访问代理用来设置访问权限。例如，只允许指定的用户调用方法，其它用户调用方法时报错。
-
-
 
 ## 意义
 
