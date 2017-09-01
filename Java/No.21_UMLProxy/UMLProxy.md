@@ -145,7 +145,44 @@ Hello, world!
 > 注意，在设置名字和显示名字的时候，并没有生成 Printer 类的实例，直到调用 print 方法时，才生成 Printer 类的实例。
 
 ### 时序图
+
+<center><img src="image/PrinterSequence.bmp" width="75%" height="75%"></center>
+
 ## 模型和角色
-### AbstractClass（抽象类）
-### ConcreteClass（具体类）
+在代理模式中有以下角色登场。
+
+### Subject（当事人）
+Subject 角色定义了 Proxy 角色和 RealProxy 角色之间的一致性接口。由于存在 Subject 角色，Client 角色不必在意它所使用的究竟是 Proxy 角色还是 RealProxy 角色。在示例程序中，由 Printable 接口扮演此角色。
+
+### Proxy（代理人）
+Proxy 角色会尽量处理来自 Client 角色的请求，只有当自己不能处理时，它才会将工作转交给 RealProxy 角色来处理。Proxy 角色
+只有在必要时才会生成 RealProxy 角色，它实现了在 Subject 角色中定义的接口。在示例程序中，由 PrinterProxy 类扮演此角色。
+
+### RealSubject（实际当事人）
+`实际当事人`角色会在`代理人`角色无法胜任工作时出场。它与 Proxy 角色一样，也实现了在 Subject 角色中定义的接口。在示例程序
+中，由 Printer 类扮演此角色。
+
+### Client（客户）
+使用代理模式的角色。在示例程序中，由 Main 类扮演此角色。
+
+## 代理模式的种类
+### 远程代理（Remote Proxy）
+远程代理为不同地址空间的对象提供了一个本地代表（代理人）。例如，Android 进程间通信的 Binder 对象；
+
+### 虚拟代理（Virtual Proxy）
+本文介绍的代理模式就是虚拟代理。只有当真正需要时，才生成并初始化 xxx 实例；
+
+### 访问代理（Access Proxy）
+当访问者有不同的访问权限时，访问代理用来设置访问权限。例如，只允许指定的用户调用方法，其它用户调用方法时报错。
+
+
+
 ## 意义
+
+- 将耗时的处理推迟执行，只在必要时才生成实例，可以改善用户体验；
+- 对于不同的代理模式，在恰当的时候，代理人可以将请求转发给当事人。
+
+## 参考
+
+- Design Patterns : Elements of Reusable Object-Oriented Software
+- 图解设计模式
