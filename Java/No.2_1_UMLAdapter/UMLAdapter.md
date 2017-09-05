@@ -21,7 +21,7 @@
 
 扮演适配器角色的是 PrintBanner 类。该类继承了 Banner 类并实现了 Print 接口。PrintBanner 类使用 showWithParen 方法实现了 printWeak，使用 showWithAster 方法实现了 printStrong。这样，PrintBanner 类就具有适配器的功能了。电源比喻中的组件和示例程序中类或接口的对应关系如下。
 
-s    | 电源比喻        | 示例程序
+_            | 电源比喻        | 示例程序
 -------------|----------------|------------------------------------------
 **实际情况**  |交流 220 伏特    |Banner 类（showWithParen、showWithAster）
 **变换装置**  |适配器           |PrintBanner 类
