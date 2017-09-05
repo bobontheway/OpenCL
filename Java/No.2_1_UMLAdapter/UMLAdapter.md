@@ -38,7 +38,7 @@ Main          |测试程序行为的类
 
 #### 类图
 
-<center><img src="image/AdapterClass.bmp" width="70%" height="70%"></center>
+
 
 #### 代码
 ##### Banner 类
@@ -146,6 +146,14 @@ public class PrintBanner extends Print {
 
 
 ## 模型和角色
+读完示例程序后，下面我们分别看看类适配模式和对象适配模式的模型图。
+
+**类适配模式**
+<img src="image/AdapterClassRole.bmp" width="70%" height="70%">
+
+**对象适配模式**
+<img src="image/AdapterObjectRole.bmp" width="70%" height="70%">
+
 在 Adapter 模式中有以下角色。
 
 ### Target（目标需求）
