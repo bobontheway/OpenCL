@@ -11,7 +11,7 @@
 下面是使用了适配器模式的示例程序。该示例程序会将输入的字符串分别显示为 （Hello） 和 \*Hello\*。
 
 ### 继承的适配器
-下面是一段使用了继承的适配器的示例程序。
+下面是一段使用了`继承的适配器`的示例程序。
 
 在已有的 Banner 类中，包含了将字符串用括号括起来的 showWithParen 方法，以及将字符串用星号括起来的 showWithAster 方法。Banner 类和上面已存在的`交流 220 伏特电压`类似。
 
@@ -31,29 +31,68 @@
 名称            描述
 
 ### 类图
+
+<center><img src="image/AdapterClass.bmp" width="70%" height="70%"></center>
+
 ### 代码
 #### Banner 类
-Banner 类表示现在的实际情况，提供现有的方法。
+Banner 类表示现在的`实际情况`，提供现有的方法。
 ```java
-代码……
+public class Banner {
+	private String string;
+
+	public Banner(String string) {
+		this.string = string;
+	}
+
+	public void showWithParen() {
+		System.out.println("(" + string + ")");
+	}
+
+	public void showWithAster() {
+		System.out.println("*" + string + "*");
+	}
+}
 ```
 
 #### Print 接口
 Print 声明了`当前需求`的接口。
 ```java
-代码……
+public interface Print {
+	public abstract void printWeak();
+	public abstract void printStrong();
+}
 ```
 
 #### PrintBanner 类
 PrintBanner 类扮演适配器的角色。它继承了 Banner 类的 showWithParen 和 showWithAster 方法。同时，它又实现了 Print 接口的 printWeak 和 printStrong 方法。
 ```java
-代码……
+public class PrintBanner extends Banner implements Print {
+	public PrintBanner(String string) {
+		super(string);
+	}
+
+	public void printWeak() {
+		showWithParen();
+	}
+
+	public void printStrong() {
+		showWithAster();
+	}
+}
 ```
 
 #### Main 类
 Main 类作用是通过使用适配器来弱化或强调字符串显示。
 ```java
-代码……
+public class Main {
+	public static void main(String[] args) {
+		// 针对接口编程，而不是具体实现
+		Print p = new PrintBanner("Java");
+		p.printWeak();
+		p.printStrong();
+	}
+}
 ```
 在 Main 类中，我们使用 Print 接口来编程，而不是使用具体实现，这隐藏了 Banner 类及其实现的方法。这就好像笔记本电脑只需要在直流 12 伏特电压下工作，而不需要知道这 12 伏特的电压通过适配器将 220 伏特交流电转换而来的。
 
