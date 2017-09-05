@@ -1,0 +1,43 @@
+format 213
+
+classcanvas 128002 class_ref 177922 // Client
+  classdiagramsettings member_max_width 0 end
+  xyzwh 118.8 78.6 2000 91 41
+end
+classcanvas 128130 class_ref 178050 // Target
+  classdiagramsettings member_max_width 0 end
+  xyz 115.9 311.7 2000
+end
+classcanvas 128258 class_ref 178178 // Adapter
+  classdiagramsettings member_max_width 0 end
+  xyzwh 350.1 311.2 2000 107 71
+end
+classcanvas 128386 class_ref 178306 // Adaptee
+  classdiagramsettings member_max_width 0 end
+  xyzwh 587 311.5 2000 107 89
+end
+textcanvas 129154 "extends"
+  xyzwh 262 303 2000 46 16
+textcanvas 129282 "has"
+  xyzwh 509 300 2000 21 16
+relationcanvas 128514 relation_ref 179842 // <unidirectional association>
+  decenter_end 467
+  from ref 128002 z 2001 to ref 128130
+  no_role_a no_role_b
+  no_multiplicity_a no_multiplicity_b
+end
+relationcanvas 128898 relation_ref 180226 // <directional composition>
+  decenter_begin 153
+  decenter_end 123
+  from ref 128258 z 2001 to ref 128386
+  no_role_a no_role_b
+  no_multiplicity_a no_multiplicity_b
+end
+relationcanvas 129026 relation_ref 180354 // <generalisation>
+  decenter_begin 196
+  decenter_end 196
+  from ref 128258 z 2001 to ref 128130
+  no_role_a no_role_b
+  no_multiplicity_a no_multiplicity_b
+end
+end

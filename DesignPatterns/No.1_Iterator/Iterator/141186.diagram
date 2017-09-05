@@ -1,0 +1,29 @@
+format 213
+
+classcanvas 128130 class_ref 141698 // ArrayIterator
+  classdiagramsettings member_max_width 0 end
+  xyz 354.1 148.15 2000
+end
+classcanvas 128386 class_ref 148610 // Client
+  classdiagramsettings member_max_width 0 end
+  xyzwh 144.25 152.9 2000 78 64
+end
+classcanvas 128898 class_ref 148738 // array
+  classdiagramsettings member_max_width 0 end
+  xyzwh 537.75 151.9 2000 78 50
+end
+relationcanvas 128770 relation_ref 150146 // <unidirectional association>
+  decenter_begin 180
+  decenter_end 128
+  from ref 128386 z 2001 to ref 128130
+  role_a_pos 316 143 3000 no_role_b
+  no_multiplicity_a no_multiplicity_b
+end
+relationcanvas 129026 relation_ref 150274 // <directional aggregation>
+  decenter_begin 111
+  decenter_end 223
+  from ref 128130 z 2001 to ref 128898
+  no_role_a no_role_b
+  no_multiplicity_a no_multiplicity_b
+end
+end

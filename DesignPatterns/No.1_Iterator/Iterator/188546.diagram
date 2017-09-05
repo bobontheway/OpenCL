@@ -1,0 +1,47 @@
+format 213
+
+classcanvas 128002 class_ref 185730 // Client
+  classdiagramsettings member_max_width 0 end
+  xyzwh 130.9 379.65 2000 109 41
+end
+classcanvas 128130 class_ref 185346 // Subject
+  classdiagramsettings member_max_width 0 end
+  xyzwh 496.5 142.1 2000 109 89
+end
+classcanvas 128258 class_ref 185474 // RealSubject
+  classdiagramsettings member_max_width 0 end
+  xyzwh 646 379.05 2000 109 89
+end
+classcanvas 128386 class_ref 185602 // Proxy
+  classdiagramsettings member_max_width 0 end
+  xyzwh 352.1 379.2 2000 109 107
+end
+relationcanvas 129026 relation_ref 187522 // <realization>
+  from ref 128386 z 2001 to point 404.1 309.85
+  line 129538 z 2001 to point 547.15 309.85
+  line 129410 z 2001 to ref 128130
+  no_role_a no_role_b
+  no_multiplicity_a no_multiplicity_b
+end
+relationcanvas 129154 relation_ref 187650 // <realization>
+  from ref 128258 z 2001 to point 698 310.2
+  line 129794 z 2001 to point 547.15 310.2
+  line 129666 z 2001 to ref 128130
+  no_role_a no_role_b
+  no_multiplicity_a no_multiplicity_b
+end
+relationcanvas 129922 relation_ref 187778 // <directional composition>
+  decenter_begin 140
+  decenter_end 167
+  from ref 128386 z 2001 to ref 128258
+  role_a_pos 557 369 3000 no_role_b
+  no_multiplicity_a no_multiplicity_b
+end
+relationcanvas 130050 relation_ref 187906 // <unidirectional association>
+  decenter_begin 268
+  decenter_end 97
+  from ref 128002 z 2001 to ref 128386
+  role_a_pos 285 370 3000 no_role_b
+  no_multiplicity_a no_multiplicity_b
+end
+end

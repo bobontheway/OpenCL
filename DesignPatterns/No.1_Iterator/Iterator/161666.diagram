@@ -1,0 +1,51 @@
+format 213
+
+classcanvas 128002 class_ref 163842 // Product
+  classdiagramsettings member_max_width 0 end
+  xyzwh 436.85 116 2005 115 89
+end
+classcanvas 128130 class_ref 163970 // ConcreteProduct
+  classdiagramsettings member_max_width 0 end
+  xyz 434.85 340.55 2000
+end
+classcanvas 128258 class_ref 164098 // Creator
+  classdiagramsettings member_max_width 0 end
+  xyz 139.8 115.85 2005
+end
+classcanvas 128386 class_ref 164226 // ConcreteCreator
+  classdiagramsettings member_max_width 0 end
+  xyz 138.15 340.65 2000
+end
+packagecanvas 128514 
+  package_ref 134658 // Manufacture
+  name_in_tab yes  xyzwh 108.5 294.5 0 469 164
+end
+packagecanvas 129282 
+  package_ref 128002 // framework
+  name_in_tab yes  xyzwh 108.5 71.45 2000 469 164
+end
+relationcanvas 128642 relation_ref 172290 // <unidirectional association>
+  decenter_begin 164
+  decenter_end 125
+  from ref 128258 z 2001 to ref 128002
+  role_a_pos 382 107 3000 no_role_b
+  no_multiplicity_a no_multiplicity_b
+end
+relationcanvas 128770 relation_ref 172418 // <unidirectional association>
+  decenter_begin 245
+  decenter_end 141
+  from ref 128386 z 2001 to ref 128130
+  role_a_pos 381 333 3000 no_role_b
+  no_multiplicity_a no_multiplicity_b
+end
+relationcanvas 129026 relation_ref 172546 // <generalisation>
+  from ref 128130 z 2001 to ref 128002
+  no_role_a no_role_b
+  no_multiplicity_a no_multiplicity_b
+end
+relationcanvas 129154 relation_ref 172674 // <generalisation>
+  from ref 128386 z 2001 to ref 128258
+  no_role_a no_role_b
+  no_multiplicity_a no_multiplicity_b
+end
+end

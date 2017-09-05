@@ -1,0 +1,96 @@
+format 213
+
+classinstance 128002 class_ref 135042 // Main
+  name ""   xyz 98.6 19.75 2005 life_line_z 2000
+classinstance 128130 class_ref 128258 // BookShelf
+  name ""   xyz 300.55 19.75 2005 life_line_z 2000
+classinstance 128258 class_ref 128514 // BookShelfIterator
+  name ""   xyz 518.3 19.75 2005 life_line_z 2000
+durationcanvas 128898 classinstance_ref 128002 // :Main
+  xyzwh 117 104 2010 11 455
+end
+durationcanvas 129026 classinstance_ref 128130 // :BookShelf
+  xyzwh 332 100 2010 11 59
+end
+durationcanvas 129410 classinstance_ref 128130 // :BookShelf
+  xyzwh 332 206 2010 11 59
+end
+durationcanvas 130178 classinstance_ref 128130 // :BookShelf
+  xyzwh 332 312 2010 11 61
+end
+durationcanvas 130434 classinstance_ref 128258 // :BookShelfIterator
+  xyzwh 570 318 2010 11 43
+end
+durationcanvas 131202 classinstance_ref 128258 // :BookShelfIterator
+  xyzwh 570 419 2010 11 47
+end
+durationcanvas 131586 classinstance_ref 128258 // :BookShelfIterator
+  xyzwh 570 502 2010 11 53
+end
+msg 129154 synchronous
+  from durationcanvas_ref 128898
+  to durationcanvas_ref 129026
+  yz 104 2015 explicitmsg "new BookShelf()"
+  show_full_operations_definition default show_class_of_operation default drawing_language default show_context_mode default
+  label_xy 183 88
+msg 129538 synchronous
+  from durationcanvas_ref 128898
+  to durationcanvas_ref 129410
+  yz 207 2015 msg operation_ref 128386 // "appendBook()"
+  show_full_operations_definition default show_class_of_operation default drawing_language default show_context_mode default
+  label_xy 186 191
+msg 129922 return
+  from durationcanvas_ref 129026
+  to durationcanvas_ref 128898
+  yz 148 2015 unspecifiedmsg
+  show_full_operations_definition default show_class_of_operation default drawing_language default show_context_mode default
+msg 130050 return
+  from durationcanvas_ref 129410
+  to durationcanvas_ref 128898
+  yz 254 2015 unspecifiedmsg
+  show_full_operations_definition default show_class_of_operation default drawing_language default show_context_mode default
+msg 130306 synchronous
+  from durationcanvas_ref 128898
+  to durationcanvas_ref 130178
+  yz 314 2015 msg operation_ref 128642 // "iterator()"
+  show_full_operations_definition default show_class_of_operation default drawing_language default show_context_mode default
+  label_xy 202 298
+msg 130562 synchronous
+  from durationcanvas_ref 130178
+  to durationcanvas_ref 130434
+  yz 318 2020 explicitmsg "new BookShelfIterator()"
+  show_full_operations_definition default show_class_of_operation default drawing_language default show_context_mode default
+  label_xy 392 302
+msg 130690 return
+  from durationcanvas_ref 130434
+  to durationcanvas_ref 130178
+  yz 350 2015 unspecifiedmsg
+  show_full_operations_definition default show_class_of_operation default drawing_language default show_context_mode default
+msg 130818 return
+  from durationcanvas_ref 130178
+  to durationcanvas_ref 128898
+  yz 362 2020 unspecifiedmsg
+  show_full_operations_definition default show_class_of_operation default drawing_language default show_context_mode default
+msg 131330 synchronous
+  from durationcanvas_ref 128898
+  to durationcanvas_ref 131202
+  yz 420 2015 msg operation_ref 129026 // "hasNext()"
+  show_full_operations_definition default show_class_of_operation default drawing_language default show_context_mode default
+  label_xy 328 404
+msg 131458 return
+  from durationcanvas_ref 131202
+  to durationcanvas_ref 128898
+  yz 455 2015 unspecifiedmsg
+  show_full_operations_definition default show_class_of_operation default drawing_language default show_context_mode default
+msg 131714 synchronous
+  from durationcanvas_ref 128898
+  to durationcanvas_ref 131586
+  yz 503 2015 msg operation_ref 129154 // "next()"
+  show_full_operations_definition default show_class_of_operation default drawing_language default show_context_mode default
+  label_xy 340 487
+msg 131970 return
+  from durationcanvas_ref 131586
+  to durationcanvas_ref 128898
+  yz 544 2015 unspecifiedmsg
+  show_full_operations_definition default show_class_of_operation default drawing_language default show_context_mode default
+end

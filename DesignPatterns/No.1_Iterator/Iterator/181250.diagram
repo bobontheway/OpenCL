@@ -1,0 +1,35 @@
+format 213
+
+classcanvas 128002 class_ref 177794 // Main
+  classdiagramsettings member_max_width 0 end
+  xyzwh 128.8 134.3 2000 89 41
+end
+classcanvas 128130 class_ref 177410 // Print
+  classdiagramsettings member_max_width 0 end
+  xyzwh 119.5 333 2000 110 71
+end
+classcanvas 128258 class_ref 177666 // PrintBanner
+  classdiagramsettings member_max_width 0 end
+  xyzwh 332.95 332.75 2000 110 71
+end
+classcanvas 128386 class_ref 177538 // Banner
+  classdiagramsettings member_max_width 0 end
+  xyz 548.2 332.6 2000
+end
+relationcanvas 128770 relation_ref 179458 // <unidirectional association>
+  decenter_begin 515
+  from ref 128002 z 2001 to ref 128130
+  role_a_pos 182 312 3000 no_role_b
+  no_multiplicity_a no_multiplicity_b
+end
+relationcanvas 128898 relation_ref 179586 // <directional composition>
+  from ref 128258 z 2001 to ref 128386
+  no_role_a no_role_b
+  no_multiplicity_a no_multiplicity_b
+end
+relationcanvas 129026 relation_ref 179714 // <generalisation>
+  from ref 128258 z 2001 to ref 128130
+  no_role_a no_role_b
+  no_multiplicity_a no_multiplicity_b
+end
+end

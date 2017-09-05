@@ -1,0 +1,52 @@
+format 213
+
+classcanvas 128002 class_ref 163074 // Producte
+  classdiagramsettings member_max_width 0 end
+  xyzwh 507 87.5 2005 123 53
+end
+classcanvas 128130 class_ref 163330 // IDCard
+  classdiagramsettings member_max_width 0 end
+  xyzwh 507.2 344.05 2010 123 53
+end
+classcanvas 128258 class_ref 163202 // Factory
+  classdiagramsettings member_max_width 0 end
+  xyz 169 86.35 2005
+end
+classcanvas 128386 class_ref 163458 // IDCardFactory
+  classdiagramsettings member_max_width 0 end
+  xyz 169 344.3 2010
+end
+packagecanvas 128514 
+  package_ref 128002 // framework
+  name_in_tab yes  xyzwh 147.1 44.8 2000 503 161
+end
+packagecanvas 128642 
+  package_ref 128130 // idcard
+  name_in_tab yes  xyzwh 147.1 296.05 2000 503 147
+end
+relationcanvas 128770 relation_ref 165378 // <generalisation>
+  decenter_end 504
+  from ref 128386 z 2011 to ref 128258
+  no_role_a no_role_b
+  no_multiplicity_a no_multiplicity_b
+end
+relationcanvas 128898 relation_ref 165506 // <generalisation>
+  from ref 128130 z 2011 to ref 128002
+  no_role_a no_role_b
+  no_multiplicity_a no_multiplicity_b
+end
+relationcanvas 129154 relation_ref 165634 // <unidirectional association>
+  decenter_begin 141
+  decenter_end 266
+  from ref 128258 z 2006 to ref 128002
+  role_a_pos 454 80 3000 no_role_b
+  no_multiplicity_a no_multiplicity_b
+end
+relationcanvas 129282 relation_ref 165762 // <unidirectional association>
+  decenter_begin 186
+  decenter_end 266
+  from ref 128386 z 2011 to ref 128130
+  role_a_pos 453 337 3000 no_role_b
+  no_multiplicity_a no_multiplicity_b
+end
+end

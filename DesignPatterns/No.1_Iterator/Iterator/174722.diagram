@@ -1,0 +1,24 @@
+format 213
+
+classinstance 128002 class_ref 156546 // Main
+  name ""   xyz 198 55 2000 life_line_z 2000
+classinstance 128130 class_ref 170754 // Singleton
+  name ""   xyz 546 55 2000 life_line_z 2000
+durationcanvas 128258 classinstance_ref 128002 // :Main
+  xyzwh 217 148 2010 11 57
+end
+durationcanvas 128386 classinstance_ref 128130 // :Singleton
+  xyzwh 575 151 2010 11 43
+end
+msg 128514 synchronous
+  from durationcanvas_ref 128258
+  to durationcanvas_ref 128386
+  yz 151 2015 msg operation_ref 167682 // "getInstance()"
+  show_full_operations_definition default show_class_of_operation default drawing_language default show_context_mode default
+  label_xy 364 135
+msg 128642 return
+  from durationcanvas_ref 128386
+  to durationcanvas_ref 128258
+  yz 183 2020 unspecifiedmsg
+  show_full_operations_definition default show_class_of_operation default drawing_language default show_context_mode default
+end

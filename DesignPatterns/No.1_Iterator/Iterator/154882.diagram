@@ -1,0 +1,77 @@
+format 213
+
+classinstance 128514 class_ref 156546 // Main
+  name ""   xyz 183.8 56.15 2000 life_line_z 2000
+classinstance 128642 class_ref 156034 // CharDisplay
+  name ""   xyz 387.15 56.15 2000 life_line_z 2000
+classinstance 128770 class_ref 156162 // StringDisplay
+  name ""   xyz 609.25 56.15 2000 life_line_z 2000
+durationcanvas 128898 classinstance_ref 128514 // :Main
+  xyzwh 202 134 2010 11 44
+end
+durationcanvas 129026 classinstance_ref 128642 // :CharDisplay
+  xyzwh 424 133 2010 11 40
+end
+durationcanvas 129410 classinstance_ref 128514 // :Main
+  xyzwh 202 254 2010 11 44
+end
+durationcanvas 129538 classinstance_ref 128770 // :StringDisplay
+  xyzwh 650 253 2010 11 40
+end
+durationcanvas 129922 classinstance_ref 128514 // :Main
+  xyzwh 202 383 2010 11 44
+end
+durationcanvas 130050 classinstance_ref 128642 // :CharDisplay
+  xyzwh 424 382 2010 11 40
+end
+durationcanvas 130306 classinstance_ref 128514 // :Main
+  xyzwh 202 531 2010 11 44
+end
+durationcanvas 130434 classinstance_ref 128770 // :StringDisplay
+  xyzwh 650 531 2010 11 40
+end
+msg 129154 synchronous
+  from durationcanvas_ref 128898
+  to durationcanvas_ref 129026
+  yz 136 2015 explicitmsg "new CharDisplay()"
+  show_full_operations_definition default show_class_of_operation default drawing_language default show_context_mode default
+  label_xy 271 120
+msg 129282 return
+  from durationcanvas_ref 129026
+  to durationcanvas_ref 128898
+  yz 163 2020 unspecifiedmsg
+  show_full_operations_definition default show_class_of_operation default drawing_language default show_context_mode default
+msg 129666 synchronous
+  from durationcanvas_ref 129410
+  to durationcanvas_ref 129538
+  yz 255 2015 explicitmsg "new StringDisplay()"
+  show_full_operations_definition default show_class_of_operation default drawing_language default show_context_mode default
+  label_xy 380 239
+msg 129794 return
+  from durationcanvas_ref 129538
+  to durationcanvas_ref 129410
+  yz 283 2015 unspecifiedmsg
+  show_full_operations_definition default show_class_of_operation default drawing_language default show_context_mode default
+msg 130178 synchronous
+  from durationcanvas_ref 129922
+  to durationcanvas_ref 130050
+  yz 383 2015 explicitmsg "display()"
+  show_full_operations_definition default show_class_of_operation default drawing_language default show_context_mode default
+  label_xy 295 367
+msg 130562 synchronous
+  from durationcanvas_ref 130306
+  to durationcanvas_ref 130434
+  yz 532 2015 explicitmsg "display()"
+  show_full_operations_definition default show_class_of_operation default drawing_language default show_context_mode default
+  label_xy 408 516
+msg 130690 return
+  from durationcanvas_ref 130434
+  to durationcanvas_ref 130306
+  yz 561 2020 unspecifiedmsg
+  show_full_operations_definition default show_class_of_operation default drawing_language default show_context_mode default
+msg 130818 return
+  from durationcanvas_ref 130050
+  to durationcanvas_ref 129922
+  yz 412 2020 unspecifiedmsg
+  show_full_operations_definition default show_class_of_operation default drawing_language default show_context_mode default
+end

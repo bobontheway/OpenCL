@@ -1,0 +1,87 @@
+format 213
+
+classcanvas 128386 class_ref 141826 // Iterator
+  classdiagramsettings member_max_width 0 end
+  xyzwh 576.6 169 2005 125 71
+end
+classcanvas 130690 class_ref 148610 // Client
+  classdiagramsettings member_max_width 0 end
+  xyzwh 371.4 168.2 2000 96 51
+end
+classcanvas 132098 class_ref 148866 // ArrayList
+  classdiagramsettings member_max_width 0 end
+  xyz 73.6 480 2000
+end
+classcanvas 132226 class_ref 141570 // Array
+  classdiagramsettings member_max_width 0 end
+  xyzwh 208.2 384.4 2005 111 53
+end
+classcanvas 132354 class_ref 141698 // ArrayIterator
+  classdiagramsettings member_max_width 0 end
+  xyzwh 492.4 383.2 2000 113 101
+end
+classcanvas 132482 class_ref 148994 // ArrayListIterator
+  classdiagramsettings member_max_width 0 end
+  xyz 676.2 478.8 2000
+end
+classcanvas 133378 class_ref 149122 // AbstractArray
+  classdiagramsettings member_max_width 0 end
+  xyz 139 167.2 2000
+end
+relationcanvas 130818 relation_ref 150018 // <unidirectional association>
+  decenter_begin 273
+  decenter_end 196
+  from ref 130690 z 2006 to ref 128386
+  no_role_a no_role_b
+  no_multiplicity_a no_multiplicity_b
+end
+relationcanvas 132610 relation_ref 150658 // <realization>
+  from ref 132354 z 2006 to point 545.6 300.6
+  line 132738 z 2006 to point 635.6 300.6
+  line 132866 z 2006 to ref 128386
+  no_role_a no_role_b
+  no_multiplicity_a no_multiplicity_b
+end
+relationcanvas 132994 relation_ref 150786 // <realization>
+  from ref 132482 z 2006 to point 728.6 300.6
+  line 133250 z 2006 to point 635.6 300.6
+  line 133122 z 2006 to ref 128386
+  no_role_a no_role_b
+  no_multiplicity_a no_multiplicity_b
+end
+relationcanvas 133506 relation_ref 150914 // <realization>
+  from ref 132098 z 2001 to point 124 300
+  line 133634 z 2001 to point 192 300
+  line 133762 z 2001 to ref 133378
+  no_role_a no_role_b
+  no_multiplicity_a no_multiplicity_b
+end
+relationcanvas 133890 relation_ref 151042 // <realization>
+  from ref 132226 z 2006 to point 262 301
+  line 134146 z 2006 to point 192 301
+  line 134018 z 2006 to ref 133378
+  no_role_a no_role_b
+  no_multiplicity_a no_multiplicity_b
+end
+relationcanvas 134274 relation_ref 151170 // <directional composition>
+  decenter_begin 229
+  decenter_end 119
+  from ref 132226 z 2006 to ref 132354
+  no_role_a no_role_b
+  no_multiplicity_a no_multiplicity_b
+end
+relationcanvas 134402 relation_ref 151298 // <directional composition>
+  decenter_begin 261
+  decenter_end 136
+  from ref 132098 z 2001 to ref 132482
+  no_role_a no_role_b
+  no_multiplicity_a no_multiplicity_b
+end
+relationcanvas 134530 relation_ref 151426 // <unidirectional association>
+  decenter_begin 245
+  decenter_end 277
+  from ref 130690 z 2001 to ref 133378
+  no_role_a no_role_b
+  no_multiplicity_a no_multiplicity_b
+end
+end

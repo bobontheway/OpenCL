@@ -1,0 +1,52 @@
+format 213
+
+classcanvas 128002 class_ref 128002 // Aggregate
+  classdiagramsettings member_max_width 0 end
+  xyzwh 137.94 62.6711 2000 123 53
+end
+classcanvas 128130 class_ref 128386 // Iterator
+  classdiagramsettings member_max_width 0 end
+  xyzwh 492.418 63.7211 2000 123 71
+end
+classcanvas 128258 class_ref 128514 // BookShelfIterator
+  classdiagramsettings member_max_width 0 end
+  xyz 492.418 203.933 2000
+end
+classcanvas 128386 class_ref 128258 // BookShelf
+  classdiagramsettings member_max_width 0 end
+  xyzwh 137.54 205.033 2000 123 137
+end
+classcanvas 128514 class_ref 128130 // Book
+  classdiagramsettings member_max_width 0 end
+  xyzwh 137.94 416.86 2000 123 65
+end
+relationcanvas 128642 relation_ref 135554 // <realization>
+  from ref 128386 z 2001 to ref 128002
+  no_role_a no_role_b
+  no_multiplicity_a no_multiplicity_b
+end
+relationcanvas 128770 relation_ref 135682 // <realization>
+  from ref 128258 z 2001 to ref 128130
+  no_role_a no_role_b
+  no_multiplicity_a no_multiplicity_b
+end
+relationcanvas 129154 relation_ref 136066 // <directional aggregation>
+  decenter_begin 136
+  decenter_end 101
+  from ref 128258 z 2001 to ref 128386
+  no_role_a no_role_b
+  no_multiplicity_a no_multiplicity_b
+end
+relationcanvas 129282 relation_ref 136194 // <unidirectional association>
+  decenter_begin 245
+  decenter_end 180
+  from ref 128002 z 2001 to ref 128130
+  role_a_pos 437 55 3000 no_role_b
+  no_multiplicity_a no_multiplicity_b
+end
+relationcanvas 129794 relation_ref 151554 // <directional composition>
+  from ref 128386 z 2001 to ref 128514
+  no_role_a no_role_b
+  no_multiplicity_a no_multiplicity_b
+end
+end

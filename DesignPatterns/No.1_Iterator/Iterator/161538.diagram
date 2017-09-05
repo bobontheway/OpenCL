@@ -1,0 +1,63 @@
+format 213
+
+classinstance 128002 class_ref 163714 // Main
+  name ""   xyz 127.6 71.2 2000 life_line_z 2000
+classinstance 128130 class_ref 163458 // IDCardFactory
+  name ""   xyz 354.4 71.2 2000 life_line_z 2000
+classinstance 128258 class_ref 163074 // Producte
+  name ""   xyz 627.8 70.2 2000 life_line_z 2000
+fragment 129922 "IDCard Sequence Diagram"
+  xyzwh 99 24.25 2000 621 584
+end
+durationcanvas 128386 classinstance_ref 128002 // :Main
+  xyzwh 146 168.6 2010 11 58
+end
+durationcanvas 128514 classinstance_ref 128130 // :IDCardFactory
+  xyzwh 397 169.4 2010 11 49
+end
+durationcanvas 128898 classinstance_ref 128002 // :Main
+  xyzwh 146 346.2 2010 11 58
+end
+durationcanvas 129026 classinstance_ref 128130 // :IDCardFactory
+  xyzwh 398 352.6 2010 11 51
+end
+durationcanvas 129410 classinstance_ref 128002 // :Main
+  xyzwh 146 507.8 2010 11 58
+end
+durationcanvas 129538 classinstance_ref 128258 // :Producte
+  xyzwh 655 509.4 2010 11 49
+end
+msg 128642 synchronous
+  from durationcanvas_ref 128386
+  to durationcanvas_ref 128514
+  yz 169 2015 explicitmsg "new IDCardFactory()"
+  show_full_operations_definition default show_class_of_operation default drawing_language default show_context_mode default
+  label_xy 217 153
+msg 128770 return
+  from durationcanvas_ref 128514
+  to durationcanvas_ref 128386
+  yz 207 2015 unspecifiedmsg
+  show_full_operations_definition default show_class_of_operation default drawing_language default show_context_mode default
+msg 129154 synchronous
+  from durationcanvas_ref 128898
+  to durationcanvas_ref 129026
+  yz 356 2015 msg operation_ref 159234 // "create()"
+  show_full_operations_definition default show_class_of_operation default drawing_language default show_context_mode default
+  label_xy 251 340
+msg 129282 return
+  from durationcanvas_ref 129026
+  to durationcanvas_ref 128898
+  yz 392 2015 unspecifiedmsg
+  show_full_operations_definition default show_class_of_operation default drawing_language default show_context_mode default
+msg 129666 synchronous
+  from durationcanvas_ref 129410
+  to durationcanvas_ref 129538
+  yz 509 2015 msg operation_ref 159106 // "use()"
+  show_full_operations_definition default show_class_of_operation default drawing_language default show_context_mode default
+  label_xy 393 493
+msg 129794 return
+  from durationcanvas_ref 129538
+  to durationcanvas_ref 129410
+  yz 547 2015 unspecifiedmsg
+  show_full_operations_definition default show_class_of_operation default drawing_language default show_context_mode default
+end

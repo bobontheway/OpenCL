@@ -1,0 +1,24 @@
+format 213
+
+classcanvas 128002 class_ref 156290 // AbstractClass
+  classdiagramsettings member_max_width 0 end
+  xyz 268.2 180.9 2000
+end
+classcanvas 128130 class_ref 156418 // ConcreteClass
+  classdiagramsettings member_max_width 0 end
+  xyzwh 268.45 427.3 2000 113 89
+end
+note 128258 "{
+     method1();
+     method2();
+     method3();
+}"
+  xyzwh 482 199.7 2005 117 103
+relationcanvas 132098 relation_ref 158850 // <generalisation>
+  from ref 128130 z 2001 to ref 128002
+  no_role_a no_role_b
+  no_multiplicity_a no_multiplicity_b
+end
+line 132738 -_-_ decenter_begin 372 decenter_end 202
+  from ref 128002 z 2006 to ref 128258
+end
