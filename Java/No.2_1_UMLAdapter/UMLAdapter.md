@@ -125,6 +125,7 @@ Main          |测试程序行为的类
 Main 类和 Banner 类与类适配器模式中的内容完全相同，这里假设 Print 不是接口而是类。我们将 PrintBanner 声明为 Print 的子类。由于 Java 无法同时继承两个类，为了引用 Banner 类的方法，我们将它的的实例保存在 PrintBanner 类的字段中。
 
 #### 类图
+
 <center><img src="image/AdapterObject.bmp" width="65%" height="65%"></center>
 
 #### 代码
@@ -160,6 +161,9 @@ public class PrintBanner extends Print {
 ```
 这就形成了一种委托关系。当 PrintBanner 类的 printWeak 被调用时，并不是 PrintBanner 类自己进行处理，而是将处理交给 Banner 类的实例。
 
+#### 时序图
+
+<center><img src="image/ObjectAdapter.bmp" width="70%" height="70%"></center>
 
 ## 模型和角色
 读完示例程序后，下面我们分别看看类适配模式和对象适配模式的模型图。
