@@ -37,8 +37,7 @@ Banner        |表示`实际情况`的类
 Main          |测试程序行为的类
 
 #### 类图
-
-
+<center><img src="image/AdapterClass.bmp" width="65%" height="65%"></center>
 
 #### 代码
 ##### Banner 类
@@ -113,9 +112,25 @@ xbdong@ubuntu:~/Project/src/github/No.2_UMLAdapter$ sh build.sh
 
 
 ### 对象适配器
-上面的示例程序展示了类适配器模式，下面是对象适配器模式。在类适配器模式中使用了`继承`实现适配，而这里我们需要使用`委托`来实现适配。在 Java 语言中，委托就是将方法中的具体处理交给其它实例的方式。
+上面的示例程序展示了类适配器模式，下面是对象适配器模式。在类适配器模式中使用了`继承`实现适配，而这里我们需要使用`委托`来实现适配。在 Java 语言中，委托就是将方法中的具体处理交给其它实例的方式。下面是对象适配器的类列表。
 
-Main 类和 Banner 类与类适配器模式中的内容完全相同，这里假设 Print 不是接口而是类。由于 Java 无法同时继承两个类，我们需要将 PrintBanner 定义为 Print 的子类。
+#### 类列表
+
+名称           | 描述
+--------------|---------------------------------------------
+Print         |表示`当前需求`的类
+PrintBanner   |表示适配器的类
+Banner        |表示`实际情况`的类
+Main          |测试程序行为的类
+
+Main 类和 Banner 类与类适配器模式中的内容完全相同，这里假设 Print 不是接口而是类。我们将 PrintBanner 声明为 Print 的子类。由于 Java 无法同时继承两个类，为了引用 Banner 类的方法，我们将它的的实例保存在 PrintBanner 类的字段中。
+
+#### 类图
+<center><img src="image/AdapterObject.bmp" width="65%" height="65%"></center>
+
+#### 代码
+##### Print 类
+
 ```java
 public abstract class Print {
 	public abstract void printWeak();
@@ -123,6 +138,8 @@ public abstract class Print {
 }
 
 ```
+
+##### PrintBanner 类
 PrintBanner 类的 banner 字段保存了 Banner 类的实例，该实例是在 PrintBanner 类的构造函数中生成的。然后，printWeak 方法和 printStrong 方法会通过 banner 字段调用 Banner 类的 showWithParen 和 showWithAster 方法来实现。
 ```java
 public class PrintBanner extends Print {
