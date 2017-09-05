@@ -10,7 +10,7 @@
 ## 示例程序
 下面是使用了适配器模式的示例程序。该示例程序会将输入的字符串分别显示为 （Hello） 和 \*Hello\*。
 
-### 继承的适配器
+### 类适配器
 下面是一段使用了`继承的适配器`的示例程序。
 
 在已有的 Banner 类中，包含了将字符串用括号括起来的 showWithParen 方法，以及将字符串用星号括起来的 showWithAster 方法。Banner 类和上面已存在的`交流 220 伏特电压`类似。
@@ -27,15 +27,21 @@
 **变换装置**  |适配器           |PrintBanner 类
 **当前需求**  |直流 12 伏特     |Print 接口（printWeak、printStrong）
 
-### 类和接口列表
-名称            描述
+#### 类和接口列表
 
-### 类图
+名称           | 描述
+--------------|---------------------------------------------
+Print         |表示`当前需求`的接口
+PrintBanner   |表示适配器的类
+Banner        |表示`实际情况`的类
+Main          |测试程序行为的类
+
+#### 类图
 
 <center><img src="image/AdapterClass.bmp" width="70%" height="70%"></center>
 
-### 代码
-#### Banner 类
+#### 代码
+##### Banner 类
 Banner 类表示现在的`实际情况`，提供现有的方法。
 ```java
 public class Banner {
@@ -55,7 +61,7 @@ public class Banner {
 }
 ```
 
-#### Print 接口
+##### Print 接口
 Print 声明了`当前需求`的接口。
 ```java
 public interface Print {
@@ -64,7 +70,7 @@ public interface Print {
 }
 ```
 
-#### PrintBanner 类
+##### PrintBanner 类
 PrintBanner 类扮演适配器的角色。它继承了 Banner 类的 showWithParen 和 showWithAster 方法。同时，它又实现了 Print 接口的 printWeak 和 printStrong 方法。
 ```java
 public class PrintBanner extends Banner implements Print {
@@ -82,7 +88,7 @@ public class PrintBanner extends Banner implements Print {
 }
 ```
 
-#### Main 类
+##### Main 类
 Main 类作用是通过使用适配器来弱化或强调字符串显示。
 ```java
 public class Main {
@@ -96,8 +102,48 @@ public class Main {
 ```
 在 Main 类中，我们使用 Print 接口来编程，而不是使用具体实现，这隐藏了 Banner 类及其实现的方法。这就好像笔记本电脑只需要在直流 12 伏特电压下工作，而不需要知道这 12 伏特的电压通过适配器将 220 伏特交流电转换而来的。
 
-#### 运行结果
-### 时序图
+##### 运行结果
+```bash
+xbdong@ubuntu:~/Project/src/github/No.2_UMLAdapter$ sh build.sh
+(Java)
+*Java*
+```
+
+#### 时序图
+
+
+### 对象适配器
+上面的示例程序展示了类适配器模式，下面是对象适配器模式。在类适配器模式中使用了`继承`实现适配，而这里我们需要使用`委托`来实现适配。在 Java 语言中，委托就是将方法中的具体处理交给其它实例的方式。
+
+Main 类和 Banner 类与类适配器模式中的内容完全相同，这里假设 Print 不是接口而是类。由于 Java 无法同时继承两个类，我们需要将 PrintBanner 定义为 Print 的子类。
+```java
+public abstract class Print {
+	public abstract void printWeak();
+	public abstract void printStrong();
+}
+
+```
+PrintBanner 类的 banner 字段保存了 Banner 类的实例，该实例是在 PrintBanner 类的构造函数中生成的。然后，printWeak 方法和 printStrong 方法会通过 banner 字段调用 Banner 类的 showWithParen 和 showWithAster 方法来实现。
+```java
+public class PrintBanner extends Print {
+	private Banner banner;
+
+	public PrintBanner(String string) {
+		this.banner = new Banner(string);
+	}
+
+	public void printWeak() {
+		banner.showWithParen();
+	}
+
+	public void printStrong() {
+		banner.showWithAster();
+	}
+}
+
+```
+这就形成了一种委托关系。当 PrintBanner 类的 printWeak 被调用时，并不是 PrintBanner 类自己进行处理，而是将处理交给 Banner 类的实例。
+
 
 ## 模型和角色
 在 Adapter 模式中有以下角色。
