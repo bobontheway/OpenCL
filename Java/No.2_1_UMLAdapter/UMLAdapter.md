@@ -174,7 +174,7 @@ public class PrintBanner extends Print {
 **对象适配模式**
 <img src="image/AdapterObjectRole.bmp" width="70%" height="70%">
 
-在 Adapter 模式中有以下角色。
+下面是适配器模式中规定的角色。
 
 ### Target（目标需求）
 该角色负责定义所需方法。以本文开头的例子来说，即让笔记本电脑正常工作的直流 12 伏特电源。在示例程序中，由 Print 接口（使用继承时）和 Print 类（使用委托时）扮演此角色。
