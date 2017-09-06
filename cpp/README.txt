@@ -3,7 +3,7 @@ http://www.runoob.com/cplusplus/cpp-tutorial.html
 
 
 [Tag]
-http://www.runoob.com/cplusplus/cpp-inheritance.html
+http://www.runoob.com/cplusplus/cpp-polymorphism.html
 
 函数调用
 值传递，指针传递，引用传递
