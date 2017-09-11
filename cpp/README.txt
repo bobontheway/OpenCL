@@ -11,3 +11,6 @@ http://www.runoob.com/cplusplus/cpp-files-streams.html
 
 翻译自下面地方：
 https://www.tutorialspoint.com/cplusplus/cpp_strings.htm
+
+C++ 标准
+https://isocpp.org/std/the-standard
