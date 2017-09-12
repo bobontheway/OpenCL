@@ -18,3 +18,9 @@ No.6_UMLProxy
 
 #No.7_UMLComposite
 容器模式。
+
+#No.8_UMLCommand
+Command 模式编写宏命令时使用了 Composite 模式；
+
+#No.9_UMLDecorator
+Decorator 模式使装饰框和内容具体有一致性；
