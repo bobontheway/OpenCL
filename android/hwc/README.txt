@@ -9,3 +9,6 @@ http://www.linuxplumbersconf.org/2016/ocw/proposals/4185.html
 
 SurfaceFlinger —— google 开发者邮件列表
 https://groups.google.com/forum/#!searchin/android-developers/surfaceflinger%7Csort:relevance/android-developers/J-l7seWY8wE/tcQY0eSfuUYJ
+
+Google HWC2.0
+https://source.android.com/devices/graphics/implement-hwc?hl=zh-cn
