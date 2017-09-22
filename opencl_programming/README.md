@@ -74,4 +74,6 @@ git push -f origin master
 执行 Profiling 操作来获取时间戳数据，以计算内存拷贝带宽。
 
 
-
+问题：
+OpenCL 中缓冲区对象和图像缓冲区对象的区别？
+https://stackoverflow.com/questions/9903855/buffer-object-and-image-buffer-object-in-opencl
