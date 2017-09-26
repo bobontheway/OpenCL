@@ -18,3 +18,6 @@ https://isocpp.org/std/the-standard
 C++ 虚拟基类
 http://www.cnblogs.com/BeyondAnyTime/archive/2012/06/05/2537451.html
 http://blog.csdn.net/jackystudio/article/details/17877219
+
+C++11 之 override
+http://www.cnblogs.com/xinxue/p/5471708.html
