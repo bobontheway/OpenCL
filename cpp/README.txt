@@ -21,3 +21,6 @@ http://blog.csdn.net/jackystudio/article/details/17877219
 
 C++11 之 override
 http://www.cnblogs.com/xinxue/p/5471708.html
+
+vim中文乱码参考
+https://blog.csdn.net/bugall/article/details/45740555
